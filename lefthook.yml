@@ -1,0 +1,16 @@
+pre-commit:
+  piped: true
+  commands:
+    lint:
+      run: pnpm exec eslint .
+    format-check:
+      run: pnpm exec prettier --check .
+    typecheck:
+      run: just typecheck
+    test:
+      run: pnpm exec vitest run --passWithNoTests
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm exec commitlint --edit {1}
