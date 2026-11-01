@@ -28,3 +28,15 @@ typecheck:
 # 测试（递归跑各工作区成员的 test 脚本）
 test:
     pnpm -r run test
+
+# server 构建（apps/server；首次运行自动经镜像下载 Gradle 发行版与依赖）
+server-build:
+    cd apps/server && ./gradlew build
+
+# server 测试（依赖本地依赖已起：先 just up）
+server-test:
+    cd apps/server && ./gradlew test
+
+# server 本地运行（依赖本地 Redis 已起：先 just up）
+server-run:
+    cd apps/server && ./gradlew bootRun
