@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { defineAsyncComponent } from 'vue'
 
+import { useTheme } from '@/theme'
+
+// 主题三态与主色接线（偏好 store 驱动）
+useTheme()
+
 // 查询调试面板仅开发态按需加载，生产构建经死代码消除不进产物；测试态不挂（无 QueryClient 上下文）
 const devtools =
   import.meta.env.DEV && !import.meta.env.VITEST
