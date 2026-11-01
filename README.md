@@ -16,6 +16,14 @@ Vue 3 + Element Plus 前端与 Spring Boot 后端的管理系统 monorepo。
 
 本地依赖默认端口 MySQL 3307、Redis 6380（错开机器既有实例）；在根目录建 `.env` 可覆盖，模板与既有实例切换样例见 `.env.example`。
 
+## 本地数据库
+
+MySQL 数据目录首次初始化时由 compose 自动创建 `eladmin_plus` 库；已初始化过的旧数据卷不会自动建库，需补建一次（dev 数据可弃也可直接重建卷）：
+
+```bash
+docker exec eladmin-plus-mysql mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS eladmin_plus CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci"
+```
+
 ## 环境准备（mise）
 
 node、pnpm、just 的版本由根目录 `.mise.toml` 统一钉定，进目录自动切换：

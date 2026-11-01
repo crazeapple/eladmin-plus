@@ -27,6 +27,11 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0")
     // Boot 4 默认 Jackson 3；spring-data-redis 的 JSON 序列化器仍基于 Jackson 2，显式引入（版本随 BOM）
     implementation("com.fasterxml.jackson.core:jackson-databind")
+    // 数据访问：MyBatis-Plus（Boot 4 适配 starter）与 MySQL 驱动（版本随 Boot BOM）
+    implementation("com.baomidou:mybatis-plus-spring-boot4-starter:3.5.18.1")
+    // 分页等 inner interceptor 自 3.5.9 拆到独立构件，与 starter 同版
+    implementation("com.baomidou:mybatis-plus-jsqlparser:3.5.18.1")
+    runtimeOnly("com.mysql:mysql-connector-j")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-webmvc-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
