@@ -44,3 +44,8 @@ server-run:
 # SQL 检查（sqlfluff 为全局 Python 工具需自行安装；仅手动运行，不挂提交门禁）
 sql-lint:
     cd apps/server && sqlfluff lint src/main/resources/db
+
+# 契约生成：后端构建期导出 OpenAPI JSON + 前端生成 TS 类型、zod schema 与 client（生成物入库）
+api-gen:
+    cd apps/server && rm -f build/openapi.json && ./gradlew generateOpenApiDocs -q
+    pnpm --filter @eladmin-plus/web run api-gen

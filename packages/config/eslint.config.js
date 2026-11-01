@@ -15,6 +15,7 @@ export default tseslint.config(
       '.worktrees/',
       'apps/web/src/types/auto-imports.d.ts',
       'apps/web/src/types/components.d.ts',
+      'apps/web/src/api/generated/',
     ],
   },
   js.configs.recommended,

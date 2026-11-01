@@ -6,3 +6,4 @@ pnpm-lock.yaml
 .worktrees/
 apps/web/src/types/auto-imports.d.ts
 apps/web/src/types/components.d.ts
+apps/web/src/api/generated/
