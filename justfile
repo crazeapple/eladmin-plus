@@ -29,6 +29,10 @@ typecheck:
 test:
     pnpm -r run test
 
+# 前端开发服务器（vite 默认 5173；接口代理到本地后端 8080，先 just server-run）
+web-dev:
+    pnpm --filter @eladmin-plus/web run dev
+
 # server 构建（apps/server；首次运行自动经镜像下载 Gradle 发行版与依赖）
 server-build:
     cd apps/server && ./gradlew build
@@ -37,7 +41,8 @@ server-build:
 server-test:
     cd apps/server && ./gradlew test
 
-# server 本地运行（依赖本地 Redis 已起：先 just up）
+# server 本地运行（依赖本地依赖已起：先 just up；Ctrl+C 中断属正常退出，静默 just 的退出提示）
+[no-exit-message]
 server-run:
     cd apps/server && ./gradlew bootRun
 
