@@ -9,3 +9,8 @@ target/
 .env.local
 .env.*.local
 .DS_Store
+
+# server 构建与运行产物
+.gradle/
+build/
+logs/
