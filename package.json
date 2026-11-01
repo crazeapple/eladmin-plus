@@ -2,9 +2,15 @@
   "name": "eladmin-plus",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "packageManager": "pnpm@12.14.0",
   "engines": {
     "node": ">=24"
   },
-  "scripts": {}
+  "scripts": {},
+  "devDependencies": {
+    "@eladmin-plus/config": "workspace:*",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0"
+  }
 }

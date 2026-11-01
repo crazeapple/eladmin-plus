@@ -4,15 +4,15 @@ Vue 3 + Element Plus 前端与 Spring Boot 后端的管理系统 monorepo。
 
 ## 常用命令
 
-| 命令 | 作用 |
-|---|---|
-| `just install` | 安装全部 JS 侧依赖 |
-| `just up` | 起本地依赖（MySQL、Redis），等待健康检查通过 |
-| `just down` | 停本地依赖（保留数据卷） |
-| `just lint` | 代码检查 |
-| `just format` | 格式化 |
-| `just typecheck` | 类型检查 |
-| `just test` | 测试 |
+| 命令             | 作用                                         |
+| ---------------- | -------------------------------------------- |
+| `just install`   | 安装全部 JS 侧依赖                           |
+| `just up`        | 起本地依赖（MySQL、Redis），等待健康检查通过 |
+| `just down`      | 停本地依赖（保留数据卷）                     |
+| `just lint`      | 代码检查                                     |
+| `just format`    | 格式化                                       |
+| `just typecheck` | 类型检查                                     |
+| `just test`      | 测试                                         |
 
 本地依赖默认端口 MySQL 3307、Redis 6380（错开机器既有实例）；在根目录建 `.env` 可覆盖，模板与既有实例切换样例见 `.env.example`。
 

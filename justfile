@@ -12,13 +12,14 @@ up:
 down:
     docker compose down
 
-# 代码检查（lint 链就位前为占位）
+# 代码检查（ESLint）+ 格式检查（Prettier）
 lint:
-    echo "lint 尚未接入"
+    pnpm exec eslint .
+    pnpm exec prettier --check .
 
-# 格式化（format 链就位前为占位）
+# 格式化（Prettier）
 format:
-    echo "format 尚未接入"
+    pnpm exec prettier --write .
 
 # 类型检查（仓库内暂无 TypeScript 项目，提示即过）
 typecheck:
