@@ -1,0 +1,4 @@
+[sqlfluff]
+dialect = mysql
+# 排除构建产物与 Gradle 目录
+exclude_paths = build, .gradle

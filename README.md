@@ -13,6 +13,9 @@ Vue 3 + Element Plus 前端与 Spring Boot 后端的管理系统 monorepo。
 | `just format`    | 格式化                                       |
 | `just typecheck` | 类型检查                                     |
 | `just test`      | 测试                                         |
+| `just sql-lint`  | SQL 检查（sqlfluff，需全局安装）             |
+
+`just sql-lint` 依赖全局安装的 [sqlfluff](https://docs.sqlfluff.com/)（如 `pipx install sqlfluff`）；未安装时该配方失败属预期，不影响其余命令与提交门禁。
 
 本地依赖默认端口 MySQL 3307、Redis 6380（错开机器既有实例）；在根目录建 `.env` 可覆盖，模板与既有实例切换样例见 `.env.example`。
 

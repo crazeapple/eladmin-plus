@@ -40,3 +40,7 @@ server-test:
 # server 本地运行（依赖本地 Redis 已起：先 just up）
 server-run:
     cd apps/server && ./gradlew bootRun
+
+# SQL 检查（sqlfluff 为全局 Python 工具需自行安装；仅手动运行，不挂提交门禁）
+sql-lint:
+    cd apps/server && sqlfluff lint src/main/resources/db

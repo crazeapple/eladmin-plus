@@ -24,6 +24,13 @@ class DataAccessTest {
     }
 
     @Test
+    void 迁移历史在册() {
+        Long applied = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM flyway_schema_history WHERE success = 1", Long.class);
+        assertThat(applied).isGreaterThanOrEqualTo(1);
+    }
+
+    @Test
     void 分页换算页码从零起() {
         Page<?> first = new PageRequest(0, 10).toMpPage();
         assertThat(first.getCurrent()).isEqualTo(1);

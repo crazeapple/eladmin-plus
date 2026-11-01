@@ -32,6 +32,9 @@ dependencies {
     // 分页等 inner interceptor 自 3.5.9 拆到独立构件，与 starter 同版
     implementation("com.baomidou:mybatis-plus-jsqlparser:3.5.18.1")
     runtimeOnly("com.mysql:mysql-connector-j")
+    // 数据库迁移：Boot 4 模块化后自动配置在 spring-boot-flyway；MySQL 方言支持在独立构件（版本随 Boot BOM）
+    implementation("org.springframework.boot:spring-boot-flyway")
+    implementation("org.flywaydb:flyway-mysql")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-webmvc-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
