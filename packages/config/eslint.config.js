@@ -30,5 +30,11 @@ export default tseslint.config(
       },
     },
   },
+  {
+    rules: {
+      // 路由页面组件 name 必须与路由 name 一致（keep-alive 缓存契约），单词名合法
+      'vue/multi-word-component-names': 'off',
+    },
+  },
   configPrettier,
 )

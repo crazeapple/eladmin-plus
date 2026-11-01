@@ -8,17 +8,20 @@ import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vitest/config'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
+// 测试态不注入 EP 样式（vitest 外部化链路不处理 node_modules 的 css）
+const epResolver = () => ElementPlusResolver({ importStyle: process.env.VITEST ? false : 'css' })
+
 export default defineConfig({
   plugins: [
     vue(),
     // EP API 自动按需（仅限 Element Plus；Vue 核心 API 保持显式导入）
     AutoImport({
-      resolvers: [ElementPlusResolver()],
+      resolvers: [epResolver()],
       dts: 'src/types/auto-imports.d.ts',
     }),
     // EP 组件模板自动按需注册
     Components({
-      resolvers: [ElementPlusResolver()],
+      resolvers: [epResolver()],
       dts: 'src/types/components.d.ts',
     }),
     // 本地 SVG 图标集合：virtual:icons/app/<name>
