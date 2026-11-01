@@ -25,6 +25,6 @@ format:
 typecheck:
     echo "typecheck: 暂无 TypeScript 项目"
 
-# 测试（测试链就位前为占位）
+# 测试（Vitest；空测试集不阻塞）
 test:
-    echo "test 尚未接入"
+    pnpm exec vitest run --passWithNoTests
