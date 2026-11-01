@@ -25,6 +25,6 @@ format:
 typecheck:
     echo "typecheck: 暂无 TypeScript 项目"
 
-# 测试（Vitest；空测试集不阻塞）
+# 测试（递归跑各工作区成员的 test 脚本）
 test:
-    pnpm exec vitest run --passWithNoTests
+    pnpm -r run test

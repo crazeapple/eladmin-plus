@@ -8,7 +8,7 @@ pre-commit:
     typecheck:
       run: just typecheck
     test:
-      run: pnpm exec vitest run --passWithNoTests
+      run: pnpm -r run test
 
 commit-msg:
   commands:

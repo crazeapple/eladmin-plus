@@ -4,3 +4,5 @@ target/
 pnpm-lock.yaml
 .mira/
 .worktrees/
+apps/web/src/types/auto-imports.d.ts
+apps/web/src/types/components.d.ts
