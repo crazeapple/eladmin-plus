@@ -1,0 +1,47 @@
+/** zh-CN 语言包：namespace 按模块拆分（与 en 的 key 集同构，测试断言） */
+export default {
+  common: {
+    notFoundDesc: '页面不存在或已被移动。',
+    backHome: '回首页',
+  },
+  home: {
+    placeholder: '仪表盘随后续提案接入，当前为占位视图。',
+  },
+  demo: {
+    cachedTitle: '演示·缓存',
+    cachedDesc: '此页参与 keep-alive 缓存：离开再回来，下面的输入内容保留。',
+    cachedPlaceholder: '输入点什么，然后切走再切回',
+    noCacheTitle: '演示·不缓存',
+    noCacheDesc: '此页 meta.noCache：页签可开可关，不入缓存集，关闭即销毁。',
+    noCachePlaceholder: '输入点什么，切走再切回会清空',
+  },
+  layout: {
+    collapseToggle: '折叠或展开侧栏',
+    searchPlaceholder: '菜单搜索（占位）',
+    sizePlaceholder: '尺寸切换（占位）',
+    fullscreenToggle: '切换全屏',
+    avatarPlaceholder: '头像与下拉（占位）',
+    openSettings: '打开设置',
+  },
+  tags: {
+    closeCurrent: '关闭当前',
+    closeOthers: '关闭其他',
+    closeAll: '关闭全部',
+  },
+  settings: {
+    title: '设置',
+    theme: '主题',
+    themeLight: '浅色',
+    themeDark: '深色',
+    themeAuto: '随系统',
+    primaryColor: '主色',
+    language: '语言',
+    localeSystem: '跟随系统',
+  },
+  routes: {
+    home: '首页',
+    demoCached: '演示·缓存',
+    demoNoCache: '演示·不缓存',
+    notFound: '404',
+  },
+}

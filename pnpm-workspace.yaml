@@ -8,3 +8,10 @@ allowBuilds:
   esbuild: true
   lefthook: true
   vue-demi: true
+
+minimumReleaseAgeExclude:
+  - '@intlify/core-base@11.4.17'
+  - '@intlify/devtools-types@11.4.17'
+  - '@intlify/message-compiler@11.4.17'
+  - '@intlify/shared@11.4.17'
+  - vue-i18n@11.4.17

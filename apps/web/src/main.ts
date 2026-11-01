@@ -3,7 +3,9 @@ import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 
 import App from './App.vue'
+import { buildI18n } from './i18n'
 import router from './router'
+import { usePreferencesStore } from './stores/preferences'
 // EP 暗色变量集（html.dark 时生效）
 import 'element-plus/theme-chalk/dark/css-vars.css'
 import '@/styles/index.scss'
@@ -16,8 +18,13 @@ const queryClient = new QueryClient({
 })
 
 const app = createApp(App)
+const pinia = createPinia()
+app.use(pinia)
 
-app.use(createPinia())
+// i18n 初值取偏好解析语言（首访随系统检测已在偏好 store 完成）
+const i18n = buildI18n(usePreferencesStore().resolvedLocale)
+app.use(i18n)
+
 app.use(VueQueryPlugin, { queryClient })
 app.use(router)
 app.mount('#app')
