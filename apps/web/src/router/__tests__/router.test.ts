@@ -17,7 +17,7 @@ async function renderAt(path: string) {
 describe('router', () => {
   it('根路径进入布局与首页占位', async () => {
     await renderAt('/')
-    expect(await screen.findByText('首页')).toBeTruthy()
+    expect(await screen.findByText('仪表盘随后续提案接入，当前为占位视图。')).toBeTruthy()
   })
 
   it('未知路由进入 404', async () => {

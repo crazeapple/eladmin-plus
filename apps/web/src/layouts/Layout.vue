@@ -1,15 +1,253 @@
 <script setup lang="ts">
+import { useFullscreen, useMediaQuery } from '@vueuse/core'
+import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
+
+import AppIcon from '@/components/AppIcon.vue'
+import { routes } from '@/router'
+
 defineOptions({ name: 'Layout' })
+
+const route = useRoute()
+
+// 移动端断点：768px 以下侧栏抽屉化
+const isMobile = useMediaQuery('(max-width: 768px)')
+const mobileOpen = ref(false)
+
+// 侧栏折叠为组件内部状态，刷新还原（持久化随偏好框架）
+const collapsed = ref(false)
+
+const menuItems = computed(() =>
+  (routes[0].children ?? []).map((child) => ({
+    path: `/${(child.path as string).replace(/^\//, '')}`,
+    title: child.meta?.title ?? '',
+    icon: child.meta?.icon,
+  })),
+)
+
+// 面包屑按静态路由 matched 生成，首页常驻首项
+const breadcrumbItems = computed(() => {
+  const items = [{ title: '首页', path: '/home' }]
+  for (const record of route.matched) {
+    if (record.meta?.title && record.path !== '/' && record.path !== '/home') {
+      items.push({ title: record.meta.title, path: record.path })
+    }
+  }
+  return items
+})
+
+const { isSupported, isFullscreen, toggle } = useFullscreen()
+
+function onTriggerClick() {
+  if (isMobile.value) {
+    mobileOpen.value = !mobileOpen.value
+  } else {
+    collapsed.value = !collapsed.value
+  }
+}
+
+function onMenuSelect() {
+  // 移动端选中菜单后收起抽屉
+  mobileOpen.value = false
+}
 </script>
 
 <template>
-  <div class="layout-min">
-    <router-view />
-  </div>
+  <el-container class="layout">
+    <div v-if="isMobile && mobileOpen" class="layout__overlay" @click="mobileOpen = false" />
+    <aside
+      :class="[
+        'layout__aside',
+        {
+          'is-collapsed': collapsed && !isMobile,
+          'is-mobile': isMobile,
+          'is-open': isMobile && mobileOpen,
+        },
+      ]"
+    >
+      <div class="layout__logo">
+        <span v-if="collapsed && !isMobile">e+</span>
+        <span v-else>eladmin-plus</span>
+      </div>
+      <el-menu
+        :default-active="route.path"
+        :collapse="collapsed && !isMobile"
+        :collapse-transition="false"
+        router
+        class="layout__menu"
+        @select="onMenuSelect"
+      >
+        <el-menu-item v-for="item in menuItems" :key="item.path" :index="item.path">
+          <app-icon v-if="item.icon" :name="item.icon" />
+          <template #title>{{ item.title }}</template>
+        </el-menu-item>
+      </el-menu>
+    </aside>
+    <el-container class="layout__body">
+      <el-header class="layout__header">
+        <button
+          type="button"
+          class="layout__trigger"
+          aria-label="折叠或展开侧栏"
+          @click="onTriggerClick"
+        >
+          <app-icon name="menu" />
+        </button>
+        <el-breadcrumb class="layout__breadcrumb" separator="/">
+          <el-breadcrumb-item v-for="item in breadcrumbItems" :key="item.path" :to="item.path">
+            {{ item.title }}
+          </el-breadcrumb-item>
+        </el-breadcrumb>
+        <div class="layout__actions">
+          <span class="layout__placeholder" title="菜单搜索（占位）">
+            <app-icon name="search" />
+          </span>
+          <span class="layout__placeholder" title="尺寸切换（占位）">
+            <app-icon name="size" />
+          </span>
+          <button
+            v-if="isSupported"
+            type="button"
+            class="layout__trigger"
+            aria-label="切换全屏"
+            @click="toggle()"
+          >
+            <app-icon :name="isFullscreen ? 'exit-fullscreen' : 'fullscreen'" />
+          </button>
+          <span class="layout__placeholder" title="头像与下拉（占位）">
+            <app-icon name="user" />
+          </span>
+        </div>
+      </el-header>
+      <el-main class="layout__main">
+        <router-view />
+      </el-main>
+      <el-footer class="layout__footer">eladmin-plus</el-footer>
+    </el-container>
+  </el-container>
 </template>
 
 <style scoped lang="scss">
-.layout-min {
-  min-height: 100%;
+.layout {
+  height: 100vh;
+}
+
+.layout__aside {
+  display: flex;
+  flex-direction: column;
+  width: 210px;
+  transition:
+    width 0.2s,
+    transform 0.2s;
+  background-color: var(--el-bg-color, #fff);
+  border-right: 1px solid var(--el-border-color-light, #e4e7ed);
+  overflow-x: hidden;
+
+  &.is-collapsed {
+    width: 64px;
+  }
+
+  &.is-mobile {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1001;
+    transform: translateX(-100%);
+
+    &.is-open {
+      transform: translateX(0);
+    }
+  }
+}
+
+.layout__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background-color: rgb(0 0 0 / 50%);
+}
+
+.layout__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--el-text-color-primary, #303133);
+  white-space: nowrap;
+}
+
+.layout__menu {
+  flex: 1;
+  border-right: none;
+
+  .app-icon {
+    margin-right: 8px;
+  }
+}
+
+.layout__body {
+  min-width: 0;
+}
+
+.layout__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 48px;
+  background-color: var(--el-bg-color, #fff);
+  border-bottom: 1px solid var(--el-border-color-light, #e4e7ed);
+}
+
+.layout__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 16px;
+  color: var(--el-text-color-regular, #606266);
+  cursor: pointer;
+  background: none;
+  border: none;
+
+  &:hover {
+    color: var(--el-color-primary, #409eff);
+  }
+}
+
+.layout__breadcrumb {
+  min-width: 0;
+}
+
+.layout__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  font-size: 16px;
+}
+
+.layout__placeholder {
+  display: inline-flex;
+  align-items: center;
+  color: var(--el-text-color-regular, #606266);
+  cursor: default;
+}
+
+.layout__main {
+  background-color: var(--el-bg-color-page, #f2f3f5);
+}
+
+.layout__footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary, #909399);
 }
 </style>
