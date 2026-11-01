@@ -2,6 +2,7 @@ package com.eladminplus.common.error;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -22,30 +23,32 @@ class GlobalExceptionHandlerTest {
     private MockMvc mockMvc;
 
     @Test
-    void 受控异常映射语义化状态码并返回统一错误体() throws Exception {
+    void 受控异常回真实状态码且失败响应与成功同形() throws Exception {
         getJson("/test/boom")
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.timestamp").isNotEmpty())
-                .andExpect(jsonPath("$.message").value("请求参数或操作不被接受"));
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.message").value("请求参数或操作不被接受"))
+                .andExpect(jsonPath("$.data").value(nullValue()));
     }
 
     @Test
     void 未知异常回500通用消息且不泄内部细节() throws Exception {
         getJson("/test/unknown")
                 .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.status").value(500))
-                .andExpect(jsonPath("$.timestamp").isNotEmpty())
+                .andExpect(jsonPath("$.code").value(500))
                 .andExpect(jsonPath("$.message").value("服务内部错误，请稍后再试"))
+                .andExpect(jsonPath("$.data").value(nullValue()))
                 .andExpect(content().string(not(containsString("IllegalStateException"))))
                 .andExpect(content().string(not(containsString("内部细节"))));
     }
 
     @Test
-    void 成功响应为裸数据() throws Exception {
+    void 成功响应为同形结构包裹负载数据() throws Exception {
         getJson("/test/ok")
                 .andExpect(status().isOk())
-                .andExpect(content().string("ok"));
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.message").value(""))
+                .andExpect(jsonPath("$.data").value("ok"));
     }
 
     private ResultActions getJson(String path) throws Exception {

@@ -1,11 +1,12 @@
 package com.eladminplus.common.error;
 
+import com.eladminplus.common.R;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 测试专用控制器：触发受控异常与未知异常，供 MockMvc 断言错误结构。
+ * 测试专用控制器：成功、受控异常、未知异常三态，供 MockMvc 断言同形响应结构。
  */
 @RestController
 public class BoomController {
@@ -21,7 +22,7 @@ public class BoomController {
     }
 
     @GetMapping("/test/ok")
-    public String ok() {
-        return "ok";
+    public R<String> ok() {
+        return R.ok("ok");
     }
 }
