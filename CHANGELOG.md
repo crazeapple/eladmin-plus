@@ -1,5 +1,15 @@
 # 更新日志
 
+## 0.4.0
+
+接口契约链与数据访问。
+
+- 响应结构全链统一为 `{code, message, data}`：成功失败同形，code 取 HTTP 状态码；失败回真实 4xx/5xx 状态行，message 可直接展示（资源文件本地化）；无返回体的写操作统一 200 加空 data
+- 契约链：后端 springdoc 接口描述（swagger-ui 就位）+ 构建期导出 OpenAPI；`just api-gen` 一条命令生成前端 TS 类型、zod schema 与请求 client（生成物入库，克隆即可构建），接口变更在前端编译期暴露
+- 统计概览占位端点（`GET /stats/overview`，静态演示数据）：为首页仪表盘预留数据源形状
+- 数据访问：MySQL 数据源、MyBatis-Plus（分页插件与页码换算封装）、Flyway 数据库迁移、SQL 检查命令 `just sql-lint`
+- 前端数据层：TanStack Query 接入（默认 30 秒缓存、失败重试一次、开发态调试面板）；请求统一解包取数据，失败抛携带状态码的错误；统计查询样例（zod 校验演示）
+
 ## 0.3.0
 
 后端应用壳。
