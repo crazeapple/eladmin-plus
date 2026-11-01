@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
 import AppIcon from '@/components/AppIcon.vue'
+import SettingsDrawer from '@/components/settings/SettingsDrawer.vue'
 import { routes } from '@/router'
 import { useTagsViewStore } from '@/stores/tags-view'
 import TagsView from '@/layouts/TagsView.vue'
@@ -22,6 +23,9 @@ const mobileOpen = ref(false)
 
 // 侧栏折叠为组件内部状态，刷新还原（持久化随偏好框架）
 const collapsed = ref(false)
+
+// 设置抽屉：主题三态、主色、语言集中一处
+const settingsOpen = ref(false)
 
 const menuItems = computed(() =>
   (routes[0].children ?? []).map((child) => ({
@@ -120,10 +124,20 @@ function onMenuSelect() {
           >
             <app-icon :name="isFullscreen ? 'exit-fullscreen' : 'fullscreen'" />
           </button>
+          <button
+            type="button"
+            class="layout__trigger"
+            :aria-label="t('layout.openSettings')"
+            data-test="settings-trigger"
+            @click="settingsOpen = true"
+          >
+            <app-icon name="theme" />
+          </button>
           <span class="layout__placeholder" :title="t('layout.avatarPlaceholder')">
             <app-icon name="user" />
           </span>
         </div>
+        <SettingsDrawer v-model="settingsOpen" />
       </el-header>
       <TagsView />
       <el-main class="layout__main">
