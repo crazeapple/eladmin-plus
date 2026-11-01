@@ -1,5 +1,17 @@
 # 更新日志
 
+## 0.3.0
+
+后端应用壳。
+
+- Spring Boot 4.1 应用骨架：Gradle 9.8.2 wrapper（发行版走腾讯云镜像、依赖走阿里云镜像，克隆即构建）、Java 21（仓库根 .java-version 锁定 21.0.12 + 构建期 toolchain 兜底）、Lombok
+- 统一错误响应 `{status, timestamp, message}`：受控异常映射语义化状态码、未知异常回 500 通用消息（堆栈只进日志），错误消息经资源文件管理；成功响应裸数据
+- 安全骨架：全放行过滤链（结构为后续认证段接线而立），端点匿名可达
+- actuator 健康端点（Redis UP 才 UP）、端口 8080、配置默认本地 compose 实例（Redis 6380）可环境变量覆盖
+- Redis 连接模板：key 字符串 / value JSON 序列化，key 统一 eladmin-plus:域:键 前缀
+- 日志：控制台 + 按天与大小上限滚动落盘
+- 仓库级命令：just server-build / server-test / server-run
+
 ## 0.2.0
 
 前端应用壳与布局。
