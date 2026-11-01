@@ -5,6 +5,7 @@ export interface TagView {
   /** 路由 name，keep-alive include 依此匹配 */
   name: string
   path: string
+  /** 标题存 i18n key，渲染处统一 t()（语言切换即时随动） */
   title: string
   noCache: boolean
 }
@@ -16,7 +17,12 @@ export interface TagRouteLike {
   meta?: { title?: string; noCache?: boolean }
 }
 
-export const HOME_TAG: TagView = { name: 'Home', path: '/home', title: '首页', noCache: false }
+export const HOME_TAG: TagView = {
+  name: 'Home',
+  path: '/home',
+  title: 'routes.home',
+  noCache: false,
+}
 
 export const useTagsViewStore = defineStore('tags-view', () => {
   // 首页固定 tag：store 建立即存在，不可关闭

@@ -1,12 +1,16 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
 defineOptions({ name: 'NotFound' })
+
+const { t } = useI18n()
 </script>
 
 <template>
   <div class="not-found">
-    <h1>404</h1>
-    <p>页面不存在或已被移动。</p>
-    <router-link to="/home">回首页</router-link>
+    <h1>{{ t('routes.notFound') }}</h1>
+    <p>{{ t('common.notFoundDesc') }}</p>
+    <router-link to="/home">{{ t('common.backHome') }}</router-link>
   </div>
 </template>
 

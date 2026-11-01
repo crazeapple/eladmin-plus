@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 defineOptions({ name: 'DemoNoCache' })
 
+const { t } = useI18n()
 const draft = ref('')
 </script>
 
 <template>
   <div class="page-placeholder">
-    <h1>演示·不缓存</h1>
-    <p>此页 meta.noCache：页签可开可关，不入缓存集，关闭即销毁。</p>
-    <el-input v-model="draft" placeholder="输入点什么，切走再切回会清空" />
+    <h1>{{ t('demo.noCacheTitle') }}</h1>
+    <p>{{ t('demo.noCacheDesc') }}</p>
+    <el-input v-model="draft" :placeholder="t('demo.noCachePlaceholder')" />
   </div>
 </template>
 

@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 defineOptions({ name: 'DemoCached' })
 
+const { t } = useI18n()
 const draft = ref('')
 </script>
 
 <template>
   <div class="page-placeholder">
-    <h1>演示·缓存</h1>
-    <p>此页参与 keep-alive 缓存：离开再回来，下面的输入内容保留。</p>
-    <el-input v-model="draft" placeholder="输入点什么，然后切走再切回" />
+    <h1>{{ t('demo.cachedTitle') }}</h1>
+    <p>{{ t('demo.cachedDesc') }}</p>
+    <el-input v-model="draft" :placeholder="t('demo.cachedPlaceholder')" />
   </div>
 </template>
 

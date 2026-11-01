@@ -2,6 +2,7 @@
 import { useFullscreen, useMediaQuery } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
 import AppIcon from '@/components/AppIcon.vue'
@@ -11,6 +12,7 @@ import TagsView from '@/layouts/TagsView.vue'
 
 defineOptions({ name: 'Layout' })
 
+const { t } = useI18n()
 const route = useRoute()
 const { cachedViews } = storeToRefs(useTagsViewStore())
 
@@ -29,9 +31,9 @@ const menuItems = computed(() =>
   })),
 )
 
-// 面包屑按静态路由 matched 生成，首页常驻首项
+// 面包屑按静态路由 matched 生成（title 存 i18n key，渲染处 t()），首页常驻首项
 const breadcrumbItems = computed(() => {
-  const items = [{ title: '首页', path: '/home' }]
+  const items = [{ title: 'routes.home', path: '/home' }]
   for (const record of route.matched) {
     if (record.meta?.title && record.path !== '/' && record.path !== '/home') {
       items.push({ title: record.meta.title, path: record.path })
@@ -83,7 +85,7 @@ function onMenuSelect() {
       >
         <el-menu-item v-for="item in menuItems" :key="item.path" :index="item.path">
           <app-icon v-if="item.icon" :name="item.icon" />
-          <template #title>{{ item.title }}</template>
+          <template #title>{{ t(item.title) }}</template>
         </el-menu-item>
       </el-menu>
     </aside>
@@ -92,33 +94,33 @@ function onMenuSelect() {
         <button
           type="button"
           class="layout__trigger"
-          aria-label="折叠或展开侧栏"
+          :aria-label="t('layout.collapseToggle')"
           @click="onTriggerClick"
         >
           <app-icon name="menu" />
         </button>
         <el-breadcrumb class="layout__breadcrumb" separator="/">
           <el-breadcrumb-item v-for="item in breadcrumbItems" :key="item.path" :to="item.path">
-            {{ item.title }}
+            {{ t(item.title) }}
           </el-breadcrumb-item>
         </el-breadcrumb>
         <div class="layout__actions">
-          <span class="layout__placeholder" title="菜单搜索（占位）">
+          <span class="layout__placeholder" :title="t('layout.searchPlaceholder')">
             <app-icon name="search" />
           </span>
-          <span class="layout__placeholder" title="尺寸切换（占位）">
+          <span class="layout__placeholder" :title="t('layout.sizePlaceholder')">
             <app-icon name="size" />
           </span>
           <button
             v-if="isSupported"
             type="button"
             class="layout__trigger"
-            aria-label="切换全屏"
+            :aria-label="t('layout.fullscreenToggle')"
             @click="toggle()"
           >
             <app-icon :name="isFullscreen ? 'exit-fullscreen' : 'fullscreen'" />
           </button>
-          <span class="layout__placeholder" title="头像与下拉（占位）">
+          <span class="layout__placeholder" :title="t('layout.avatarPlaceholder')">
             <app-icon name="user" />
           </span>
         </div>

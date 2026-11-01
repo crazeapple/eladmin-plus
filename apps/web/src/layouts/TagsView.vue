@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import { useTagsViewStore, HOME_TAG, type TagView } from '@/stores/tags-view'
 
 defineOptions({ name: 'TagsView' })
 
+const { t } = useI18n()
 const store = useTagsViewStore()
 const { visitedViews } = storeToRefs(store)
 const route = useRoute()
@@ -95,13 +97,13 @@ onBeforeUnmount(() => document.removeEventListener('click', closeMenu))
       @click="router.push(view.path)"
       @contextmenu.prevent="openMenu($event, view)"
     >
-      {{ view.title }}
+      {{ t(view.title) }}
     </el-tag>
     <teleport to="body">
       <ul v-if="menu.visible" class="tags-view__menu" :style="menuStyle" data-test="tags-menu">
-        <li @click="handleCloseCurrent">关闭当前</li>
-        <li @click="handleCloseOthers">关闭其他</li>
-        <li @click="handleCloseAll">关闭全部</li>
+        <li @click="handleCloseCurrent">{{ t('tags.closeCurrent') }}</li>
+        <li @click="handleCloseOthers">{{ t('tags.closeOthers') }}</li>
+        <li @click="handleCloseAll">{{ t('tags.closeAll') }}</li>
       </ul>
     </teleport>
   </div>

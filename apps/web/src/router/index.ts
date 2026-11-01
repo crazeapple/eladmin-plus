@@ -4,6 +4,7 @@ import Layout from '@/layouts/Layout.vue'
 
 declare module 'vue-router' {
   interface RouteMeta {
+    /** 标题存 i18n key（两语言包在册，测试断言防漏翻译） */
     title: string
     icon?: string
     noCache?: boolean
@@ -20,19 +21,19 @@ export const routes: RouteRecordRaw[] = [
         path: 'home',
         name: 'Home',
         component: () => import('@/views/home/index.vue'),
-        meta: { title: '首页', icon: 'index' },
+        meta: { title: 'routes.home', icon: 'index' },
       },
       {
         path: 'demo/cached',
         name: 'DemoCached',
         component: () => import('@/views/demo/cached/index.vue'),
-        meta: { title: '演示·缓存', icon: 'tab' },
+        meta: { title: 'routes.demoCached', icon: 'tab' },
       },
       {
         path: 'demo/no-cache',
         name: 'DemoNoCache',
         component: () => import('@/views/demo/no-cache/index.vue'),
-        meta: { title: '演示·不缓存', icon: 'edit', noCache: true },
+        meta: { title: 'routes.demoNoCache', icon: 'edit', noCache: true },
       },
     ],
   },
@@ -40,7 +41,7 @@ export const routes: RouteRecordRaw[] = [
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('@/views/error/404.vue'),
-    meta: { title: '404' },
+    meta: { title: 'routes.notFound' },
   },
 ]
 

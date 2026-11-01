@@ -34,3 +34,15 @@ export function applyLocale(i18n: { locale: { value: string } }, locale: AppLoca
 export function elementPlusLocale(locale: AppLocale) {
   return locale === 'zh-CN' ? zhCn : enPack
 }
+
+/** 语言包点分 key 全列表（key 在册断言用） */
+export function localeKeys(locale: AppLocale): string[] {
+  const flatten = (source: Record<string, unknown>, prefix = ''): string[] =>
+    Object.entries(source).flatMap(([key, value]) => {
+      const name = prefix ? `${prefix}.${key}` : key
+      return typeof value === 'object' && value !== null
+        ? flatten(value as Record<string, unknown>, name)
+        : [name]
+    })
+  return flatten(LOCALE_MESSAGES[locale]).sort()
+}

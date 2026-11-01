@@ -1,11 +1,15 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
 defineOptions({ name: 'Home' })
+
+const { t } = useI18n()
 </script>
 
 <template>
   <div class="page-placeholder">
-    <h1>首页</h1>
-    <p>仪表盘随后续提案接入，当前为占位视图。</p>
+    <h1>{{ t('routes.home') }}</h1>
+    <p>{{ t('home.placeholder') }}</p>
   </div>
 </template>
 

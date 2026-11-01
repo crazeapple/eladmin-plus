@@ -1,13 +1,20 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/vue'
 import { createPinia } from 'pinia'
 import { createMemoryHistory, createRouter } from 'vue-router'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { buildI18n } from '@/i18n'
 import Layout from '@/layouts/Layout.vue'
 import { routes } from '@/router'
 
+beforeEach(() => {
+  // 钉住系统语言，偏好首访检测稳定取 zh-CN（文案断言走中文语言包）
+  vi.spyOn(window.navigator, 'language', 'get').mockReturnValue('zh-CN')
+})
+
 afterEach(() => {
   cleanup()
+  localStorage.clear()
   vi.restoreAllMocks()
 })
 
@@ -31,7 +38,7 @@ async function renderLayout(path = '/home') {
   const router = createRouter({ history: createMemoryHistory(), routes })
   await router.push(path)
   await router.isReady()
-  render(Layout, { global: { plugins: [createPinia(), router] } })
+  render(Layout, { global: { plugins: [createPinia(), router, buildI18n('zh-CN')] } })
 }
 
 describe('Layout', () => {
