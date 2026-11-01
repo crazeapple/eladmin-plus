@@ -34,6 +34,10 @@ docker exec eladmin-plus-mysql mysql -uroot -proot -e "CREATE DATABASE IF NOT EX
 
 前端请求统一经 `apps/web/src/api/client.ts`：baseURL `/api`，开发态由 vite proxy 去掉 `/api` 前缀转发到 8080；成功响应自动解包取 `data`，失败响应抛 `ApiError`（携带后端 `code` 与可直接展示的 `message`）。
 
+## 偏好（主题与语言）
+
+右上角设置图标打开设置抽屉：主题三态（浅色 / 深色 / 随系统）、主色（预设色板或任意取色）、语言（跟随系统 / 简体中文 / English）即改即生效，并持久化在浏览器（localStorage），下次打开自动恢复；随系统模式跟随系统深浅色实时切换。偏好语言会同步到请求头 `Accept-Language`，后端错误消息随之本地化。
+
 ## 环境准备（mise）
 
 node、pnpm、just 的版本由根目录 `.mise.toml` 统一钉定，进目录自动切换：
