@@ -1,0 +1,4 @@
+[tools]
+node = "24"
+just = "1.59.0"
+"npm:pnpm" = "12.14.0"
