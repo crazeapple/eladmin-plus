@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 
 import App from './App.vue'
+import { bindLocaleHeader } from './api/locale'
 import { buildI18n } from './i18n'
 import router from './router'
 import { usePreferencesStore } from './stores/preferences'
@@ -24,6 +25,9 @@ app.use(pinia)
 // i18n 初值取偏好解析语言（首访随系统检测已在偏好 store 完成）
 const i18n = buildI18n(usePreferencesStore().resolvedLocale)
 app.use(i18n)
+
+// 请求默认头随偏好语言联动（后端消息本地化）
+bindLocaleHeader()
 
 app.use(VueQueryPlugin, { queryClient })
 app.use(router)
