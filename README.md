@@ -27,6 +27,12 @@ MySQL 数据目录首次初始化时由 compose 自动创建 `eladmin_plus` 库�
 docker exec eladmin-plus-mysql mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS eladmin_plus CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci"
 ```
 
+## 契约链
+
+后端接口是唯一真相源：改完后端跑 `just api-gen`（后端构建期导出 OpenAPI，再生成前端 TS 类型、zod schema 与请求 client），生成物入库 `apps/web/src/api/generated`。提交生成物后，接口变更的影响面在 `just typecheck` 编译期可见。
+
+前端请求统一经 `apps/web/src/api/client.ts`：baseURL `/api`，开发态由 vite proxy 去掉 `/api` 前缀转发到 8080；成功响应自动解包取 `data`，失败响应抛 `ApiError`（携带后端 `code` 与可直接展示的 `message`）。
+
 ## 环境准备（mise）
 
 node、pnpm、just 的版本由根目录 `.mise.toml` 统一钉定，进目录自动切换：
