@@ -4,5 +4,6 @@ packages:
 
 # 允许执行安装脚本的依赖（esbuild 二进制校验、lefthook 装 git 钩子）
 allowBuilds:
+  '@parcel/watcher': true
   esbuild: true
   lefthook: true
