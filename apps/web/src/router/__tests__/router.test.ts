@@ -1,4 +1,5 @@
 import { cleanup, render, screen } from '@testing-library/vue'
+import { createPinia } from 'pinia'
 import { createMemoryHistory, createRouter, type RouteRecordRaw } from 'vue-router'
 import { afterEach, describe, expect, it } from 'vitest'
 
@@ -11,7 +12,7 @@ async function renderAt(path: string) {
   const router = createRouter({ history: createMemoryHistory(), routes })
   await router.push(path)
   await router.isReady()
-  return render(App, { global: { plugins: [router] } })
+  return render(App, { global: { plugins: [createPinia(), router] } })
 }
 
 describe('router', () => {

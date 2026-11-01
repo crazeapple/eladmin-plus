@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import { useFullscreen, useMediaQuery } from '@vueuse/core'
+import { storeToRefs } from 'pinia'
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 import AppIcon from '@/components/AppIcon.vue'
 import { routes } from '@/router'
+import { useTagsViewStore } from '@/stores/tags-view'
+import TagsView from '@/layouts/TagsView.vue'
 
 defineOptions({ name: 'Layout' })
 
 const route = useRoute()
+const { cachedViews } = storeToRefs(useTagsViewStore())
 
 // 移动端断点：768px 以下侧栏抽屉化
 const isMobile = useMediaQuery('(max-width: 768px)')
@@ -119,8 +123,13 @@ function onMenuSelect() {
           </span>
         </div>
       </el-header>
+      <TagsView />
       <el-main class="layout__main">
-        <router-view />
+        <router-view v-slot="{ Component }">
+          <keep-alive :include="cachedViews">
+            <component :is="Component" />
+          </keep-alive>
+        </router-view>
       </el-main>
       <el-footer class="layout__footer">eladmin-plus</el-footer>
     </el-container>

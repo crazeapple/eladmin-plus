@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/vue'
+import { createPinia } from 'pinia'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -30,7 +31,7 @@ async function renderLayout(path = '/home') {
   const router = createRouter({ history: createMemoryHistory(), routes })
   await router.push(path)
   await router.isReady()
-  render(Layout, { global: { plugins: [router] } })
+  render(Layout, { global: { plugins: [createPinia(), router] } })
 }
 
 describe('Layout', () => {
