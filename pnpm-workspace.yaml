@@ -2,8 +2,9 @@ packages:
   - apps/*
   - packages/*
 
-# 允许执行安装脚本的依赖（esbuild 二进制校验、lefthook 装 git 钩子）
+# 允许执行安装脚本的依赖（esbuild 二进制校验、lefthook 装 git 钩子、vue-demi 切 Vue 版本）
 allowBuilds:
   '@parcel/watcher': true
   esbuild: true
   lefthook: true
+  vue-demi: true
