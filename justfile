@@ -21,9 +21,9 @@ lint:
 format:
     pnpm exec prettier --write .
 
-# 类型检查（仓库内暂无 TypeScript 项目，提示即过）
+# 类型检查（递归跑各工作区成员的 typecheck 脚本）
 typecheck:
-    echo "typecheck: 暂无 TypeScript 项目"
+    pnpm -r run typecheck
 
 # 测试（递归跑各工作区成员的 test 脚本）
 test:

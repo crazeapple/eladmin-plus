@@ -62,7 +62,7 @@ describe('Layout', () => {
   it('面包屑按静态路由生成', async () => {
     mockMediaQuery(false)
     await renderLayout('/demo/cached')
-    const breadcrumb = document.querySelector('.layout__breadcrumb')!
+    const breadcrumb = document.querySelector('.layout__breadcrumb') as HTMLElement
     expect(within(breadcrumb).getByText('首页')).toBeTruthy()
     expect(within(breadcrumb).getByText('演示·缓存')).toBeTruthy()
   })
