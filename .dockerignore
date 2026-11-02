@@ -1,0 +1,13 @@
+# Docker 构建上下文裁剪（上下文为仓库根）
+.git
+.worktrees
+.mira
+.export
+node_modules
+**/node_modules
+apps/server/build
+apps/server/.gradle
+apps/web/dist
+logs
+*.md
+apps/server/logs

@@ -1,0 +1,78 @@
+name: eladmin-plus-prod
+
+# 生产栈：web（nginx，唯一宿主映射端口）+ server + mysql + redis。
+# 数据服务端口一律不映射宿主——只在 compose 内网可达（认证方案私钥入 Redis 的信任边界前提）。
+# 运行参数经环境变量注入（--env-file deploy/deploy.env 或 shell 环境覆盖），内联值为本地冒烟缺省。
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/web.Dockerfile
+    container_name: eladmin-plus-prod-web
+    ports:
+      - '${WEB_PORT:-80}:80'
+    depends_on:
+      server:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1/']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
+  server:
+    build:
+      context: ..
+      dockerfile: deploy/server.Dockerfile
+    container_name: eladmin-plus-prod-server
+    environment:
+      DATASOURCE_URL: ${DATASOURCE_URL:-jdbc:mysql://mysql:3306/eladmin_plus?useUnicode=true&characterEncoding=utf8}
+      DATASOURCE_USERNAME: ${DATASOURCE_USERNAME:-root}
+      DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD:-root}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: '6379'
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:8080/actuator/health']
+      interval: 5s
+      timeout: 3s
+      retries: 40
+      start_period: 30s
+
+  mysql:
+    image: mysql:8.4
+    container_name: eladmin-plus-prod-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATASOURCE_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-eladmin_plus}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+    volumes:
+      - prod_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-proot']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 30s
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: eladmin-plus-prod-redis
+    volumes:
+      - prod_redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  prod_mysql_data:
+  prod_redis_data:
