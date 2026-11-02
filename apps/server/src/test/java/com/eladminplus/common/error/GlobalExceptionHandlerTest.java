@@ -52,6 +52,7 @@ class GlobalExceptionHandlerTest {
     }
 
     private ResultActions getJson(String path) throws Exception {
-        return mockMvc.perform(get(path));
+        // 显式 zh：词条本地化后消息随请求语言，断言锚定中文文案
+        return mockMvc.perform(get(path).header("Accept-Language", "zh-CN"));
     }
 }

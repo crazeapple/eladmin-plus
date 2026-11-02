@@ -1,6 +1,9 @@
 spring:
   application:
     name: eladmin-plus-server
+  messages:
+    # zh 为缺省语言：locale 链 miss 落 root 包（中文），不跟 JVM 系统 locale 走
+    fallback-to-system-locale: false
   datasource:
     # 默认指向 compose 自起实例（just up）；环境变量可整体覆盖 URL 或分别覆盖账号
     url: '${DATASOURCE_URL:jdbc:mysql://localhost:3307/eladmin_plus?useUnicode=true&characterEncoding=utf8}'

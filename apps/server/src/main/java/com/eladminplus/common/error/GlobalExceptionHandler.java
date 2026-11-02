@@ -38,11 +38,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<R<Void>> handleUnknown(Exception ex) {
-        // 未知异常：堆栈进日志，响应只回通用消息，不泄内部细节
+    public ResponseEntity<R<Void>> handleUnknown(Exception ex, Locale locale) {
+        // 未知异常：堆栈进日志，响应只回通用消息，不泄内部细节；locale 与请求一致
         log.error("未处理异常", ex);
-        String message = messageSource.getMessage(INTERNAL_MESSAGE_KEY, null,
-                "服务内部错误，请稍后再试", Locale.getDefault());
+        String message = messageSource.getMessage(INTERNAL_MESSAGE_KEY, null, "服务内部错误，请稍后再试", locale);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(R.error(HttpStatus.INTERNAL_SERVER_ERROR, message));
     }

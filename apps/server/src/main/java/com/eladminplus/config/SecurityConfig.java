@@ -57,6 +57,8 @@ public class SecurityConfig {
                                 "/auth/refresh",
                                 "/auth/logout",
                                 "/stats/overview",
+                                // 错误结构测试载体路径（仅测试构建有对应控制器，生产无路由无暴露面）
+                                "/test/**",
                                 "/actuator/health",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**")

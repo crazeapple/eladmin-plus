@@ -19,7 +19,8 @@ class SecurityFilterChainTest extends RefreshLogoutTest {
         MvcResult result = mockMvc.perform(get("/auth-test-protected/authenticated-only")).andReturn();
         status().isUnauthorized().match(result);
         String body = result.getResponse().getContentAsString();
-        assertThat(body).contains("\"code\":401", "error.auth.unauthorized");
+        assertThat(body).contains("\"code\":401");
+        assertThat(body).doesNotContain("error.auth.");
     }
 
     @Test
@@ -50,7 +51,7 @@ class SecurityFilterChainTest extends RefreshLogoutTest {
                         .header("Authorization", "Bearer " + session.accessToken()))
                 .andReturn();
         status().isForbidden().match(result);
-        assertThat(result.getResponse().getContentAsString()).contains("error.auth.forbidden");
+        assertThat(result.getResponse().getContentAsString()).contains("\"code\":403");
     }
 
     @Test

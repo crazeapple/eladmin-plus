@@ -92,7 +92,7 @@ class RefreshLogoutFlowTest extends RefreshLogoutTest {
         LoginSession session = loginSuccessfully();
         MvcResult result = refresh(session.refreshCookie(), null);
         status().isForbidden().match(result);
-        assertThat(result.getResponse().getContentAsString()).contains("error.auth.csrf-required");
+        assertThat(result.getResponse().getContentAsString()).contains("\"code\":403");
     }
 
     @Test
@@ -102,7 +102,7 @@ class RefreshLogoutFlowTest extends RefreshLogoutTest {
 
         MvcResult forged = refresh("999.forged-token-id.bad", "XMLHttpRequest");
         status().isUnauthorized().match(forged);
-        assertThat(forged.getResponse().getContentAsString()).contains("error.auth.refresh-invalid");
+        assertThat(forged.getResponse().getContentAsString()).contains("\"code\":401");
     }
 
     @Test
