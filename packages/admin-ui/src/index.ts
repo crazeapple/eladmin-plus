@@ -15,3 +15,7 @@ export type {
   AutoFormModel,
   AutoFormOption,
 } from './auto-form/types'
+
+export { setDictSource, useDict } from './dict/use-dict'
+export type { UseDictResult } from './dict/use-dict'
+export type { DictOption, DictSource } from './dict/types'
