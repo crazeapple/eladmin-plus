@@ -1,5 +1,6 @@
 <script setup lang="ts" generic="TData extends RowData">
 import { computed, ref, useSlots } from 'vue'
+import { useMediaQuery } from '@vueuse/core'
 import {
   ElButton,
   ElCheckbox,
@@ -67,6 +68,9 @@ const emit = defineEmits<{
 }>()
 
 const slots = useSlots()
+
+// 移动端断点与布局壳一致（768px）；useMediaQuery 初值取 matchMedia 当前值，无闪烁
+const isMobile = useMediaQuery('(max-width: 768px)')
 
 // 文案默认中文，页面经 texts 覆盖（i18n 注入点）
 const resolvedTexts = computed<Required<DataTableTexts>>(() => ({
@@ -232,7 +236,7 @@ function cellSlotName(cell: Cell<typeof dataTableFeatures, TData, unknown>): str
       <div v-if="loading" class="data-table__loading" data-test="admin-table-loading">
         <span class="data-table__spinner" aria-hidden="true"></span>
       </div>
-      <table class="data-table__table">
+      <table v-if="!isMobile" class="data-table__table">
         <thead>
           <tr v-for="group in table.getHeaderGroups()" :key="group.id">
             <th v-for="header in group.headers" :key="header.id" :aria-sort="ariaSort(header)">
@@ -286,6 +290,22 @@ function cellSlotName(cell: Cell<typeof dataTableFeatures, TData, unknown>): str
           </tr>
         </tbody>
       </table>
+
+      <!-- 移动端卡片形态：内容由页面经 card-row 插槽提供，选择/操作列语义由插槽自带 -->
+      <div v-else class="data-table__cards" data-test="admin-table-cards">
+        <div v-if="isEmpty" class="data-table__empty" data-test="admin-table-empty">
+          <ElEmpty :image-size="60" :description="resolvedTexts.empty" />
+        </div>
+        <div
+          v-else
+          v-for="row in table.getRowModel().rows"
+          :key="row.id"
+          class="data-table__card"
+          data-test="admin-table-card"
+        >
+          <slot name="card-row" :row="row.original" />
+        </div>
+      </div>
     </div>
 
     <div v-if="totalRows > 0" class="data-table__pagination" data-test="admin-table-pagination">
@@ -385,6 +405,19 @@ function cellSlotName(cell: Cell<typeof dataTableFeatures, TData, unknown>): str
 
 .data-table__empty {
   padding: 8px 0;
+}
+
+.data-table__cards {
+  padding: 4px 12px;
+}
+
+.data-table__card {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+.data-table__card:last-child {
+  border-bottom: none;
 }
 
 .data-table__pagination {

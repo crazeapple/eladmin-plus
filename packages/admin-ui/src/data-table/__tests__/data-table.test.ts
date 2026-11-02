@@ -1,4 +1,5 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { nextTick } from 'vue'
 import { cleanup, render, screen } from '@testing-library/vue'
 import { fireEvent } from '@testing-library/dom'
 import DataTable from '../DataTable.vue'
@@ -22,7 +23,33 @@ const rows: Row[] = [
 
 afterEach(() => {
   cleanup()
+  vi.unstubAllGlobals()
 })
+
+/** matchMedia 桩：初值即当前形态，flip 触发 change 监听模拟断点切换 */
+function stubMatchMedia(matches: boolean) {
+  const listeners = new Set<(event: { matches: boolean }) => void>()
+  const mql = {
+    matches,
+    media: '(max-width: 768px)',
+    addEventListener: (_type: string, cb: (event: { matches: boolean }) => void) => {
+      listeners.add(cb)
+    },
+    removeEventListener: (_type: string, cb: (event: { matches: boolean }) => void) => {
+      listeners.delete(cb)
+    },
+  }
+  vi.stubGlobal(
+    'matchMedia',
+    vi.fn(() => mql),
+  )
+  return {
+    flip(next: boolean) {
+      mql.matches = next
+      listeners.forEach((cb) => cb({ matches: next }))
+    },
+  }
+}
 
 describe('DataTable 基础渲染', () => {
   it('按 columns 声明出表头，按 data 渲染行', () => {
@@ -184,5 +211,64 @@ describe('行选择', () => {
 
     await fireEvent.click(document.querySelector('[data-test="admin-table-select-all"] input')!)
     expect(emitted()['selection-change']).toEqual([[rows], [[]]])
+  })
+})
+
+describe('移动端卡片化', () => {
+  const cardSlots = {
+    'card-row': '<div class="card-row-content">卡片内容：{{ params.row.name }}</div>',
+  }
+
+  it('窄屏初始渲染即卡片形态，经 card-row 插槽出内容', () => {
+    stubMatchMedia(true)
+    render(DataTable, { props: { columns, data: rows }, slots: cardSlots })
+
+    expect(document.querySelector('[data-test="admin-table-cards"]')).toBeTruthy()
+    expect(document.querySelector('table')).toBeNull()
+    expect(document.querySelectorAll('[data-test="admin-table-card"]')).toHaveLength(2)
+    expect(screen.getByText('卡片内容：张三')).toBeTruthy()
+    expect(screen.getByText('卡片内容：李四')).toBeTruthy()
+  })
+
+  it('宽屏初始渲染即表格形态', () => {
+    stubMatchMedia(false)
+    render(DataTable, { props: { columns, data: rows }, slots: cardSlots })
+
+    expect(document.querySelector('table')).toBeTruthy()
+    expect(document.querySelector('[data-test="admin-table-cards"]')).toBeNull()
+  })
+
+  it('断点切换实时跟随且无闪烁重挂载', async () => {
+    const stub = stubMatchMedia(false)
+    render(DataTable, { props: { columns, data: rows }, slots: cardSlots })
+
+    expect(document.querySelector('table')).toBeTruthy()
+
+    stub.flip(true)
+    await nextTick()
+    expect(document.querySelector('table')).toBeNull()
+    expect(document.querySelectorAll('[data-test="admin-table-card"]')).toHaveLength(2)
+
+    stub.flip(false)
+    await nextTick()
+    expect(document.querySelector('table')).toBeTruthy()
+    expect(screen.getByRole('cell', { name: '张三' })).toBeTruthy()
+  })
+
+  it('卡片形态与分页控件共用', () => {
+    stubMatchMedia(true)
+    render(DataTable, {
+      props: { columns, data: rows, page: 0, pageSize: 10, total: 25 },
+      slots: cardSlots,
+    })
+
+    expect(document.querySelector('[data-test="admin-table-pagination"]')).toBeTruthy()
+  })
+
+  it('卡片形态空数据呈现空态', () => {
+    stubMatchMedia(true)
+    render(DataTable, { props: { columns, data: [] }, slots: cardSlots })
+
+    expect(screen.getByText('暂无数据')).toBeTruthy()
   })
 })
