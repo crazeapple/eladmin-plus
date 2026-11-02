@@ -1,5 +1,17 @@
 # 更新日志
 
+## 0.9.0
+
+认证会话与菜单权限后端。
+
+- RBAC 五表落地（用户 / 角色 / 用户角色 / 菜单 / 角色菜单）：按钮型权限点绑菜单树，菜单含 i18n key、组件路径 key、noCache、排序；幂等种子——admin 账号（初始密码 123456）、ROLE_ROOT 内置超管角色位（判定走角色位不依赖用户名）、初始菜单三条（首页与两个演示页）
+- 登录链路全链：滑块验证码（出题答案只进 Redis、题目即焚、一次性票据）→ 密码 RSA-OAEP 加密传输（密钥对存 Redis 双槽：current + retired 带 10 分钟 TTL）→ keyId 定位解密（current 直接命中零额外读，跨重启在途密文点查 retired 兜底，皆无返回「公钥已过期」驱动前端重取）→ BCrypt 比对 → 不透明令牌对签发
+- 会话语义：accessToken 即 Redis 会话键（删键即强退），refresh 按 userId + tokenId 记账；刷新旋转——旧键 TTL 收窄至 30 秒宽限窗口（可配），窗口内多 tab 并发各得新对；登出删会话与 refresh，幂等重入
+- refresh cookie：HttpOnly + SameSite=Lax + path 收窄 /auth，Secure 标志环境变量可配（TLS 开启即开）；刷新端点自定义头必备（CSRF 纵深）
+- 平台过滤链就位：匿名清单精确到端点，其余一律 authenticated；Bearer 令牌过滤器还原身份（authorities = 角色位 + 权限点）；401 / 403 同形结构输出；方法级 @PreAuthorize 载体生效
+- `/auth/me`：用户视图（不含密码哈希）+ 角色码 + 权限点 + 菜单树（按角色关联组装，ROLE_ROOT 直通全菜单）
+- 认证错误词条 zh / en 双语补齐，缺省语言锚定中文（locale 链 miss 落 root 包，不随 JVM 系统 locale 漂移）
+
 ## 0.8.0
 
 发布基础设施。
