@@ -29,6 +29,10 @@ typecheck:
 test:
     pnpm -r run test
 
+# 生产栈 E2E 冒烟（先起栈：docker compose -f deploy/compose.yaml up -d --wait）
+e2e:
+    pnpm --filter @eladmin-plus/web run test:e2e
+
 # 前端开发服务器（vite 默认 5173；接口代理到本地后端 8080，先 just server-run）
 web-dev:
     pnpm --filter @eladmin-plus/web run dev

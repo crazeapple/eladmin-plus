@@ -17,3 +17,7 @@ logs/
 
 # 生产部署参数（deploy/deploy.env.example 模板复制而来）
 deploy/deploy.env
+
+# Playwright 产物
+test-results/
+playwright-report/
