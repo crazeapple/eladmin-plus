@@ -7,7 +7,6 @@ import com.eladminplus.auth.mapper.UserMapper;
 import com.eladminplus.auth.rsa.RsaKeyService;
 import com.eladminplus.common.error.BusinessException;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,19 +25,21 @@ public class LoginService {
     private final BlockPuzzleService blockPuzzleService;
     private final TokenService tokenService;
     private final AuthContextService authContextService;
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder;
 
     public LoginService(
             UserMapper userMapper,
             RsaKeyService rsaKeyService,
             BlockPuzzleService blockPuzzleService,
             TokenService tokenService,
-            AuthContextService authContextService) {
+            AuthContextService authContextService,
+            PasswordEncoder passwordEncoder) {
         this.userMapper = userMapper;
         this.rsaKeyService = rsaKeyService;
         this.blockPuzzleService = blockPuzzleService;
         this.tokenService = tokenService;
         this.authContextService = authContextService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public LoginResult login(String username, String cipherText, String keyId, String ticket) {

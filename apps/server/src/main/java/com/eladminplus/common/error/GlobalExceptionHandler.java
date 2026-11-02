@@ -29,6 +29,14 @@ public class GlobalExceptionHandler {
                 .body(R.error(ex.getStatus(), resolve(ex.getMessage(), locale)));
     }
 
+    /** 方法级 @PreAuthorize 的拒绝在 MVC 层抛出，须在此转 403（否则落入未知异常成 500） */
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<R<Void>> handleAccessDenied(
+            org.springframework.security.access.AccessDeniedException ex, Locale locale) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(R.error(HttpStatus.FORBIDDEN, resolve("error.auth.forbidden", locale)));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<R<Void>> handleUnknown(Exception ex) {
         // 未知异常：堆栈进日志，响应只回通用消息，不泄内部细节
