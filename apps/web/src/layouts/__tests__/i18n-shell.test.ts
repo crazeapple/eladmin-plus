@@ -1,3 +1,4 @@
+import { VueQueryPlugin } from '@tanstack/vue-query'
 import { cleanup, render, within } from '@testing-library/vue'
 import { createPinia, setActivePinia } from 'pinia'
 import { nextTick } from 'vue'
@@ -60,7 +61,7 @@ describe('壳层多语言', () => {
     await router.push('/demo/cached')
     await router.isReady()
     // 渲染 App：语言绑定 watch（偏好 locale → i18n 实例）在 App 内接线
-    render(App, { global: { plugins: [pinia, router, buildI18n('zh-CN')] } })
+    render(App, { global: { plugins: [pinia, router, buildI18n('zh-CN'), VueQueryPlugin] } })
 
     // 中文态：菜单、面包屑、页签各自容器内为中文
     const menu = document.querySelector('.layout__menu') as HTMLElement

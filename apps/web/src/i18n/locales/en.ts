@@ -3,8 +3,10 @@ export default {
   common: {
     notFoundDesc: 'Page not found or has been moved.',
     backHome: 'Back to home',
+    retry: 'Retry',
   },
   home: {
+    statsError: 'Failed to load statistics. Retry.',
     cards: {
       users: 'Users',
       online: 'Online users',

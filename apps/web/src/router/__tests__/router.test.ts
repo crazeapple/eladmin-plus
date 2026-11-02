@@ -1,3 +1,4 @@
+import { VueQueryPlugin } from '@tanstack/vue-query'
 import { cleanup, render, screen, waitFor } from '@testing-library/vue'
 import { createPinia } from 'pinia'
 import { createMemoryHistory, createRouter, type RouteRecordRaw } from 'vue-router'
@@ -23,7 +24,7 @@ async function renderAt(path: string) {
   await router.push(path)
   await router.isReady()
   return render(App, {
-    global: { plugins: [createPinia(), router, buildI18n('zh-CN')] },
+    global: { plugins: [createPinia(), router, buildI18n('zh-CN'), VueQueryPlugin] },
   })
 }
 

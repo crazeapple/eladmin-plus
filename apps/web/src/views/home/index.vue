@@ -11,6 +11,7 @@ import {
   chartPalette,
   type ChartPalette,
 } from '@/components/charts/options'
+import { useOverviewStatsQuery } from '@/api/stats'
 import { barDemo, lineDatasets, pieDemo, radarDemo, weekdayKeys, type CardKey } from './demo-data'
 import StatCards from './components/StatCards.vue'
 
@@ -18,8 +19,26 @@ defineOptions({ name: 'Home' })
 
 const { t } = useI18n()
 
-// 演示态：数字与色板为静态默认值——端点消费与偏好联动随后任务接线
-const stats = { users: 10240, online: 321, visits: 8123, logs: 2048 }
+// 卡片数字消费统计端点（占位契约，真实数据仅换后端实现）；图表仍前端静态演示
+const { data, isError, refetch } = useOverviewStatsQuery()
+
+// 契约 int64 在 zod 侧为 coerce bigint（字段可缺省）：视图边界统一转 number，缺省保持 undefined 显占位符
+const toCount = (value: bigint | undefined): number | undefined =>
+  value === undefined ? undefined : Number(value)
+
+const stats = computed(() => {
+  const source = data.value
+  return source
+    ? {
+        users: toCount(source.userCount),
+        online: toCount(source.onlineCount),
+        visits: toCount(source.todayVisitCount),
+        logs: toCount(source.logCount),
+      }
+    : {}
+})
+
+// 演示态：色板为静态默认值——偏好联动随后任务接线
 const palette: ChartPalette = chartPalette('#409eff', false)
 const selectedKey = ref<CardKey>('users')
 
@@ -62,6 +81,13 @@ const barOption = computed(() =>
 
 <template>
   <div class="home" data-test="home-dashboard">
+    <div v-if="isError" class="home__error" data-test="stats-error">
+      <span>{{ t('home.statsError') }}</span>
+      <el-button size="small" data-test="stats-retry" @click="refetch()">
+        {{ t('common.retry') }}
+      </el-button>
+    </div>
+
     <StatCards :stats="stats" />
 
     <div class="home__chart home__chart--wide" data-test="chart-line">
@@ -91,6 +117,17 @@ const barOption = computed(() =>
 <style scoped lang="scss">
 .home {
   padding: 16px;
+}
+
+.home__error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 8px 16px;
+  color: var(--el-color-danger);
+  background: var(--el-color-danger-light-9);
+  border-radius: 4px;
 }
 
 .home__chart {

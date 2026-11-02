@@ -1,3 +1,4 @@
+import { VueQueryPlugin } from '@tanstack/vue-query'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/vue'
 import { createPinia } from 'pinia'
 import { createMemoryHistory, createRouter } from 'vue-router'
@@ -38,7 +39,9 @@ async function renderLayout(path = '/home') {
   const router = createRouter({ history: createMemoryHistory(), routes })
   await router.push(path)
   await router.isReady()
-  render(Layout, { global: { plugins: [createPinia(), router, buildI18n('zh-CN')] } })
+  render(Layout, {
+    global: { plugins: [createPinia(), router, buildI18n('zh-CN'), VueQueryPlugin] },
+  })
 }
 
 describe('Layout', () => {

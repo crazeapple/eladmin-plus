@@ -3,8 +3,10 @@ export default {
   common: {
     notFoundDesc: '页面不存在或已被移动。',
     backHome: '回首页',
+    retry: '重试',
   },
   home: {
+    statsError: '统计数据加载失败，请重试。',
     cards: {
       users: '用户数',
       online: '在线用户',
