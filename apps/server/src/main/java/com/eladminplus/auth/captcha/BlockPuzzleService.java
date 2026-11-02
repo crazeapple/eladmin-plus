@@ -32,6 +32,10 @@ public class BlockPuzzleService {
     private static final int SLIDER_SIZE = 44;
     private static final int SLIDER_RADIUS = 10;
 
+    /** token 仅接受 UUID 形态（与 keyId 同策略，防 Redis key 探测） */
+    private static final java.util.regex.Pattern TOKEN_PATTERN =
+            java.util.regex.Pattern.compile("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$");
+
     private final StringRedisTemplate redis;
     private final CaptchaProperties props;
 
@@ -59,15 +63,15 @@ public class BlockPuzzleService {
 
     /**
      * 校验拖动距离：命中即焚题并签发一次性票据；偏离容差或题目已失效（含重复提交）一律拒绝。
+     * 取题与焚题原子完成（GETDEL）——并发同 token 只有一个调用方能观察到活题。
      */
     public String check(String token, int moveDistance) {
-        String answer = redis.opsForValue().get(PUZZLE_PREFIX + token);
-        if (answer == null) {
+        if (token == null || !TOKEN_PATTERN.matcher(token).matches()) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "error.auth.captcha-invalid");
         }
-        // 题目无论对错即焚（防观察重放），失败由前端换题重来
-        redis.delete(PUZZLE_PREFIX + token);
-        if (Math.abs(Integer.parseInt(answer) - moveDistance) > props.tolerance()) {
+        // 题目无论对错即焚（防观察重放），失败由前端换题重来；差值用 long 展开，杜绝 int 溢出绕过
+        String answer = redis.opsForValue().getAndDelete(PUZZLE_PREFIX + token);
+        if (answer == null || Math.abs(Long.parseLong(answer) - (long) moveDistance) > props.tolerance()) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "error.auth.captcha-invalid");
         }
         String ticket = UUID.randomUUID().toString();
@@ -75,9 +79,9 @@ public class BlockPuzzleService {
         return ticket;
     }
 
-    /** 登录消费票据：存在即通过并立即焚毁（一次性），不存在即无效或重放 */
+    /** 登录消费票据：存在即通过并立即焚毁（一次性），不存在或格式非法即无效或重放 */
     public boolean consumeTicket(String ticket) {
-        if (ticket == null || ticket.isBlank()) {
+        if (ticket == null || !TOKEN_PATTERN.matcher(ticket).matches()) {
             return false;
         }
         return Boolean.TRUE.equals(redis.delete(TICKET_PREFIX + ticket));

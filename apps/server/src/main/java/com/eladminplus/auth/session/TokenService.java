@@ -26,10 +26,12 @@ public class TokenService {
 
     private final StringRedisTemplate redis;
     private final AuthSessionProperties props;
+    private final AuthContextService authContextService;
 
-    public TokenService(StringRedisTemplate redis, AuthSessionProperties props) {
+    public TokenService(StringRedisTemplate redis, AuthSessionProperties props, AuthContextService authContextService) {
         this.redis = redis;
         this.props = props;
+        this.authContextService = authContextService;
     }
 
     /** 一次登录的令牌对与上下文 */
@@ -76,6 +78,26 @@ public class TokenService {
                 List.of(((String) hash.get("roles")).split(",")),
                 splitPermissions((String) hash.get("permissions")),
                 Instant.parse((String) hash.get("loginAt")));
+    }
+
+    /**
+     * refresh 旋转：值匹配即签发全新令牌对；旧键不删、TTL 收窄到宽限窗口——
+     * 多 tab 并发在窗口内各自旋转各得新对（前端 Web Locks 单飞失效时的后端保险）。
+     * 键不存在或值不匹配（过期 / 伪造）返回 null。
+     */
+    public TokenPair rotate(Long userId, String tokenId, String random) {
+        String key = refreshKey(userId, tokenId);
+        String stored = redis.opsForValue().get(key);
+        if (stored == null || !stored.equals(random)) {
+            return null;
+        }
+        var context = authContextService.load(userId);
+        if (context.user() == null) {
+            return null;
+        }
+        // 宽限窗口：旧键短命留存（从本次使用起计）
+        redis.opsForValue().set(key, stored, props.graceWindow().getSeconds(), TimeUnit.SECONDS);
+        return issue(context.user(), context.roles(), context.permissions());
     }
 
     /** 登出：删会话与其 refresh 键 */
