@@ -98,6 +98,7 @@ function onMenuSelect() {
         <button
           type="button"
           class="layout__trigger"
+          :title="t('layout.collapseToggle')"
           :aria-label="t('layout.collapseToggle')"
           @click="onTriggerClick"
         >
@@ -109,16 +110,11 @@ function onMenuSelect() {
           </el-breadcrumb-item>
         </el-breadcrumb>
         <div class="layout__actions">
-          <span class="layout__placeholder" :title="t('layout.searchPlaceholder')">
-            <app-icon name="search" />
-          </span>
-          <span class="layout__placeholder" :title="t('layout.sizePlaceholder')">
-            <app-icon name="size" />
-          </span>
           <button
             v-if="isSupported"
             type="button"
             class="layout__trigger"
+            :title="t('layout.fullscreenToggle')"
             :aria-label="t('layout.fullscreenToggle')"
             @click="toggle()"
           >
@@ -127,15 +123,13 @@ function onMenuSelect() {
           <button
             type="button"
             class="layout__trigger"
+            :title="t('layout.openSettings')"
             :aria-label="t('layout.openSettings')"
             data-test="settings-trigger"
             @click="settingsOpen = true"
           >
-            <app-icon name="theme" />
+            <app-icon name="settings" />
           </button>
-          <span class="layout__placeholder" :title="t('layout.avatarPlaceholder')">
-            <app-icon name="user" />
-          </span>
         </div>
         <SettingsDrawer v-model="settingsOpen" />
       </el-header>
@@ -238,9 +232,14 @@ function onMenuSelect() {
   cursor: pointer;
   background: none;
   border: none;
+  border-radius: 6px;
+  transition:
+    color 0.2s,
+    background-color 0.2s;
 
   &:hover {
     color: var(--el-color-primary, #409eff);
+    background: var(--el-fill-color, #f0f2f5);
   }
 }
 
@@ -254,13 +253,6 @@ function onMenuSelect() {
   gap: 8px;
   margin-left: auto;
   font-size: 16px;
-}
-
-.layout__placeholder {
-  display: inline-flex;
-  align-items: center;
-  color: var(--el-text-color-regular, #606266);
-  cursor: default;
 }
 
 .layout__main {

@@ -51,10 +51,7 @@ export default {
   },
   layout: {
     collapseToggle: 'Collapse or expand sidebar',
-    searchPlaceholder: 'Menu search (placeholder)',
-    sizePlaceholder: 'Size switch (placeholder)',
     fullscreenToggle: 'Toggle fullscreen',
-    avatarPlaceholder: 'Avatar menu (placeholder)',
     openSettings: 'Open settings',
   },
   tags: {
@@ -67,10 +64,10 @@ export default {
     theme: 'Theme',
     themeLight: 'Light',
     themeDark: 'Dark',
-    themeAuto: 'Follow system',
+    themeAuto: 'System',
     primaryColor: 'Primary color',
     language: 'Language',
-    localeSystem: 'Follow system',
+    localeSystem: 'System',
   },
   routes: {
     home: 'Home',

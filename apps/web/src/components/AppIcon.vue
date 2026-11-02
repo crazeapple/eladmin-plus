@@ -56,6 +56,10 @@ function sanitize(raw: string): string {
     display: block;
     width: 100%;
     height: 100%;
+  }
+
+  // 线性图标自带 fill="none" stroke="currentColor"，不覆盖；面性图标无 fill 属性，跟随文字色
+  :deep(svg:not([fill])) {
     fill: currentColor;
   }
 }

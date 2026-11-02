@@ -21,10 +21,11 @@ const themeOptions = computed(() => [
   { value: 'auto', label: t('settings.themeAuto') },
 ])
 
+// 与主题行同构：显式值在前、「随系统」殿后——两行分段顺序对齐
 const localeOptions = computed(() => [
-  { value: 'system', label: t('settings.localeSystem') },
   { value: 'zh-CN', label: '简体中文' },
   { value: 'en', label: 'English' },
+  { value: 'system', label: t('settings.localeSystem') },
 ])
 
 const presetColors = PRESET_COLORS
@@ -40,8 +41,20 @@ const presetColors = PRESET_COLORS
   >
     <div class="settings">
       <section class="settings__section">
+        <h3>{{ t('settings.language') }}</h3>
+        <el-radio-group v-model="locale" class="settings__segment" data-test="settings-locale">
+          <el-radio-button
+            v-for="option in localeOptions"
+            :key="option.value"
+            :value="option.value"
+          >
+            {{ option.label }}
+          </el-radio-button>
+        </el-radio-group>
+      </section>
+      <section class="settings__section">
         <h3>{{ t('settings.theme') }}</h3>
-        <el-radio-group v-model="theme" data-test="settings-theme">
+        <el-radio-group v-model="theme" class="settings__segment" data-test="settings-theme">
           <el-radio-button v-for="option in themeOptions" :key="option.value" :value="option.value">
             {{ option.label }}
           </el-radio-button>
@@ -63,18 +76,6 @@ const presetColors = PRESET_COLORS
           <el-color-picker v-model="primaryColor" data-test="settings-color-picker" />
         </div>
       </section>
-      <section class="settings__section">
-        <h3>{{ t('settings.language') }}</h3>
-        <el-radio-group v-model="locale" data-test="settings-locale">
-          <el-radio-button
-            v-for="option in localeOptions"
-            :key="option.value"
-            :value="option.value"
-          >
-            {{ option.label }}
-          </el-radio-button>
-        </el-radio-group>
-      </section>
     </div>
   </el-drawer>
 </template>
@@ -88,6 +89,24 @@ const presetColors = PRESET_COLORS
     font-size: 14px;
     font-weight: 600;
     color: var(--el-text-color-primary, #303133);
+  }
+
+  // 分段控件占满内容宽且各段等宽——宽度不随语言切换变化，两行分段天然对齐
+  .settings__segment {
+    display: flex;
+    width: 100%;
+
+    :deep(.el-radio-button) {
+      // min-width: 0 拆掉 flex 的最小内容地板——分段严格等宽，不随文字长度偏移
+      flex: 1;
+      min-width: 0;
+
+      .el-radio-button__inner {
+        width: 100%;
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
   }
 }
 

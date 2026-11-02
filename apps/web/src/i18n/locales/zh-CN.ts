@@ -50,10 +50,7 @@ export default {
   },
   layout: {
     collapseToggle: '折叠或展开侧栏',
-    searchPlaceholder: '菜单搜索（占位）',
-    sizePlaceholder: '尺寸切换（占位）',
     fullscreenToggle: '切换全屏',
-    avatarPlaceholder: '头像与下拉（占位）',
     openSettings: '打开设置',
   },
   tags: {
