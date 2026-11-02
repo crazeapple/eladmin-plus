@@ -3,6 +3,12 @@
 // 消费方从包入口导入即生效
 import 'element-plus/es/components/button/style/css'
 import 'element-plus/es/components/checkbox/style/css'
+import 'element-plus/es/components/date-picker/style/css'
 import 'element-plus/es/components/empty/style/css'
+import 'element-plus/es/components/input/style/css'
+import 'element-plus/es/components/option/style/css'
 import 'element-plus/es/components/pagination/style/css'
 import 'element-plus/es/components/popover/style/css'
+import 'element-plus/es/components/radio/style/css'
+import 'element-plus/es/components/select/style/css'
+import 'element-plus/es/components/tree-select/style/css'

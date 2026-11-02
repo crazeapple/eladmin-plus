@@ -7,3 +7,11 @@ export type {
   DataTableSortState,
   DataTableTexts,
 } from './data-table/types'
+
+export { default as AutoForm } from './auto-form/AutoForm.vue'
+export type {
+  AutoFormField,
+  AutoFormFieldType,
+  AutoFormModel,
+  AutoFormOption,
+} from './auto-form/types'
