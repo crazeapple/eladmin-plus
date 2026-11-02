@@ -50,6 +50,9 @@ export default {
     noCachePlaceholder: 'Type something, switching away and back clears it',
   },
   layout: {
+    profile: 'Profile',
+    logout: 'Sign out',
+
     collapseToggle: 'Collapse or expand sidebar',
     fullscreenToggle: 'Toggle fullscreen',
     openSettings: 'Open settings',

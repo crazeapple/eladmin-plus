@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import App from '@/App.vue'
 import { buildI18n } from '@/i18n'
-import { routes } from '@/router'
+import { installAuthGuard, routes } from '@/router'
 
 beforeEach(() => {
   // 钉住系统语言，偏好首访检测稳定取 zh-CN（文案断言走中文语言包）
@@ -115,5 +115,58 @@ describe('TagsView', () => {
       '输入点什么，切走再切回会清空',
     )) as HTMLInputElement
     expect(again.value).toBe('')
+  })
+})
+
+describe('页签缓存动态接线（守卫注册路由的 noCache 语义）', () => {
+  beforeEach(() => {
+    localStorage.setItem('auth:logged-in', '1')
+  })
+
+  /** 守卫版挂载：走真实守卫链（恢复会话 + 拉菜单 + 注册动态路由） */
+  async function renderAppWithGuard(
+    path: string,
+  ): Promise<{ router: Router; pinia: ReturnType<typeof createPinia> }> {
+    const pinia = createPinia()
+    const router = createRouter({ history: createMemoryHistory(), routes })
+    installAuthGuard(router)
+    await router.push(path)
+    await router.isReady()
+    render(App, { global: { plugins: [pinia, router, buildI18n('zh-CN'), VueQueryPlugin] } })
+    await waitFor(() => expect(document.querySelector('[data-test="home-dashboard"]')).toBeTruthy())
+    return { router, pinia }
+  }
+
+  it('缓存页（demo/cached）进缓存集，noCache 页（demo/no-cache）不入', async () => {
+    const { router, pinia } = await renderAppWithGuard('/home')
+
+    await router.push('/demo/cached')
+    await waitFor(() => expect(router.currentRoute.value.path).toBe('/demo/cached'))
+    await router.push('/demo/no-cache')
+    await waitFor(() => expect(router.currentRoute.value.path).toBe('/demo/no-cache'))
+
+    const tags = pinia._s.get('tags-view')!
+    const cached = tags.cachedViews
+    expect(cached).toContain('Home')
+    expect(cached).toContain('DemoCached')
+    expect(cached).not.toContain('DemoNoCache')
+    // 页签三条都在（含固定首页）
+    expect(tags.visitedViews.map((view: { path: string }) => view.path)).toEqual([
+      '/home',
+      '/demo/cached',
+      '/demo/no-cache',
+    ])
+  })
+
+  it('登录后导航的动态路由页签标题取 i18n key', async () => {
+    const { router, pinia } = await renderAppWithGuard('/home')
+    await router.push('/demo/cached')
+    await waitFor(() => expect(router.currentRoute.value.path).toBe('/demo/cached'))
+
+    const tags = pinia._s.get('tags-view')!
+    const cachedTag = tags.visitedViews.find(
+      (view: { path: string }) => view.path === '/demo/cached',
+    )
+    expect(cachedTag?.title).toBe('routes.demoCached')
   })
 })

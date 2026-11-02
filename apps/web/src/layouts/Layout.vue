@@ -3,12 +3,16 @@ import { useFullscreen, useMediaQuery } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import AppIcon from '@/components/AppIcon.vue'
 import SettingsDrawer from '@/components/settings/SettingsDrawer.vue'
 import { routes } from '@/router'
+import { logout } from '@/api/auth'
+import { useMenusStore } from '@/stores/menus'
+import { useSessionStore } from '@/stores/session'
 import { useTagsViewStore } from '@/stores/tags-view'
+
 import TagsView from '@/layouts/TagsView.vue'
 
 defineOptions({ name: 'Layout' })
@@ -26,6 +30,29 @@ const collapsed = ref(false)
 
 // 设置抽屉：主题三态、主色、语言集中一处
 const settingsOpen = ref(false)
+const router = useRouter()
+
+const menusStore = useMenusStore()
+const sessionStore = useSessionStore()
+const tagsViewStore = useTagsViewStore()
+const username = computed(() => menusStore.user?.username ?? '')
+
+/** 退出登录：后端异常也继续清本地（登出的目的是离开）；页签与缓存回首页初始态 */
+async function onUserCommand(command: string | number | object) {
+  if (command !== 'logout') return
+  const token = sessionStore.accessToken
+  try {
+    if (token) {
+      await logout(token)
+    }
+  } catch {
+    // 忽略后端异常，本地全清
+  }
+  sessionStore.reset()
+  menusStore.reset()
+  tagsViewStore.closeAll()
+  await router.push('/login')
+}
 
 const menuItems = computed(() =>
   (routes[0].children ?? []).map((child) => ({
@@ -130,6 +157,31 @@ function onMenuSelect() {
           >
             <app-icon name="settings" />
           </button>
+          <el-dropdown
+            class="layout__user"
+            data-test="user-area"
+            trigger="click"
+            @command="onUserCommand"
+          >
+            <button
+              type="button"
+              class="layout__trigger layout__avatar"
+              :title="username"
+              data-test="user-avatar"
+            >
+              {{ username }}
+            </button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item disabled data-test="user-profile">{{
+                  t('layout.profile')
+                }}</el-dropdown-item>
+                <el-dropdown-item divided command="logout" data-test="user-logout">
+                  {{ t('layout.logout') }}
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </div>
         <SettingsDrawer v-model="settingsOpen" />
       </el-header>

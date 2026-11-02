@@ -19,15 +19,23 @@ export interface MenuNode {
  * 菜单 store：后端菜单是唯一真相。load 拉取一次，reset 随登出清空；
  * 动态注册（addRoute）由路由守卫执行，store 只管数据。
  */
+export interface SessionUser {
+  id: number
+  username: string
+  nickName: string | null
+}
+
 export const useMenusStore = defineStore('menus', () => {
   const menus = ref<MenuNode[]>([])
   const loaded = ref(false)
+  const user = ref<SessionUser | null>(null)
 
-  /** 拉取菜单树；失败（含 401）返回 false 交守卫跳登录 */
+  /** 拉取菜单树与用户视图；失败（含 401）返回 false 交守卫跳登录 */
   async function load(): Promise<boolean> {
     try {
       const { data } = await client.request({ url: '/auth/me', method: 'GET', throwOnError: true })
-      const payload = data as { menus?: MenuNode[] }
+      const payload = data as { user?: SessionUser; menus?: MenuNode[] }
+      user.value = payload.user ?? null
       menus.value = payload.menus ?? []
       loaded.value = true
       return true
@@ -39,6 +47,7 @@ export const useMenusStore = defineStore('menus', () => {
   function reset() {
     menus.value = []
     loaded.value = false
+    user.value = null
   }
 
   /** 后端菜单树展平（含各级） */
@@ -56,5 +65,5 @@ export const useMenusStore = defineStore('menus', () => {
     return result
   }
 
-  return { menus, loaded, load, reset, flatten }
+  return { menus, loaded, user, load, reset, flatten }
 })

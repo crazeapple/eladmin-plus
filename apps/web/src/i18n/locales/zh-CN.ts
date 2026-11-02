@@ -49,6 +49,9 @@ export default {
     noCachePlaceholder: '输入点什么，切走再切回会清空',
   },
   layout: {
+    profile: '个人中心',
+    logout: '退出登录',
+
     collapseToggle: '折叠或展开侧栏',
     fullscreenToggle: '切换全屏',
     openSettings: '打开设置',
