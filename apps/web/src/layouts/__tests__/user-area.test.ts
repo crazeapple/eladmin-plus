@@ -47,10 +47,11 @@ async function renderApp() {
 }
 
 describe('顶栏用户区', () => {
-  it('头像显示登录用户名，下拉含个人中心占位与退出', async () => {
+  it('头像显示用户图标与登录用户名，下拉含个人中心占位与退出（退出前有分隔线）', async () => {
     await renderApp()
-    // 菜单拉取后用户视图在 store
+    // 菜单拉取后用户视图在 store（svg 图标无文本，textContent 即用户名）
     await waitFor(() => expect(byTest('user-avatar').textContent?.trim()).toBe('admin'))
+    expect(byTest('user-avatar').querySelector('svg')).toBeTruthy()
 
     await fireEvent.click(byTest('user-avatar'))
     const dropdown = await waitFor(() => {
@@ -60,6 +61,7 @@ describe('顶栏用户区', () => {
     })
     expect(dropdown.querySelector('[data-test="user-profile"]')?.textContent).toContain('个人中心')
     expect(dropdown.querySelector('[data-test="user-logout"]')?.textContent).toContain('退出登录')
+    expect(dropdown.querySelector('.el-dropdown-menu__item--divided')).toBeTruthy()
   })
 
   it('退出登录调后端、本地全清并回登录页', async () => {

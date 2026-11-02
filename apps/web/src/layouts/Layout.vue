@@ -169,7 +169,8 @@ function onMenuSelect() {
               :title="username"
               data-test="user-avatar"
             >
-              {{ username }}
+              <app-icon name="user" />
+              <span>{{ username }}</span>
             </button>
             <template #dropdown>
               <el-dropdown-menu>
@@ -293,6 +294,14 @@ function onMenuSelect() {
     color: var(--el-color-primary, #409eff);
     background: var(--el-fill-color, #f0f2f5);
   }
+}
+
+/* 用户区触发器：图标 + 用户名，宽度随内容走，hover 行为与其余触发器一致 */
+.layout__avatar {
+  width: auto;
+  gap: 4px;
+  padding: 0 10px;
+  font-size: 14px;
 }
 
 .layout__breadcrumb {
