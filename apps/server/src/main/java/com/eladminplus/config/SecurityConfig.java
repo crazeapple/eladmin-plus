@@ -48,8 +48,14 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // 匿名清单精确到端点：/auth/me 属用户区，须过认证
                         .requestMatchers(
-                                "/auth/**",
+                                "/auth/public-key",
+                                "/auth/captcha",
+                                "/auth/captcha/check",
+                                "/auth/login",
+                                "/auth/refresh",
+                                "/auth/logout",
                                 "/stats/overview",
                                 "/actuator/health",
                                 "/v3/api-docs/**",
