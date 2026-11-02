@@ -297,8 +297,8 @@ function cellSlotName(cell: Cell<typeof dataTableFeatures, TData, unknown>): str
           <ElEmpty :image-size="60" :description="resolvedTexts.empty" />
         </div>
         <div
-          v-else
           v-for="row in table.getRowModel().rows"
+          v-else
           :key="row.id"
           class="data-table__card"
           data-test="admin-table-card"

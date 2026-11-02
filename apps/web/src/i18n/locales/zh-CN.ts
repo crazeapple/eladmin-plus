@@ -68,6 +68,16 @@ export default {
     language: '语言',
     localeSystem: '跟随系统',
   },
+  login: {
+    title: 'eladmin-plus 登录',
+    username: '账号',
+    password: '密码',
+    slideHint: '按住滑块拖动到最右侧完成验证',
+    slideFail: '验证未通过，已换题重试',
+    submit: '登录',
+    success: '登录成功',
+    failed: '登录失败，请稍后再试',
+  },
   routes: {
     home: '首页',
     demoCached: '演示·缓存',

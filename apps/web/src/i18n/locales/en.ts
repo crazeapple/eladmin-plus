@@ -69,6 +69,16 @@ export default {
     language: 'Language',
     localeSystem: 'System',
   },
+  login: {
+    title: 'Sign in to eladmin-plus',
+    username: 'Username',
+    password: 'Password',
+    slideHint: 'Hold and drag the slider to complete verification',
+    slideFail: 'Verification failed, new puzzle loaded',
+    submit: 'Sign in',
+    success: 'Signed in',
+    failed: 'Sign-in failed, please try again later',
+  },
   routes: {
     home: 'Home',
     demoCached: 'Demo · Cached',
