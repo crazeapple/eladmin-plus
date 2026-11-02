@@ -270,7 +270,51 @@ importers:
         specifier: ^3.3.0
         version: 3.3.14(typescript@5.9.3)
 
-  packages/admin-ui: {}
+  packages/admin-ui:
+    dependencies:
+      '@tanstack/vue-table':
+        specifier: ^9.0.0
+        version: 9.3.1(vue@3.5.44(typescript@5.9.3))
+      '@vueuse/core':
+        specifier: ^15.0.0
+        version: 15.0.0(vue@3.5.44(typescript@5.9.3))
+      element-plus:
+        specifier: ^2.14.0
+        version: 2.14.7(vue@3.5.44(typescript@5.9.3))
+      vue:
+        specifier: ^3.5.0
+        version: 3.5.44(typescript@5.9.3)
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@eladmin-plus/config':
+        specifier: workspace:*
+        version: link:../config
+      '@testing-library/dom':
+        specifier: ^10.4.0
+        version: 10.4.2
+      '@testing-library/vue':
+        specifier: ^8.1.0
+        version: 8.1.0(@vue/compiler-dom@3.5.44)(@vue/compiler-sfc@3.5.44)(@vue/server-renderer@3.5.44)(vue@3.5.44(typescript@5.9.3))
+      '@vitejs/plugin-vue':
+        specifier: ^6.0.0
+        version: 6.0.10(vite@8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.6.1)(sass@1.107.1))(vue@3.5.44(typescript@5.9.3))
+      happy-dom:
+        specifier: ^21.0.0
+        version: 21.0.4
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
+      vite:
+        specifier: ^8.0.0
+        version: 8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.6.1)(sass@1.107.1)
+      vitest:
+        specifier: ^5.0.0
+        version: 5.0.5(@types/node@26.6.6)(happy-dom@21.0.4)(vite@8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.6.1)(sass@1.107.1))
+      vue-tsc:
+        specifier: ^3.3.0
+        version: 3.3.14(typescript@5.9.3)
 
   packages/config:
     devDependencies:
@@ -1156,6 +1200,13 @@ packages:
   '@tanstack/query-devtools@5.105.0':
     resolution: {integrity: sha512-vRJf9XRHB+P2aMSAEHWtMLsAf1nC9NSsHVqSHiT/FZYU/+5LEo2BOrXKskURQnJEzg6whaBeP6iMn0PS30KJrQ==}
 
+  '@tanstack/store@0.11.2':
+    resolution: {integrity: sha512-sJ4mjol8uQsHV0gOJzzjwXfh2Fwm+Sz0+8deqiTm4jGbMdjzNSW+xZCFm0kUa870uhd8yi+DpKnZb5Kc4apa0Q==}
+
+  '@tanstack/table-core@9.3.1':
+    resolution: {integrity: sha512-zQvlxSNi2qGM3L4jh85Z6hqMfdIR5qOfD9KHOU32nuKFJGN0RlJ7UvV1lsPb1fPVhpFYI0VP3jJGxLdLDpTKjQ==}
+    engines: {node: '>=20'}
+
   '@tanstack/vue-query-devtools@6.3.6':
     resolution: {integrity: sha512-Nn49ZdfgqVKZWOAiSvPv6C4kE9CZ/CFKRU6MmqBP5/zajipoz7SjomgrmyCCshCi7K7SAitV7Tfokvd2We17gA==}
     peerDependencies:
@@ -1170,6 +1221,12 @@ packages:
     peerDependenciesMeta:
       '@vue/composition-api':
         optional: true
+
+  '@tanstack/vue-table@9.3.1':
+    resolution: {integrity: sha512-7z7nS4UP91rLZ01suGxQBT611ogfBrs7/E+lsKeYS9XdHSRUAzclFvQ4B10F0bC/Q8BrzgXiNH3QzumK7b0Tow==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      vue: '>=3.2'
 
   '@testing-library/dom@10.4.2':
     resolution: {integrity: sha512-yzr2S9HyAIdhz2/6qHgbs665Q7PKVcDF05vsOlHPxG1mo36gKVesdYVeDLnXgfjJ03CrKRk08knc6+E/9m8v2Q==}
@@ -4078,6 +4135,12 @@ snapshots:
     transitivePeerDependencies:
       - csstype
 
+  '@tanstack/store@0.11.2': {}
+
+  '@tanstack/table-core@9.3.1':
+    dependencies:
+      '@tanstack/store': 0.11.2
+
   '@tanstack/vue-query-devtools@6.3.6(@tanstack/vue-query@5.105.0(vue@3.5.44(typescript@5.9.3)))(csstype@3.2.3)(vue@3.5.44(typescript@5.9.3))':
     dependencies:
       '@tanstack/query-devtools': 5.105.0(csstype@3.2.3)
@@ -4093,6 +4156,12 @@ snapshots:
       '@vue/devtools-api': 6.6.4
       vue: 3.5.44(typescript@5.9.3)
       vue-demi: 0.14.10(vue@3.5.44(typescript@5.9.3))
+
+  '@tanstack/vue-table@9.3.1(vue@3.5.44(typescript@5.9.3))':
+    dependencies:
+      '@tanstack/store': 0.11.2
+      '@tanstack/table-core': 9.3.1
+      vue: 3.5.44(typescript@5.9.3)
 
   '@testing-library/dom@10.4.2':
     dependencies:
