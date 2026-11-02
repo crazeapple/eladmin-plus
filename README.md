@@ -38,6 +38,42 @@ docker exec eladmin-plus-mysql mysql -uroot -proot -e "CREATE DATABASE IF NOT EX
 
 右上角设置图标打开设置抽屉：主题三态（浅色 / 深色 / 随系统）、主色（预设色板或任意取色）、语言（跟随系统 / 简体中文 / English）即改即生效，并持久化在浏览器（localStorage），下次打开自动恢复；随系统模式跟随系统深浅色实时切换。偏好语言会同步到请求头 `Accept-Language`，后端错误消息随之本地化。
 
+## 部署
+
+生产栈与本地开发同构：`deploy/compose.yaml` 编排 web（nginx，唯一宿主映射端口）+ server + MySQL + Redis 四容器，数据服务端口一律不映射宿主，运行参数经环境变量注入。
+
+### 本地生产栈验证
+
+```bash
+docker compose -f deploy/compose.yaml up -d --wait   # 构建镜像并起栈，等全部 healthy
+just e2e                                             # 生产栈冒烟：首页渲染 / 主题语言切换 / 深链刷新 / gzip / 无 console 错误
+docker compose -f deploy/compose.yaml down           # 停栈（保留数据卷）
+```
+
+栈起在 `http://localhost:80`（`WEB_PORT` 可覆盖）；`docker compose ps` 中四容器均 healthy 即验证形态。
+
+### 一键发布
+
+```bash
+cp deploy/deploy.env.example deploy/deploy.env   # 填远程主机、路径与运行参数（实文件不入库）
+scripts/deploy.sh --dry-run                       # 只走构建与冒烟，验证发布链不触碰远端
+scripts/deploy.sh                                 # 构建 → 冒烟门禁（非零即中止）→ 传输镜像与组态 → 远端 compose 拉起
+```
+
+冒烟全绿才允许发布：`test:e2e` 非零退出时脚本立即中止，传输与远端阶段不执行。TLS 未启用（nginx 配置内含证书就位后的注释段）；WebSocket 反代段同样以注释预留。
+
+### 备份
+
+```bash
+scripts/backup-mysql.sh eladmin-plus-prod-mysql   # 立即备份一次（docker exec mysqldump + gzip）
+```
+
+备份写入 `backups/`（`BACKUP_DIR` 可覆盖），文件名带时间戳，脚本自动滚动清理 7 天前的旧备份（只识别本脚本产出的文件名模式）。宿主机定时安装一行 crontab（每日 02:30）：
+
+```bash
+30 2 * * * /bin/bash /opt/eladmin-plus/scripts/backup-mysql.sh eladmin-plus-prod-mysql >> /var/log/eladmin-plus-backup.log 2>&1
+```
+
 ## 环境准备（mise）
 
 node、pnpm、just 的版本由根目录 `.mise.toml` 统一钉定，进目录自动切换：
