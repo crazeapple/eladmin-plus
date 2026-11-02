@@ -21,3 +21,6 @@ deploy/deploy.env
 # Playwright 产物
 test-results/
 playwright-report/
+
+# 备份产物
+backups/
