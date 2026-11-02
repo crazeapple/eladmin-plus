@@ -5,6 +5,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import Home from '@/views/home/index.vue'
 import { buildI18n } from '@/i18n'
+import { chartPalette } from '@/components/charts/options'
+import { usePreferencesStore } from '@/stores/preferences'
 import { lineDatasets } from '../demo-data'
 import { statsQueryState } from './stats-query-mock'
 
@@ -33,17 +35,34 @@ afterEach(() => {
   cleanup()
   vi.useRealTimers()
   vi.clearAllMocks()
+  localStorage.clear()
   statsQueryState.data.value = undefined
   statsQueryState.isError.value = false
 })
 
-/** 渲染 Home：偏好 store 与 i18n 注入（图表联动用例直接驱动 store 与 locale） */
+/** 渲染 Home：偏好 store 与 i18n 注入（联动用例直接驱动 store 与 locale） */
 function renderHome() {
   const pinia = createPinia()
   setActivePinia(pinia)
   const i18n = buildI18n('zh-CN')
   render(Home, { global: { plugins: [pinia, i18n] } })
-  return i18n
+  return { i18n, prefs: usePreferencesStore() }
+}
+
+interface RecordedOption {
+  color?: string[]
+  legend?: { data?: string[] }
+  xAxis?: { data?: string[] }
+  series?: { type?: string; data?: number[] }[]
+}
+
+/** spy 收到的是四个图表的全部 option：按折线特征（首系列 type line）取最近一次 */
+function lastLineOption(): RecordedOption {
+  for (let i = optionSpy.mock.calls.length - 1; i >= 0; i--) {
+    const option = optionSpy.mock.calls[i]?.[0] as RecordedOption
+    if (option?.series?.[0]?.type === 'line') return option
+  }
+  throw new Error('折线 option 未被记录')
 }
 
 describe('首页版面', () => {
@@ -64,7 +83,7 @@ describe('首页版面', () => {
 
   it('切换语言后卡片文案随动', async () => {
     vi.useFakeTimers()
-    const i18n = renderHome()
+    const { i18n } = renderHome()
     await vi.advanceTimersByTimeAsync(2100)
 
     i18n.global.locale.value = 'en'
@@ -122,17 +141,6 @@ describe('端点消费', () => {
 })
 
 describe('卡片交互', () => {
-  /** spy 收到的是四个图表的全部 option：按折线特征（首系列 type line）取最近一次 */
-  function lastLineOption(): { series?: { type?: string; data?: number[] }[] } {
-    for (let i = optionSpy.mock.calls.length - 1; i >= 0; i--) {
-      const option = optionSpy.mock.calls[i]?.[0] as {
-        series?: { type?: string; data?: number[] }[]
-      }
-      if (option?.series?.[0]?.type === 'line') return option
-    }
-    throw new Error('折线 option 未被记录')
-  }
-
   it('点击卡片切换折线数据集', async () => {
     vi.useFakeTimers()
     renderHome()
@@ -145,5 +153,36 @@ describe('卡片交互', () => {
     const option = lastLineOption()
     expect(option.series?.[0]).toMatchObject({ data: lineDatasets.online.expected })
     expect(option.series?.[1]).toMatchObject({ data: lineDatasets.online.actual })
+  })
+})
+
+describe('主题与语言联动', () => {
+  it('深浅与主色变更后图表色板按公式重算', async () => {
+    vi.useFakeTimers()
+    const { prefs } = renderHome()
+    await vi.advanceTimersByTimeAsync(100)
+
+    prefs.theme = 'dark'
+    await nextTick()
+    const dark = chartPalette('#409eff', true)
+    expect(lastLineOption().color).toEqual([dark.dark2, dark.primary])
+
+    prefs.theme = 'light'
+    prefs.primaryColor = '#11a983'
+    await nextTick()
+    const light = chartPalette('#11a983', false)
+    expect(lastLineOption().color).toEqual([light.dark2, light.primary])
+  })
+
+  it('切换语言后图例与轴标签随动', async () => {
+    vi.useFakeTimers()
+    const { i18n } = renderHome()
+    await vi.advanceTimersByTimeAsync(100)
+
+    i18n.global.locale.value = 'en'
+    await nextTick()
+    const option = lastLineOption()
+    expect(option.xAxis?.data).toEqual(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])
+    expect(option.legend?.data).toEqual(['Expected', 'Actual'])
   })
 })

@@ -2,8 +2,13 @@ import { useColorMode } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { type Ref, computed, watchEffect } from 'vue'
 
-import { usePreferencesStore } from '@/stores/preferences'
+import { usePreferencesStore, type ThemePreference } from '@/stores/preferences'
 import { primaryVariants } from './colors'
+
+/** 三态偏好解析为明暗（auto 随系统）；系统信号由调用方传入，监听归各自持有 */
+export function resolveDarkness(theme: ThemePreference, systemDark: boolean): boolean {
+  return theme === 'auto' ? systemDark : theme === 'dark'
+}
 
 /** 把主色变体写到根元素行内样式（覆盖 EP 样式表变量） */
 export function applyPrimaryColor(color: string, dark: boolean): void {
@@ -30,7 +35,7 @@ export function useTheme() {
   })
 
   const resolvedTheme = computed<'light' | 'dark'>(() =>
-    theme.value === 'auto' ? (colorMode.system.value === 'dark' ? 'dark' : 'light') : theme.value,
+    resolveDarkness(theme.value, colorMode.system.value === 'dark') ? 'dark' : 'light',
   )
 
   // 主色随偏好与明暗分支即时重算（浅深两套混合基准）

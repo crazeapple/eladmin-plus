@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { usePreferredDark } from '@vueuse/core'
 
 import BaseChart from '@/components/charts/BaseChart.vue'
 import {
@@ -9,9 +10,10 @@ import {
   buildPieOption,
   buildRadarOption,
   chartPalette,
-  type ChartPalette,
 } from '@/components/charts/options'
 import { useOverviewStatsQuery } from '@/api/stats'
+import { usePreferencesStore } from '@/stores/preferences'
+import { resolveDarkness } from '@/theme'
 import { barDemo, lineDatasets, pieDemo, radarDemo, weekdayKeys, type CardKey } from './demo-data'
 import StatCards from './components/StatCards.vue'
 
@@ -38,14 +40,18 @@ const stats = computed(() => {
     : {}
 })
 
-// 演示态：色板为静态默认值——偏好联动随后任务接线
-const palette: ChartPalette = chartPalette('#409eff', false)
+// 色板随偏好即时重算（主色与深浅，auto 随系统），option 为计算属性——图表实例不重建
+const prefs = usePreferencesStore()
+const prefersDark = usePreferredDark()
+const palette = computed(() =>
+  chartPalette(prefs.primaryColor, resolveDarkness(prefs.theme, prefersDark.value)),
+)
 const selectedKey = ref<CardKey>('users')
 
 const lineOption = computed(() => {
   const dataset = lineDatasets[selectedKey.value]
   return buildLineOption({
-    palette,
+    palette: palette.value,
     labels: weekdayKeys.map((key) => t(key)),
     names: [t('home.chart.expected'), t('home.chart.actual')],
     expected: dataset.expected,
@@ -55,7 +61,7 @@ const lineOption = computed(() => {
 
 const radarOption = computed(() =>
   buildRadarOption({
-    palette,
+    palette: palette.value,
     legend: t(radarDemo.legendKey),
     indicators: radarDemo.indicatorKeys.map((key) => t(key)),
     max: radarDemo.max,
@@ -65,14 +71,14 @@ const radarOption = computed(() =>
 
 const pieOption = computed(() =>
   buildPieOption({
-    palette,
+    palette: palette.value,
     data: pieDemo.map((item) => ({ name: t(item.nameKey), value: item.value })),
   }),
 )
 
 const barOption = computed(() =>
   buildBarOption({
-    palette,
+    palette: palette.value,
     labels: weekdayKeys.map((key) => t(key)),
     series: barDemo.series.map((item) => ({ name: t(item.nameKey), data: item.data })),
   }),
