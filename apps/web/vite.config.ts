@@ -50,5 +50,11 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     setupFiles: ['src/tests/setup.ts'],
+    // admin-ui 组件层以源码态消费：包体与 EP 样式入口内联进 vitest 处理
+    // （外部化模块的 .css 导入会走 node 原生加载报错；样式入口体量小，全量内联 EP 太重）
+    server: {
+      deps: { inline: [/@eladmin-plus\/admin-ui/, /element-plus[\\/].*style/] },
+    },
+    css: true,
   },
 })

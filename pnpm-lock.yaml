@@ -190,6 +190,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@eladmin-plus/admin-ui':
+        specifier: workspace:*
+        version: link:../../packages/admin-ui
       '@tanstack/vue-query':
         specifier: ^5.105.0
         version: 5.105.0(vue@3.5.44(typescript@5.9.3))
