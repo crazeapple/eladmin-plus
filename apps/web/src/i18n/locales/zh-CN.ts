@@ -76,7 +76,7 @@ export default {
     username: '账号',
     password: '密码',
     slideHint: '按住滑块拖动到最右侧完成验证',
-    slideFail: '验证未通过，已换题重试',
+    slideFail: '校验未通过，请重试',
     submit: '登录',
     success: '登录成功',
     failed: '登录失败，请稍后再试',

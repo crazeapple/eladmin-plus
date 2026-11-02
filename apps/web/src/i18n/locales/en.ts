@@ -77,7 +77,7 @@ export default {
     username: 'Username',
     password: 'Password',
     slideHint: 'Hold and drag the slider to complete verification',
-    slideFail: 'Verification failed, new puzzle loaded',
+    slideFail: 'Verification failed, please try again',
     submit: 'Sign in',
     success: 'Signed in',
     failed: 'Sign-in failed, please try again later',

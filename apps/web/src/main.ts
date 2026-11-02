@@ -11,6 +11,8 @@ import { usePreferencesStore } from './stores/preferences'
 import { useSessionStore } from './stores/session'
 // EP 暗色变量集（html.dark 时生效）
 import 'element-plus/theme-chalk/dark/css-vars.css'
+// API 式调用的 EP 组件（ElMessage 等，不经模板解析）样式需集中显式导入，否则渲染无样式（toast 挤出视口）
+import 'element-plus/es/components/message/style/css'
 import '@/styles/index.scss'
 
 // 后台管理数据实时性要求低：默认 30 秒内直接用缓存，失败只重试一次

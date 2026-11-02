@@ -29,7 +29,8 @@ vi.mock('@/api/auth', () => ({
   fetchCaptcha: mocks.fetchCaptcha,
   checkCaptcha: mocks.checkCaptcha,
   login: mocks.login,
-  refresh: vi.fn(),
+  // 登录页测试无既有会话:守卫的静默恢复尝试显式失败(干净拒绝,不走噪音异常路径)
+  refresh: vi.fn(() => Promise.reject(new Error('not signed in'))),
   logout: vi.fn(),
 }))
 
@@ -121,7 +122,14 @@ afterEach(() => {
 
 describe('登录页', () => {
   it('页面渲染在壳外且账号密码滑块齐备', async () => {
-    mocks.fetchCaptcha.mockResolvedValue({ token: 't', back: 'b', jigsaw: 'j', jigsawY: 3 })
+    mocks.fetchCaptcha.mockResolvedValue({
+      token: 't',
+      back: 'b',
+      jigsaw: 'j',
+      jigsawY: 3,
+      imageWidth: 310,
+      imageHeight: 155,
+    })
     const pinia = createPinia()
     setActivePinia(pinia)
     await mountLogin(makeRouter(), pinia)
@@ -138,7 +146,14 @@ describe('登录页', () => {
     const pair = await generateKeyPair()
     mocks.fetchPublicKey.mockResolvedValue({ keyId: pair.keyId, publicKey: pair.publicKey })
     mocks.login.mockResolvedValue({ accessToken: 'access-token-1', expiresIn: 7200 })
-    mocks.fetchCaptcha.mockResolvedValue({ token: 't', back: 'b', jigsaw: 'j', jigsawY: 3 })
+    mocks.fetchCaptcha.mockResolvedValue({
+      token: 't',
+      back: 'b',
+      jigsaw: 'j',
+      jigsawY: 3,
+      imageWidth: 310,
+      imageHeight: 155,
+    })
 
     const pinia = createPinia()
     setActivePinia(pinia)
@@ -165,7 +180,14 @@ describe('登录页', () => {
     const pair = await generateKeyPair()
     mocks.fetchPublicKey.mockResolvedValue({ keyId: pair.keyId, publicKey: pair.publicKey })
     mocks.login.mockResolvedValue({ accessToken: 't', expiresIn: 7200 })
-    mocks.fetchCaptcha.mockResolvedValue({ token: 't', back: 'b', jigsaw: 'j', jigsawY: 3 })
+    mocks.fetchCaptcha.mockResolvedValue({
+      token: 't',
+      back: 'b',
+      jigsaw: 'j',
+      jigsawY: 3,
+      imageWidth: 310,
+      imageHeight: 155,
+    })
 
     const pinia = createPinia()
     setActivePinia(pinia)
@@ -190,7 +212,14 @@ describe('登录页', () => {
     mocks.login
       .mockRejectedValueOnce(expired)
       .mockResolvedValueOnce({ accessToken: 'access-token-2', expiresIn: 7200 })
-    mocks.fetchCaptcha.mockResolvedValue({ token: 't', back: 'b', jigsaw: 'j', jigsawY: 3 })
+    mocks.fetchCaptcha.mockResolvedValue({
+      token: 't',
+      back: 'b',
+      jigsaw: 'j',
+      jigsawY: 3,
+      imageWidth: 310,
+      imageHeight: 155,
+    })
 
     const pinia = createPinia()
     setActivePinia(pinia)
@@ -203,11 +232,18 @@ describe('登录页', () => {
     await waitFor(() => expect(useSessionStore().accessToken).toBe('access-token-2'))
   })
 
-  it('普通失败不重试且清票据重滑', async () => {
+  it('登录失败不重试且回初始态（账号密码清空、滑块隐藏）', async () => {
     const pair = await generateKeyPair()
     mocks.fetchPublicKey.mockResolvedValue({ keyId: pair.keyId, publicKey: pair.publicKey })
     mocks.login.mockRejectedValue(new Error('账号或密码错误'))
-    mocks.fetchCaptcha.mockResolvedValue({ token: 't', back: 'b', jigsaw: 'j', jigsawY: 3 })
+    mocks.fetchCaptcha.mockResolvedValue({
+      token: 't',
+      back: 'b',
+      jigsaw: 'j',
+      jigsawY: 3,
+      imageWidth: 310,
+      imageHeight: 155,
+    })
 
     const pinia = createPinia()
     setActivePinia(pinia)
@@ -218,7 +254,10 @@ describe('登录页', () => {
     await waitFor(() => expect(mocks.login).toHaveBeenCalledTimes(1))
     expect(mocks.fetchPublicKey).toHaveBeenCalledTimes(1)
     await waitFor(() => expect(useSessionStore().accessToken).toBeNull())
-    // 票据已清：提交按钮收起，需重新滑块
-    await waitFor(() => expect(queryTest('login-submit')).toBeNull())
+    // 失败回初始态：账号密码清空（滑块随非空条件卸载）、票据清（按钮收起），重填后才重新出题
+    await waitFor(() => expect(elInput('login-username').value).toBe(''))
+    expect(elInput('login-password').value).toBe('')
+    await waitFor(() => expect(queryTest('slider-stub')).toBeNull())
+    expect(queryTest('login-submit')).toBeNull()
   })
 })

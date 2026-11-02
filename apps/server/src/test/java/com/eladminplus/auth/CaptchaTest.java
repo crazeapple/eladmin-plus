@@ -56,6 +56,9 @@ class CaptchaTest {
         assertThat(answerOf(token)).isBetween(0, 310);
         // 拼块纵向位置已下发
         assertThat(data.get("jigsawY").asInt()).isBetween(0, 155);
+        // 画布尺寸已下发（前端等比换算拖动距离与拼块定位）
+        assertThat(data.get("imageWidth").asInt()).isEqualTo(310);
+        assertThat(data.get("imageHeight").asInt()).isEqualTo(155);
     }
 
     @Test

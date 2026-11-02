@@ -70,6 +70,9 @@ async function submitWithCurrentKey(retried = false) {
       return submitWithCurrentKey(true)
     }
     ElMessage.error(message || t('login.failed'))
+    // 登录失败回初始态：账号密码清空（滑块随非空条件隐藏），重新填写后重新出题重滑（票据一次性）
+    username.value = ''
+    password.value = ''
     ticket.value = null
   }
 }

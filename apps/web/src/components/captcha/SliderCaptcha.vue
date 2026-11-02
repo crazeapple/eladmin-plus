@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onUnmounted, ref } from 'vue'
 import { checkCaptcha, fetchCaptcha } from '@/api/auth'
 
 /**
@@ -20,6 +20,8 @@ defineProps<{
 const back = ref('')
 const jigsaw = ref('')
 const jigsawY = ref(0)
+const imageWidth = ref(0)
+const imageHeight = ref(0)
 const token = ref('')
 const trackWidth = 260
 const sliderSize = 44
@@ -27,17 +29,25 @@ const slideX = ref(0)
 const dragging = ref(false)
 const failed = ref(false)
 const verifiedDone = ref(false)
+let failTimer: ReturnType<typeof setTimeout> | null = null
+
+onUnmounted(() => {
+  if (failTimer) clearTimeout(failTimer)
+})
 
 const percent = computed(() => `${(slideX.value / trackWidth) * 100}%`)
+// 拼块纵向按画布比例定位：显示高度随容器宽缩放，原图像素直用会在窄容器垂直错位
+const topPercent = computed(() => (jigsawY.value / imageHeight.value) * 100)
 
 async function loadPuzzle() {
   const puzzle = await fetchCaptcha()
   back.value = puzzle.back
   jigsaw.value = puzzle.jigsaw
   jigsawY.value = puzzle.jigsawY
+  imageWidth.value = puzzle.imageWidth
+  imageHeight.value = puzzle.imageHeight
   token.value = puzzle.token
   slideX.value = 0
-  failed.value = false
 }
 void loadPuzzle()
 
@@ -59,15 +69,20 @@ function onMove(event: PointerEvent) {
 }
 
 async function onUp() {
-  if (!dragging.value) return
+  if (!dragging.value || !imageWidth.value) return
   dragging.value = false
   try {
-    const { ticket } = await checkCaptcha(token.value, Math.round(slideX.value))
+    // 后端答案是原图像素域：把轨道逻辑域的拖动距离按画布尺寸换算回去
+    const moveDistance = Math.round((slideX.value / trackWidth) * imageWidth.value)
+    const { ticket } = await checkCaptcha(token.value, moveDistance)
     verifiedDone.value = true
     emit('verified', ticket)
   } catch {
+    // 失败提示换题后保留数秒再清（换题即清等于没提示）
     failed.value = true
+    if (failTimer) clearTimeout(failTimer)
     await loadPuzzle()
+    failTimer = setTimeout(() => (failed.value = false), 3000)
   }
 }
 </script>
@@ -80,7 +95,7 @@ async function onUp() {
         v-if="jigsaw"
         class="slider-captcha__jigsaw"
         :src="jigsaw"
-        :style="{ top: `${jigsawY}px`, left: percent }"
+        :style="{ top: `${topPercent}%`, left: percent }"
         alt=""
       />
     </div>
@@ -132,6 +147,8 @@ async function onUp() {
   border-radius: 4px;
   cursor: pointer;
   user-select: none;
+  /* 触屏拖动不打断（禁掉手势滚动） */
+  touch-action: none;
 }
 
 .slider-captcha__slider {

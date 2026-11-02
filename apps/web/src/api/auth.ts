@@ -6,12 +6,14 @@ export interface PublicKeyPayload {
   publicKey: string
 }
 
-/** 滑块题目：答案只在后端，拼块纵向位置与双图下发 */
+/** 滑块题目：答案只在后端，拼块纵向位置、画布尺寸与双图下发（尺寸供拖动距离与定位按比例换算） */
 export interface CaptchaPuzzle {
   token: string
   back: string
   jigsaw: string
   jigsawY: number
+  imageWidth: number
+  imageHeight: number
 }
 
 export interface LoginResult {
