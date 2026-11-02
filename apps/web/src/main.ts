@@ -4,9 +4,11 @@ import { createApp } from 'vue'
 
 import App from './App.vue'
 import { bindLocaleHeader } from './api/locale'
+import { onAuthBroadcast } from './api/auth-sync'
 import { buildI18n } from './i18n'
 import router from './router'
 import { usePreferencesStore } from './stores/preferences'
+import { useSessionStore } from './stores/session'
 // EP 暗色变量集（html.dark 时生效）
 import 'element-plus/theme-chalk/dark/css-vars.css'
 import '@/styles/index.scss'
@@ -21,6 +23,13 @@ const queryClient = new QueryClient({
 const app = createApp(App)
 const pinia = createPinia()
 app.use(pinia)
+
+// 其他 tab 的会话广播：刷新结果同步内存令牌，登出全清
+onAuthBroadcast((message) => {
+  const store = useSessionStore()
+  if (message.type === 'refreshed') store.save(message.accessToken)
+  if (message.type === 'logout') store.reset()
+})
 
 // i18n 初值取偏好解析语言（首访随系统检测已在偏好 store 完成）
 const i18n = buildI18n(usePreferencesStore().resolvedLocale)

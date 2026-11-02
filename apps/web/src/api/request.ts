@@ -1,5 +1,6 @@
 import { ApiError, client } from './client'
 import { refresh } from './auth'
+import { broadcastLogout, broadcastRefreshed, withRefreshLock } from './auth-sync'
 import { useSessionStore } from '@/stores/session'
 
 /**
@@ -18,21 +19,23 @@ export interface RequestOptions {
 
 let refreshing: Promise<string | null> | null = null
 
-/** 单飞刷新：并发共享同一次；成功返回新 token 并入 store，失败清态返回 null */
+/** 单飞刷新：tab 内共享 promise，跨 tab 共享锁；成功入 store 并广播，失败清态广播登出 */
 function ensureFreshToken(): Promise<string | null> {
-  refreshing ??= refresh()
-    .then((result) => {
+  refreshing ??= withRefreshLock(async () => {
+    try {
+      const result = await refresh()
       useSessionStore().save(result.accessToken)
+      broadcastRefreshed(result.accessToken)
       return result.accessToken
-    })
-    .catch(() => {
-      // 刷新失败：清空会话与登录意图（F5 恢复不再尝试）
+    } catch {
+      // 刷新失败：清空会话与登录意图（F5 恢复不再尝试），其他 tab 同步全清
       useSessionStore().reset()
+      broadcastLogout()
       return null
-    })
-    .finally(() => {
-      refreshing = null
-    })
+    }
+  }).finally(() => {
+    refreshing = null
+  })
   return refreshing
 }
 
