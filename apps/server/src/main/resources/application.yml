@@ -15,6 +15,12 @@ spring:
 server:
   port: 8080
 
+auth:
+  rsa:
+    key-size: 2048
+    # 退役私钥留存时长：覆盖重启窗口的在途登录
+    retired-ttl: 600s
+
 management:
   endpoints:
     web:
