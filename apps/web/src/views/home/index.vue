@@ -88,7 +88,7 @@ const barOption = computed(() =>
       </el-button>
     </div>
 
-    <StatCards :stats="stats" />
+    <StatCards :stats="stats" @select="selectedKey = $event" />
 
     <div class="home__chart home__chart--wide" data-test="chart-line">
       <BaseChart :option="lineOption" />

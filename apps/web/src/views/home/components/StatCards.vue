@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { CardKey } from '../demo-data'
+
 import StatCard from './StatCard.vue'
 
 export interface CardStats {
@@ -10,7 +12,7 @@ export interface CardStats {
 
 defineProps<{ stats: CardStats }>()
 
-const emit = defineEmits<{ select: [key: string] }>()
+const emit = defineEmits<{ select: [key: CardKey] }>()
 
 const cards = [
   { key: 'users', icon: 'user', labelKey: 'home.cards.users' },

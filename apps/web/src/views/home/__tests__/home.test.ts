@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import Home from '@/views/home/index.vue'
 import { buildI18n } from '@/i18n'
+import { lineDatasets } from '../demo-data'
 import { statsQueryState } from './stats-query-mock'
 
 /** canvas 在测试环境不可用——mock vue-echarts 组件层，收到的 option 记入 spy 供断言 */
@@ -117,5 +118,32 @@ describe('端点消费', () => {
 
     await fireEvent.click(document.querySelector('[data-test="stats-retry"]') as HTMLElement)
     expect(statsQueryState.refetch).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('卡片交互', () => {
+  /** spy 收到的是四个图表的全部 option：按折线特征（首系列 type line）取最近一次 */
+  function lastLineOption(): { series?: { type?: string; data?: number[] }[] } {
+    for (let i = optionSpy.mock.calls.length - 1; i >= 0; i--) {
+      const option = optionSpy.mock.calls[i]?.[0] as {
+        series?: { type?: string; data?: number[] }[]
+      }
+      if (option?.series?.[0]?.type === 'line') return option
+    }
+    throw new Error('折线 option 未被记录')
+  }
+
+  it('点击卡片切换折线数据集', async () => {
+    vi.useFakeTimers()
+    renderHome()
+    await vi.advanceTimersByTimeAsync(100)
+
+    const cards = document.querySelectorAll('[data-test="stat-card"]')
+    await fireEvent.click(cards[1] as HTMLElement)
+    await nextTick()
+
+    const option = lastLineOption()
+    expect(option.series?.[0]).toMatchObject({ data: lineDatasets.online.expected })
+    expect(option.series?.[1]).toMatchObject({ data: lineDatasets.online.actual })
   })
 })
