@@ -105,9 +105,9 @@ class LoginFlowTest {
         String accessToken = extractJsonField(body, "accessToken");
         softly.assertThat(accessToken).isNotBlank();
 
-        // Set-Cookie：HttpOnly + SameSite=Lax + Path=/auth
+        // Set-Cookie：HttpOnly + SameSite=Lax + Path=/（代理形态请求带 /api 前缀，path 收窄会使 cookie 不可达）
         String setCookie = result.getResponse().getHeader("Set-Cookie");
-        softly.assertThat(setCookie).contains("refresh_token=", "HttpOnly", "SameSite=Lax", "Path=/auth");
+        softly.assertThat(setCookie).contains("refresh_token=", "HttpOnly", "SameSite=Lax", "Path=/");
 
         // 会话与 refresh 落 Redis
         var session = redis.opsForHash().entries(TokenService.TOKEN_PREFIX + accessToken);

@@ -25,7 +25,7 @@ public record AuthSessionProperties(
             graceWindow = Duration.ofSeconds(30);
         }
         cookieName = (cookieName == null || cookieName.isBlank()) ? "refresh_token" : cookieName;
-        cookiePath = (cookiePath == null || cookiePath.isBlank()) ? "/auth" : cookiePath;
+        cookiePath = (cookiePath == null || cookiePath.isBlank()) ? "/" : cookiePath;
         cookieSameSite = (cookieSameSite == null || cookieSameSite.isBlank()) ? "Lax" : cookieSameSite;
     }
 }
