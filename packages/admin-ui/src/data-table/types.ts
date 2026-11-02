@@ -1,7 +1,7 @@
 import type { ColumnDef, RowData } from '@tanstack/vue-table'
 import type { dataTableFeatures } from './features'
 
-/** 列定义：TanStack ColumnDef 薄封装，外加选择列声明（type: 'selection'） */
+/** 列定义：TanStack ColumnDef 薄封装；`type: 'selection'` 声明选择列（需自带 id，约定 'selection'） */
 export type DataTableColumn<TData extends RowData = RowData> = ColumnDef<
   typeof dataTableFeatures,
   TData
@@ -12,6 +12,8 @@ export interface DataTableTexts {
   refresh?: string
   columnSettings?: string
   empty?: string
+  selectAll?: string
+  selectRow?: string
 }
 
 /** 排序契约：单字段语义，字段名对应列 id（accessorKey） */
