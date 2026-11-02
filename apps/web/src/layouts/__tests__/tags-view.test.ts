@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/vue'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/vue'
 import { createPinia } from 'pinia'
 import { createMemoryHistory, createRouter, type Router } from 'vue-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -92,7 +92,7 @@ describe('TagsView', () => {
     expect(input.value).toBe('hello')
 
     await router.push('/home')
-    await screen.findByText('仪表盘随后续提案接入，当前为占位视图。')
+    await waitFor(() => expect(document.querySelector('[data-test="home-dashboard"]')).toBeTruthy())
     await router.push('/demo/cached')
     const again = (await screen.findByPlaceholderText(
       '输入点什么，然后切走再切回',
@@ -108,7 +108,7 @@ describe('TagsView', () => {
     await fireEvent.input(input, { target: { value: 'temp' } })
 
     await router.push('/home')
-    await screen.findByText('仪表盘随后续提案接入，当前为占位视图。')
+    await waitFor(() => expect(document.querySelector('[data-test="home-dashboard"]')).toBeTruthy())
     await router.push('/demo/no-cache')
     const again = (await screen.findByPlaceholderText(
       '输入点什么，切走再切回会清空',

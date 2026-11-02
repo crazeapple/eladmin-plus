@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/vue'
+import { cleanup, render, screen, waitFor } from '@testing-library/vue'
 import { createPinia } from 'pinia'
 import { createMemoryHistory, createRouter, type RouteRecordRaw } from 'vue-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -28,9 +28,9 @@ async function renderAt(path: string) {
 }
 
 describe('router', () => {
-  it('根路径进入布局与首页占位', async () => {
+  it('根路径进入布局与首页仪表盘', async () => {
     await renderAt('/')
-    expect(await screen.findByText('仪表盘随后续提案接入，当前为占位视图。')).toBeTruthy()
+    await waitFor(() => expect(document.querySelector('[data-test="home-dashboard"]')).toBeTruthy())
   })
 
   it('未知路由进入 404', async () => {
