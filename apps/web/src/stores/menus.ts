@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { client } from '@/api/client'
+import { request } from '@/api/request'
 
 /** 后端 /auth/me 下发的菜单树节点（与后端 MeController 形态对齐） */
 export interface MenuNode {
@@ -35,13 +35,12 @@ export const useMenusStore = defineStore('menus', () => {
   /** 拉取菜单树与用户视图；失败（含 401）返回 false 交守卫跳登录 */
   async function load(): Promise<boolean> {
     try {
-      const { data } = await client.request({ url: '/auth/me', method: 'GET', throwOnError: true })
-      const payload = data as {
+      const payload = await request<{
         user?: SessionUser
         roles?: string[]
         permissions?: string[]
         menus?: MenuNode[]
-      }
+      }>({ url: '/auth/me' })
       user.value = payload.user ?? null
       roles.value = payload.roles ?? []
       permissions.value = payload.permissions ?? []
