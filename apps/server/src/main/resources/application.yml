@@ -20,6 +20,16 @@ auth:
     key-size: 2048
     # 退役私钥留存时长：覆盖重启窗口的在途登录
     retired-ttl: 600s
+  session:
+    access-token-ttl: 2h
+    refresh-token-ttl: 72h
+    # 旋转宽限窗口：多 tab 并发刷新的后端保险
+    grace-window: 30s
+    cookie-name: refresh_token
+    cookie-path: /auth
+    cookie-same-site: Lax
+    # 生产 TLS 开启即开（Secure 标志环境变量可配）
+    cookie-secure: false
 
 management:
   endpoints:
