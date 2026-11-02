@@ -8,6 +8,15 @@ import App from '@/App.vue'
 import { buildI18n } from '@/i18n'
 import { installAuthGuard, routes } from '@/router'
 
+// 跨 tab 协调桩：登出广播 spy 供退出用例断言；其余签名保形
+const authSync = vi.hoisted(() => ({
+  broadcastLogout: vi.fn(),
+  broadcastRefreshed: vi.fn(),
+  onAuthBroadcast: vi.fn(() => () => {}),
+  withRefreshLock: vi.fn((fn: () => Promise<unknown>) => fn()),
+}))
+vi.mock('@/api/auth-sync', () => authSync)
+
 beforeEach(() => {
   // 钉住系统语言，文案断言走中文语言包
   vi.spyOn(window.navigator, 'language', 'get').mockReturnValue('zh-CN')
@@ -124,8 +133,9 @@ describe('顶栏用户区', () => {
     expect(menus.menus).toEqual([])
     expect(tags.visitedViews).toHaveLength(1)
     expect(tags.visitedViews[0]!.path).toBe('/home')
-    // 后端登出端点被调
+    // 后端登出端点被调；其他 tab 收到登出广播
     expect(logoutCalls).toHaveLength(1)
+    expect(authSync.broadcastLogout).toHaveBeenCalled()
   })
 
   it('登出后端异常也继续清本地回登录', async () => {

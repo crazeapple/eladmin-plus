@@ -7,8 +7,10 @@ import { bindLocaleHeader } from './api/locale'
 import { onAuthBroadcast } from './api/auth-sync'
 import { buildI18n } from './i18n'
 import router from './router'
+import { useMenusStore } from './stores/menus'
 import { usePreferencesStore } from './stores/preferences'
 import { useSessionStore } from './stores/session'
+import { useTagsViewStore } from './stores/tags-view'
 // EP 暗色变量集（html.dark 时生效）
 import 'element-plus/theme-chalk/dark/css-vars.css'
 // API 式调用的 EP 组件（ElMessage 等，不经模板解析）样式需集中显式导入，否则渲染无样式（toast 挤出视口）
@@ -26,11 +28,20 @@ const app = createApp(App)
 const pinia = createPinia()
 app.use(pinia)
 
-// 其他 tab 的会话广播：刷新结果同步内存令牌，登出全清
+// 其他 tab 的会话广播：刷新结果同步内存令牌；登出全清并踢回登录页（A tab 退出 B tab 立即生效）
 onAuthBroadcast((message) => {
   const store = useSessionStore()
-  if (message.type === 'refreshed') store.save(message.accessToken)
-  if (message.type === 'logout') store.reset()
+  if (message.type === 'refreshed') {
+    store.save(message.accessToken)
+  }
+  if (message.type === 'logout') {
+    store.reset()
+    useMenusStore().reset()
+    useTagsViewStore().closeAll()
+    if (router.currentRoute.value.path !== '/login') {
+      router.push('/login')
+    }
+  }
 })
 
 // i18n 初值取偏好解析语言（首访随系统检测已在偏好 store 完成）

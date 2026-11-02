@@ -38,31 +38,37 @@ export function resolveLocale(locale: LocalePreference): 'zh-CN' | 'en' {
   return locale === 'system' ? systemLocale() : locale
 }
 
-/** 读取持久化偏好；键缺失、JSON 损坏或字段非法一律整键弃用，重跑首访检测 */
+/** 解析持久化偏好原文；JSON 损坏或字段非法返回 null（调用方整键弃用，重跑首访检测） */
+function parse(raw: string): Preferences | null {
+  try {
+    const parsed = JSON.parse(raw) as Partial<Preferences>
+    if (
+      typeof parsed.theme === 'string' &&
+      THEME_VALUES.includes(parsed.theme as ThemePreference) &&
+      typeof parsed.primaryColor === 'string' &&
+      parsed.primaryColor.length > 0 &&
+      typeof parsed.locale === 'string' &&
+      LOCALE_VALUES.includes(parsed.locale as LocalePreference)
+    ) {
+      return {
+        theme: parsed.theme as ThemePreference,
+        primaryColor: parsed.primaryColor,
+        locale: parsed.locale as LocalePreference,
+      }
+    }
+  } catch {
+    // 损坏即弃
+  }
+  return null
+}
+
+/** 读取持久化偏好；键缺失或非法一律整键弃用，重跑首访检测 */
 function load(): Preferences {
   const raw = localStorage.getItem(STORAGE_KEY)
-  if (raw) {
-    try {
-      const parsed = JSON.parse(raw) as Partial<Preferences>
-      if (
-        typeof parsed.theme === 'string' &&
-        THEME_VALUES.includes(parsed.theme as ThemePreference) &&
-        typeof parsed.primaryColor === 'string' &&
-        parsed.primaryColor.length > 0 &&
-        typeof parsed.locale === 'string' &&
-        LOCALE_VALUES.includes(parsed.locale as LocalePreference)
-      ) {
-        return {
-          theme: parsed.theme as ThemePreference,
-          primaryColor: parsed.primaryColor,
-          locale: parsed.locale as LocalePreference,
-        }
-      }
-    } catch {
-      // 损坏即弃，走首访检测
-    }
+  if (!raw) {
+    return detectDefaults()
   }
-  return detectDefaults()
+  return parse(raw) ?? detectDefaults()
 }
 
 export const usePreferencesStore = defineStore('preferences', () => {
@@ -88,6 +94,16 @@ export const usePreferencesStore = defineStore('preferences', () => {
   )
 
   const resolvedLocale = computed(() => resolveLocale(locale.value))
+
+  // 其他 tab 改偏好时实时同步本 tab（refs 一变，主题/语言的消费方 watch 即自动应用）
+  window.addEventListener('storage', (event) => {
+    if (event.key !== STORAGE_KEY || event.newValue === null) return
+    const next = parse(event.newValue)
+    if (!next) return
+    theme.value = next.theme
+    primaryColor.value = next.primaryColor
+    locale.value = next.locale
+  })
 
   return { theme, primaryColor, locale, resolvedLocale }
 })

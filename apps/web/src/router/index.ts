@@ -88,6 +88,16 @@ async function registerDynamicRoutes(router: Router) {
 export function installAuthGuard(router: Router): void {
   router.beforeEach(async (to) => {
     if (to.name === 'Login') {
+      // 已登录（可静默恢复）时访问登录页直接进系统——新 tab 开登录页自动接续同浏览器会话
+      const restored = await useSessionStore().ensureSession()
+      if (restored) {
+        const redirect = to.query.redirect
+        const target =
+          typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//')
+            ? redirect
+            : '/home'
+        return { path: target, replace: true }
+      }
       return true
     }
     const sessionStore = useSessionStore()

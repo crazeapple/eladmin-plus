@@ -79,4 +79,39 @@ describe('preferences store', () => {
     expect(resolveLocale('system')).toBe('en')
     expect(resolveLocale('zh-CN')).toBe('zh-CN')
   })
+
+  it('其他 tab 的偏好写入经 storage 事件实时同步本 tab', () => {
+    const store = freshStore()
+    expect(store.theme).toBe('auto')
+
+    // 模拟另一 tab 写 localStorage 后浏览器派发的 storage 事件
+    window.dispatchEvent(
+      new StorageEvent('storage', {
+        key: STORAGE_KEY,
+        newValue: JSON.stringify({
+          theme: 'dark',
+          primaryColor: '#123456',
+          locale: 'en',
+        }),
+      }),
+    )
+    expect(store.theme).toBe('dark')
+    expect(store.primaryColor).toBe('#123456')
+    expect(store.locale).toBe('en')
+  })
+
+  it('storage 事件的非法载荷不污染本 tab 偏好', () => {
+    // 钉住系统语言:断言依赖缺省锚定 zh-CN
+    vi.spyOn(window.navigator, 'language', 'get').mockReturnValue('zh-CN')
+    const store = freshStore()
+    window.dispatchEvent(
+      new StorageEvent('storage', {
+        key: STORAGE_KEY,
+        newValue: JSON.stringify({ theme: 'blue', primaryColor: '', locale: 'xx' }),
+      }),
+    )
+    window.dispatchEvent(new StorageEvent('storage', { key: 'other-key', newValue: '{}' }))
+    expect(store.theme).toBe('auto')
+    expect(store.locale).toBe('zh-CN')
+  })
 })

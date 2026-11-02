@@ -119,4 +119,11 @@ describe('动态路由与守卫', () => {
     expect(pinia._s.get('session')?.accessToken).toBeNull()
     expect(localStorage.getItem('auth:logged-in')).toBeNull()
   })
+
+  it('登录页可静默恢复时自动进系统（新 tab 接续会话）', async () => {
+    // 全局桩应答 refresh(setup-token) + /auth/me;直接进登录页应被守卫恢复并送进系统
+    const { router, pinia } = await renderAt('/login')
+    await waitFor(() => expect(router.currentRoute.value.path).toBe('/home'))
+    expect(pinia._s.get('session')?.accessToken).toBe('setup-token')
+  })
 })

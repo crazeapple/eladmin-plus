@@ -9,6 +9,7 @@ import AppIcon from '@/components/AppIcon.vue'
 import SettingsDrawer from '@/components/settings/SettingsDrawer.vue'
 import { routes } from '@/router'
 import { logout } from '@/api/auth'
+import { broadcastLogout } from '@/api/auth-sync'
 import { useMenusStore } from '@/stores/menus'
 import { useSessionStore } from '@/stores/session'
 import { useTagsViewStore } from '@/stores/tags-view'
@@ -51,6 +52,8 @@ async function onUserCommand(command: string | number | object) {
   sessionStore.reset()
   menusStore.reset()
   tagsViewStore.closeAll()
+  // 同浏览器其他 tab 立即清态踢回登录页（跨设备靠会话失效被动接管）
+  broadcastLogout()
   await router.push('/login')
 }
 
