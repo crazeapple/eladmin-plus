@@ -1,5 +1,18 @@
 # 更新日志
 
+## 0.8.0
+
+发布基础设施。
+
+- 生产编排 `deploy/compose.yaml`：web（nginx，唯一宿主映射端口）+ server + MySQL + Redis 四容器，数据服务端口一律不映射宿主，运行参数经环境变量注入（内联缺省即本地冒烟形态）
+- 生产镜像两件：前端 workspace 构建进 nginx 运行镜像（依赖清单层缓存），后端 gradle 构建 bootJar 进 JRE 运行镜像（构建脚本层预热依赖缓存）
+- nginx：history 路由回退、静态资产强缓存、`/api` 反代（去前缀与开发代理同语义）；gzip_static 优先 + 普通 gzip 兜底；TLS 与 WebSocket 反代均为注释预留段
+- 前端构建产物预生成 gzip（文本类静态资产逐个同名 .gz），nginx gzip_static 直接命中
+- Playwright 生产栈冒烟（`just e2e`）：首页渲染、主题 / 语言切换、深链刷新（history 回退）、gzip_static 压缩头、无控制台错误；门禁语义 = 非零退出即中止发布
+- 一键发布 `scripts/deploy.sh`：前置校验 deploy env（缺文件或缺关键字段即停）→ 构建镜像 → 本地生产栈冒烟门禁 → 镜像 save|load 与组态 scp（远端无需源码与 registry）→ 远端 compose 拉起；`--dry-run` 只走构建与冒烟
+- 数据库备份 `scripts/backup-mysql.sh`：docker exec mysqldump 单事务快照 + gzip，文件名带时间戳模式，滚动清理只删本脚本产出的 7 天前备份；crontab 安装示例内嵌脚本注释
+- README 部署一节：本地生产栈验证、发布流程、备份定时安装
+
 ## 0.7.0
 
 admin-ui 组件层。
