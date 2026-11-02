@@ -1,5 +1,16 @@
 # 更新日志
 
+## 0.7.0
+
+admin-ui 组件层。
+
+- 新增 workspace 包 `@eladmin-plus/admin-ui`：声明式 CRUD 组件层，后续系统域页面直接消费；只依赖 vue / Element Plus / TanStack Table / zod / vueuse，不依赖应用代码
+- DataTable：TanStack Table headless 自绘 DOM、EP CSS 变量对齐视觉；声明式 columns + 受控数据（组件不发请求），工具栏（刷新、列设置显隐即时生效），分页 page 0 起换算、单字段排序 asc→desc→取消循环、行选择按行 id 跨页记账；768px 断点自动切卡片形态（内容由 card-row 插槽提供），分页两形态共用
+- AutoForm：zod schema 驱动 input / select / date / radio / checkbox / tree-select 字段渲染（schema 承载必填语义），提交时整表 parse、issue 精确映射字段错误并聚焦首个错误字段、未映射 issue 归表单级提示；具名插槽手写清单外字段，upload 类型留插槽位
+- useDict：模块 Map 缓存 + 同 type 并发去重 + invalidate 失效口子；数据源注入式（setDictSource），包内置静态 mock 源，字典后端就位后换源组件层不动
+- web 应用接入组件层消费冒烟测试；vitest 配置内联组件层与 Element Plus 样式入口（外部化模块的 .css 导入在 node 侧报错）
+- 修复：顶栏设置入口观感（齿轮图标、三触发器统一样式与提示）、偏好抽屉控件顺序与等宽（语言→主题→主色，「随系统」统一殿后）
+
 ## 0.6.0
 
 首页仪表盘。
@@ -25,7 +36,7 @@
 
 接口契约链与数据访问。
 
-- 响应结构全链统一为 `{code, message, data}`：成功失败同形，code 取 HTTP 状态码；失败回真实 4xx/5xx 状态行，message 可直接展示（资源文件本地化）；无返回体的写操作统一 200 加空 data
+- 响应结构全链统一为 `{code， message， data}`：成功失败同形，code 取 HTTP 状态码；失败回真实 4xx/5xx 状态行，message 可直接展示（资源文件本地化）；无返回体的写操作统一 200 加空 data
 - 契约链：后端 springdoc 接口描述（swagger-ui 就位）+ 构建期导出 OpenAPI；`just api-gen` 一条命令生成前端 TS 类型、zod schema 与请求 client（生成物入库，克隆即可构建），接口变更在前端编译期暴露
 - 统计概览占位端点（`GET /stats/overview`，静态演示数据）：为首页仪表盘预留数据源形状
 - 数据访问：MySQL 数据源、MyBatis-Plus（分页插件与页码换算封装）、Flyway 数据库迁移、SQL 检查命令 `just sql-lint`
@@ -36,7 +47,7 @@
 后端应用壳。
 
 - Spring Boot 4.1 应用骨架：Gradle 9.8.2 wrapper（发行版走腾讯云镜像、依赖走阿里云镜像，克隆即构建）、Java 21（仓库根 .java-version 锁定 21.0.12 + 构建期 toolchain 兜底）、Lombok
-- 统一错误响应 `{status, timestamp, message}`：受控异常映射语义化状态码、未知异常回 500 通用消息（堆栈只进日志），错误消息经资源文件管理；成功响应裸数据
+- 统一错误响应 `{status， timestamp， message}`：受控异常映射语义化状态码、未知异常回 500 通用消息（堆栈只进日志），错误消息经资源文件管理；成功响应裸数据
 - 安全骨架：全放行过滤链（结构为后续认证段接线而立），端点匿名可达
 - actuator 健康端点（Redis UP 才 UP）、端口 8080、配置默认本地 compose 实例（Redis 6380）可环境变量覆盖
 - Redis 连接模板：key 字符串 / value JSON 序列化，key 统一 eladmin-plus:域:键 前缀
