@@ -1,11 +1,16 @@
 package com.eladminplus.system.service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.eladminplus.common.data.PageRequest;
+import com.eladminplus.common.data.PageResult;
 import com.eladminplus.common.error.BusinessException;
 import com.eladminplus.system.domain.Task;
+import com.eladminplus.system.domain.TaskLog;
 import com.eladminplus.system.dto.TaskSaveRequest;
 import com.eladminplus.system.dto.TaskTargetView;
 import com.eladminplus.system.dto.TaskView;
+import com.eladminplus.system.mapper.TaskLogMapper;
 import com.eladminplus.system.mapper.TaskMapper;
 import com.eladminplus.system.task.QuartzTaskJob;
 import com.eladminplus.system.task.TaskMethodScanner;
@@ -38,11 +43,17 @@ public class TaskService {
     public static final String JOB_NAME_PREFIX = "task-";
 
     private final TaskMapper taskMapper;
+    private final TaskLogMapper taskLogMapper;
     private final TaskMethodScanner taskMethodScanner;
     private final Scheduler scheduler;
 
-    public TaskService(TaskMapper taskMapper, TaskMethodScanner taskMethodScanner, Scheduler scheduler) {
+    public TaskService(
+            TaskMapper taskMapper,
+            TaskLogMapper taskLogMapper,
+            TaskMethodScanner taskMethodScanner,
+            Scheduler scheduler) {
         this.taskMapper = taskMapper;
+        this.taskLogMapper = taskLogMapper;
         this.taskMethodScanner = taskMethodScanner;
         this.scheduler = scheduler;
     }
@@ -115,6 +126,57 @@ public class TaskService {
             throw new IllegalStateException("任务调度移除失败：" + id, e);
         }
         taskMapper.deleteById(id);
+    }
+
+    /** 暂停：trigger 状态翻 PAUSED，期望态同步置 0（重启后持久化恢复含暂停态） */
+    @Transactional
+    public void pause(Long id) {
+        requireTask(id);
+        try {
+            scheduler.pauseTrigger(triggerKeyOf(id));
+        } catch (SchedulerException e) {
+            throw new IllegalStateException("任务暂停失败：" + id, e);
+        }
+        taskMapper.update(Wrappers.<Task>lambdaUpdate().eq(Task::getId, id).set(Task::getStatus, 0));
+    }
+
+    /** 恢复：重新排程，期望态同步置 1 */
+    @Transactional
+    public void resume(Long id) {
+        requireTask(id);
+        try {
+            scheduler.resumeTrigger(triggerKeyOf(id));
+        } catch (SchedulerException e) {
+            throw new IllegalStateException("任务恢复失败：" + id, e);
+        }
+        taskMapper.update(Wrappers.<Task>lambdaUpdate().eq(Task::getId, id).set(Task::getStatus, 1));
+    }
+
+    /** 立即执行一次：异步触发不阻塞请求，当次执行受暂停态影响与否由 Quartz 语义决定 */
+    public void executeOnce(Long id) {
+        requireTask(id);
+        try {
+            scheduler.triggerJob(jobKeyOf(id));
+        } catch (SchedulerException e) {
+            throw new IllegalStateException("任务触发失败：" + id, e);
+        }
+    }
+
+    /** 执行日志分页（按任务过滤；新执行在前） */
+    public PageResult<TaskLog> logs(Long taskId, int page, int size) {
+        requireTask(taskId);
+        Page<TaskLog> result = taskLogMapper.selectPage(
+                new PageRequest(page, size).toMpPage(),
+                Wrappers.<TaskLog>lambdaQuery()
+                        .eq(TaskLog::getTaskId, taskId)
+                        .orderByDesc(TaskLog::getId));
+        return PageResult.from(result);
+    }
+
+    private void requireTask(Long id) {
+        if (taskMapper.selectById(id) == null) {
+            throw new BusinessException(HttpStatus.NOT_FOUND, "error.system.not-found");
+        }
     }
 
     /** 注册 / 重排调度（replace 覆盖既有定义），期望态 0 即注册后暂停 */

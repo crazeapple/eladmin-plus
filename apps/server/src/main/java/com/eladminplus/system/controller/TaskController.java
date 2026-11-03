@@ -1,6 +1,8 @@
 package com.eladminplus.system.controller;
 
 import com.eladminplus.common.R;
+import com.eladminplus.common.data.PageResult;
+import com.eladminplus.system.domain.TaskLog;
 import com.eladminplus.system.dto.TaskSaveRequest;
 import com.eladminplus.system.dto.TaskTargetView;
 import com.eladminplus.system.dto.TaskView;
@@ -16,9 +18,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/** 定时任务管理端点：白名单清单 + 任务 CRUD（操作与执行日志随配置域推进补齐）。 */
+/** 定时任务管理端点：白名单清单 + 任务 CRUD + 操作（暂停 / 恢复 / 立即执行）与执行日志。 */
 @RestController
 @RequestMapping("/tasks")
 public class TaskController {
@@ -64,5 +67,39 @@ public class TaskController {
     public R<Void> remove(@PathVariable Long id) {
         taskService.remove(id);
         return R.ok();
+    }
+
+    /** 暂停：trigger 状态翻 PAUSED */
+    @PostMapping("/{id}/pause")
+    @PreAuthorize("hasAuthority('system:task:edit') || hasAuthority('ROLE_ROOT')")
+    public R<Void> pause(@PathVariable Long id) {
+        taskService.pause(id);
+        return R.ok();
+    }
+
+    /** 恢复：重新排程 */
+    @PostMapping("/{id}/resume")
+    @PreAuthorize("hasAuthority('system:task:edit') || hasAuthority('ROLE_ROOT')")
+    public R<Void> resume(@PathVariable Long id) {
+        taskService.resume(id);
+        return R.ok();
+    }
+
+    /** 立即执行一次：异步触发不阻塞请求 */
+    @PostMapping("/{id}/exec")
+    @PreAuthorize("hasAuthority('system:task:edit') || hasAuthority('ROLE_ROOT')")
+    public R<Void> executeOnce(@PathVariable Long id) {
+        taskService.executeOnce(id);
+        return R.ok();
+    }
+
+    /** 执行日志分页（按任务过滤） */
+    @GetMapping("/{id}/logs")
+    @PreAuthorize("hasAuthority('system:task:list') || hasAuthority('ROLE_ROOT')")
+    public R<PageResult<TaskLog>> logs(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return R.ok(taskService.logs(id, page, size));
     }
 }
