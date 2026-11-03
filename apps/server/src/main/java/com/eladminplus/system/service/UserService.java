@@ -101,7 +101,7 @@ public class UserService {
             wrapper.le(User::getCreatedAt, parseTime(query.endTime()));
         }
         wrapper.orderByAsc(User::getId);
-        Page<User> mpPage = userMapper.selectPage(new PageRequest(page, size).toMpPage(), wrapper);
+        Page<User> mpPage = userMapper.selectPageWithScope(new PageRequest(page, size).<User>toMpPage(), wrapper);
         return new PageResult<>(assembleViews(mpPage.getRecords()), mpPage.getTotal(),
                 (int) (mpPage.getCurrent() - 1), (int) mpPage.getSize());
     }
