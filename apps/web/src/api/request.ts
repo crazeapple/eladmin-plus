@@ -13,6 +13,8 @@ export interface RequestOptions {
   url: string
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
   body?: unknown
+  /** 附加请求头（如 Accept-Language 指定语言取展示名）；与注入头合并 */
+  headers?: Record<string, string>
   /** 401 重放标记：重放请求不再触发刷新（防循环），外部勿传 */
   authReplayed?: boolean
 }
@@ -51,7 +53,7 @@ export async function request<T>(options: RequestOptions): Promise<T> {
       url: options.url,
       method: options.method ?? 'GET',
       body: options.body,
-      headers,
+      headers: { ...headers, ...options.headers },
       throwOnError: true,
     })
     return data as T
