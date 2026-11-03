@@ -142,6 +142,7 @@ async function onSubmit() {
         />
         <ElInput
           v-else-if="field.type === 'input'"
+          v-bind="field.props"
           :model-value="inputModel(fieldValue(field.name))"
           :placeholder="field.placeholder"
           @update:model-value="(value) => setFieldValue(field.name, value)"

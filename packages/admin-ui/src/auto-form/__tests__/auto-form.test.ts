@@ -183,4 +183,15 @@ describe('AutoForm 插槽接管', () => {
     expect(document.querySelector('[data-test="custom-username"]')).toBeTruthy()
     expect(screen.queryByPlaceholderText('请输入用户名')).toBeNull()
   })
+
+  it('input 字段 props 透传（如 disabled）', async () => {
+    const fields: AutoFormField[] = [
+      { name: 'code', label: '编码', type: 'input', props: { disabled: true } },
+    ]
+    render(AutoForm, {
+      props: { schema, fields, modelValue: { code: 'X' } },
+    })
+    const input = document.querySelector('[data-field="code"] input') as HTMLInputElement
+    expect(input.disabled).toBe(true)
+  })
 })
