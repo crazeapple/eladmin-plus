@@ -22,6 +22,8 @@ const removeDept = useDeptRemove()
 
 /** 编辑表单语义（nameEn 空提交即清除英文名，字段提示已注明） */
 const deptSchema = z.object({
+  // id 声明进 schema 才不会被 parse strip：编辑带 id 走 PUT，新增 null 走 POST
+  id: z.coerce.number().nullable().optional(),
   name: z.string().trim().min(1),
   nameEn: z.string().trim().optional(),
   parentId: z.number().nullable(),

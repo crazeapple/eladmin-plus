@@ -32,6 +32,16 @@ test('部门页主链：面包屑两级、种子树、新增与删除', async ({
   await expect(dialog).toBeHidden()
   await expect(tree.getByText(childName, { exact: true })).toBeVisible()
 
+  // 编辑：改排序保存后树刷新生效
+  const deptRow = (name: string) => page.locator('.el-tree-node__content', { hasText: name })
+  await deptRow(childName).locator('[data-test="depts-edit"]').click()
+  const editDialog = page.locator('[data-test="depts-dialog"]')
+  await expect(editDialog).toBeVisible()
+  await editDialog.locator('[data-field="sort"] input').fill('7')
+  await editDialog.getByRole('button', { name: '保存' }).click()
+  await expect(editDialog).toBeHidden()
+  await expect(deptRow(childName)).toBeVisible()
+
   // 删除保护：总部有子部门被拒，后端消息 toast 直显
   await rowOf('总部').locator('[data-test="depts-delete"]').click()
   await page.getByRole('button', { name: '确定' }).click()
