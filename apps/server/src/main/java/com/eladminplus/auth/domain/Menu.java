@@ -32,6 +32,12 @@ public class Menu {
     /** 前端组件路径 key（views 下相对路径，不含扩展名） */
     private String componentPathKey;
 
+    /** 菜单图标名 */
+    private String icon;
+
+    /** 侧边栏隐藏 */
+    private Boolean hidden;
+
     /** 页面不入 keep-alive 缓存 */
     private Boolean noCache;
 

@@ -24,6 +24,8 @@ public class MenuTreeService {
             String permission,
             String i18nKey,
             String componentPathKey,
+            String icon,
+            Boolean hidden,
             Boolean noCache,
             Integer sort,
             List<MenuNode> children) {}
@@ -110,6 +112,8 @@ public class MenuTreeService {
                         menu.getPermission(),
                         menu.getI18nKey(),
                         menu.getComponentPathKey(),
+                        menu.getIcon(),
+                        menu.getHidden(),
                         menu.getNoCache(),
                         menu.getSort(),
                         new java.util.ArrayList<>()))
