@@ -60,6 +60,13 @@ public class UserController {
         return R.ok();
     }
 
+    @PutMapping("/{id}/enabled/{value}")
+    @PreAuthorize("hasAuthority('system:user:edit') || hasAuthority('ROLE_ROOT')")
+    public R<Void> setEnabled(@PathVariable Long id, @PathVariable int value) {
+        userService.setEnabled(id, value);
+        return R.ok();
+    }
+
     @DeleteMapping
     @PreAuthorize("hasAuthority('system:user:del') || hasAuthority('ROLE_ROOT')")
     public R<Void> removeBatch(@RequestBody List<Long> ids) {

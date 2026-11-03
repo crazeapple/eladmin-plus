@@ -21,6 +21,8 @@ public class TokenService {
 
     public static final String TOKEN_PREFIX = "auth:token:";
     public static final String REFRESH_PREFIX = "auth:refresh:";
+    /** per-user 会话索引：停用强退按 userId 精确删全部 access 会话 */
+    public static final String SESSION_INDEX_PREFIX = "auth:user-sessions:";
 
     private static final SecureRandom RANDOM = new SecureRandom();
 
@@ -55,6 +57,9 @@ public class TokenService {
         session.put("loginAt", Instant.now().toString());
         redis.opsForHash().putAll(TOKEN_PREFIX + accessToken, session);
         redis.expire(TOKEN_PREFIX + accessToken, props.accessTokenTtl().getSeconds(), TimeUnit.SECONDS);
+        redis.opsForSet()
+                .add(SESSION_INDEX_PREFIX + user.getId(), accessToken);
+        redis.expire(SESSION_INDEX_PREFIX + user.getId(), props.accessTokenTtl().getSeconds(), TimeUnit.SECONDS);
 
         String refreshRandom = randomToken();
         redis.opsForValue()
@@ -75,8 +80,8 @@ public class TokenService {
                 Long.valueOf((String) hash.get("userId")),
                 (String) hash.get("username"),
                 (String) hash.get("tokenId"),
-                List.of(((String) hash.get("roles")).split(",")),
-                splitPermissions((String) hash.get("permissions")),
+                splitJoined((String) hash.get("roles")),
+                splitJoined((String) hash.get("permissions")),
                 Instant.parse((String) hash.get("loginAt")));
     }
 
@@ -100,7 +105,7 @@ public class TokenService {
         return issue(context.user(), context.roles(), context.permissions());
     }
 
-    /** 登出：删会话与其 refresh 键 */
+    /** 登出：删会话与其 refresh 键,并从用户会话索引移除 */
     public void revoke(String accessToken) {
         SessionContext context = resolve(accessToken);
         if (context == null) {
@@ -108,6 +113,23 @@ public class TokenService {
         }
         redis.delete(TOKEN_PREFIX + accessToken);
         redis.delete(refreshKey(context.userId(), context.tokenId()));
+        redis.opsForSet().remove(SESSION_INDEX_PREFIX + context.userId(), accessToken);
+    }
+
+    /**
+     * 按用户强退：删该用户全部 access 会话与 refresh 键并清索引。
+     * refresh 键含 userId 路径段,SCAN 精确前缀遍历;停用账号场景调用(量小可靠)。
+     */
+    public void revokeAllForUser(Long userId) {
+        var members = redis.opsForSet().members(SESSION_INDEX_PREFIX + userId);
+        if (members != null) {
+            members.forEach(token -> redis.delete(TOKEN_PREFIX + token));
+        }
+        redis.delete(SESSION_INDEX_PREFIX + userId);
+        java.util.Set<String> refreshKeys = redis.keys(REFRESH_PREFIX + userId + ":*");
+        if (refreshKeys != null && !refreshKeys.isEmpty()) {
+            redis.delete(refreshKeys);
+        }
     }
 
     public static String refreshKey(Long userId, String tokenId) {
@@ -120,7 +142,7 @@ public class TokenService {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
-    private static List<String> splitPermissions(String joined) {
+    private static List<String> splitJoined(String joined) {
         if (joined == null || joined.isBlank()) {
             return List.of();
         }

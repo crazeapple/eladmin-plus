@@ -49,6 +49,7 @@ public class UserService {
     private final TranslationService translationService;
     private final AuthContextService authContextService;
     private final PasswordEncoder passwordEncoder;
+    private final TokenService tokenService;
 
     public UserService(
             UserMapper userMapper,
@@ -60,7 +61,8 @@ public class UserService {
             DeptService deptService,
             TranslationService translationService,
             AuthContextService authContextService,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            TokenService tokenService) {
         this.userMapper = userMapper;
         this.deptMapper = deptMapper;
         this.userJobMapper = userJobMapper;
@@ -71,6 +73,7 @@ public class UserService {
         this.translationService = translationService;
         this.authContextService = authContextService;
         this.passwordEncoder = passwordEncoder;
+        this.tokenService = tokenService;
     }
 
     /** 用户分页：部门过滤含子级；名称与邮箱模糊；状态与创建时间范围筛选 */
@@ -275,6 +278,31 @@ public class UserService {
             userJob.setUserId(userId);
             userJob.setJobId(jobId);
             userJobMapper.insert(userJob);
+        }
+    }
+
+    /**
+     * 状态启停：停用即强退（删该用户全部会话与 refresh）。
+     * 保护：不能停用自己、admin 账号不能被停用。
+     */
+    public void setEnabled(Long userId, int value) {
+        TokenService.SessionContext operator = authContextService.currentSession();
+        if (userId.equals(operator.userId())) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "error.system.self-disable");
+        }
+        User target = userMapper.selectById(userId);
+        if (target == null) {
+            throw new BusinessException(HttpStatus.NOT_FOUND, "error.system.not-found");
+        }
+        if ("admin".equals(target.getUsername())) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "error.system.admin-protected");
+        }
+        User update = new User();
+        update.setId(userId);
+        update.setEnabled(value);
+        userMapper.updateById(update);
+        if (value == 0) {
+            tokenService.revokeAllForUser(userId);
         }
     }
 

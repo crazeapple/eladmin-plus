@@ -51,7 +51,9 @@ public class LoginService {
         String plainPassword = rsaKeyService.decrypt(cipherText, keyId);
 
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUsername, username));
-        if (user == null || !passwordEncoder.matches(plainPassword, user.getPassword())) {
+        boolean disabled = user != null && user.getEnabled() != null && user.getEnabled() == 0;
+        if (user == null || disabled || !passwordEncoder.matches(plainPassword, user.getPassword())) {
+            // 停用用户与密码错误同文案（不泄露账号状态,防枚举）
             throw new BusinessException(HttpStatus.UNAUTHORIZED, "error.auth.login-failed");
         }
         var context = authContextService.load(user.getId());
