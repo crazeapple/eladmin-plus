@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ElButton, ElMessage, ElMessageBox, ElTag, ElTreeSelect } from 'element-plus'
-import { computed, h, reactive, ref } from 'vue'
+import { ElButton, ElMessage, ElMessageBox, ElTag, ElTree, ElTreeSelect } from 'element-plus'
+import type { TreeInstance } from 'element-plus'
+import { computed, h, nextTick, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { z } from 'zod'
 
@@ -9,8 +10,9 @@ import type { AutoFormField, AutoFormModel, DataTableColumn } from '@eladmin-plu
 
 import { useAuth } from '@/composables/use-auth'
 import { useDeptTree } from '@/api/depts'
+import { fetchMenuTree, fetchRoleMenuIds, useSaveRoleMenus } from '@/api/grants'
 import { fetchRolePageEn, useRolePage, useRoleRemove, useRoleSave } from '@/api/roles'
-import type { RoleView } from '@/api/generated'
+import type { MenuNode, RoleView } from '@/api/generated'
 
 defineOptions({ name: 'SystemRoles' })
 
@@ -35,6 +37,7 @@ const query = computed(() => ({
 const { data, isLoading } = useRolePage(query)
 const saveRole = useRoleSave()
 const removeRole = useRoleRemove()
+const saveRoleMenus = useSaveRoleMenus()
 
 const { data: deptTree } = useDeptTree()
 
@@ -207,6 +210,45 @@ const DATA_SCOPE_LABEL_KEYS: Record<string, string> = {
   CUSTOM: 'roles.scopeCustom',
 }
 
+/** —— 菜单授权（全量树勾选含按钮权限点，保存提交全选加半选的完整路径） —— */
+
+const grantVisible = ref(false)
+const grantRole = ref<RoleView | null>(null)
+const menuTreeRef = ref<TreeInstance | null>(null)
+const menuTreeData = ref<MenuNode[]>([])
+const grantSubmitting = ref(false)
+
+function menuNodeLabel(node: MenuNode): string {
+  return node.i18nKey ? t(node.i18nKey) : (node.permission ?? '')
+}
+
+async function openGrant(row: RoleView) {
+  grantRole.value = row
+  grantVisible.value = true
+  const [tree, checked] = await Promise.all([fetchMenuTree(), fetchRoleMenuIds(row.id ?? 0)])
+  menuTreeData.value = tree
+  await nextTick()
+  menuTreeRef.value?.setCheckedKeys(checked ?? [], true)
+}
+
+async function onGrantSave() {
+  if (!grantRole.value?.id) {
+    return
+  }
+  grantSubmitting.value = true
+  try {
+    const checked = (menuTreeRef.value?.getCheckedKeys() ?? []) as number[]
+    const half = (menuTreeRef.value?.getHalfCheckedKeys() ?? []) as number[]
+    await saveRoleMenus.mutateAsync({ roleId: grantRole.value.id, menuIds: [...half, ...checked] })
+    ElMessage.success(t('roles.grantSuccess'))
+    grantVisible.value = false
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : t('roles.grantFailed'))
+  } finally {
+    grantSubmitting.value = false
+  }
+}
+
 const columns = computed<DataTableColumn<RoleView>[]>(() => [
   { accessorKey: 'code', header: t('roles.code') },
   { accessorKey: 'name', header: t('roles.name') },
@@ -242,6 +284,18 @@ const columns = computed<DataTableColumn<RoleView>[]>(() => [
                 onClick: () => openEdit(row.original),
               },
               () => t('roles.edit'),
+            )
+          : null,
+        hasAuth('system:role:edit')
+          ? h(
+              ElButton,
+              {
+                link: true,
+                type: 'warning',
+                'data-test': 'roles-grant',
+                onClick: () => openGrant(row.original),
+              },
+              () => t('roles.grant'),
             )
           : null,
         hasAuth('system:role:del')
@@ -344,6 +398,40 @@ const total = computed(() => data.value?.total ?? 0)
           />
         </template>
       </AutoForm>
+    </el-dialog>
+
+    <el-dialog
+      v-model="grantVisible"
+      :title="t('roles.grantTitle', { name: grantRole?.name ?? '' })"
+      width="480px"
+      data-test="roles-grant-dialog"
+    >
+      <el-tree
+        ref="menuTreeRef"
+        :data="menuTreeData"
+        node-key="id"
+        show-checkbox
+        default-expand-all
+        :props="{ label: 'name', children: 'children' }"
+        data-test="roles-grant-tree"
+      >
+        <template #default="{ data }">
+          <span :data-test="data.type === 2 ? 'grant-perm-node' : 'grant-menu-node'">
+            {{ menuNodeLabel(data) }}
+          </span>
+        </template>
+      </el-tree>
+      <template #footer>
+        <el-button @click="grantVisible = false">{{ t('roles.cancel') }}</el-button>
+        <el-button
+          type="primary"
+          :loading="grantSubmitting"
+          data-test="roles-grant-save"
+          @click="onGrantSave"
+        >
+          {{ t('roles.submit') }}
+        </el-button>
+      </template>
     </el-dialog>
   </div>
 </template>

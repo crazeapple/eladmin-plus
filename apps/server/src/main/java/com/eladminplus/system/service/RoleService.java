@@ -3,7 +3,9 @@ package com.eladminplus.system.service;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.eladminplus.auth.domain.Role;
+import com.eladminplus.auth.domain.RoleMenu;
 import com.eladminplus.auth.domain.UserRole;
+import com.eladminplus.auth.mapper.RoleMenuMapper;
 import com.eladminplus.auth.mapper.UserRoleMapper;
 import com.eladminplus.auth.session.AuthContextService;
 import com.eladminplus.auth.session.TokenService;
@@ -28,6 +30,7 @@ public class RoleService {
 
     private final com.eladminplus.auth.mapper.RoleMapper roleMapper;
     private final UserRoleMapper userRoleMapper;
+    private final RoleMenuMapper roleMenuMapper;
     private final RoleDeptMapper roleDeptMapper;
     private final TranslationService translationService;
     private final AuthContextService authContextService;
@@ -35,11 +38,13 @@ public class RoleService {
     public RoleService(
             com.eladminplus.auth.mapper.RoleMapper roleMapper,
             UserRoleMapper userRoleMapper,
+            RoleMenuMapper roleMenuMapper,
             RoleDeptMapper roleDeptMapper,
             TranslationService translationService,
             AuthContextService authContextService) {
         this.roleMapper = roleMapper;
         this.userRoleMapper = userRoleMapper;
+        this.roleMenuMapper = roleMenuMapper;
         this.roleDeptMapper = roleDeptMapper;
         this.translationService = translationService;
         this.authContextService = authContextService;
@@ -169,8 +174,10 @@ public class RoleService {
         if (userCount > 0) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "error.system.role-in-use");
         }
-        roleMapper.deleteById(id);
+        // 先清授权与数据范围关联再删主行（role_menu 的外键约束指向 role 主键）
+        roleMenuMapper.delete(Wrappers.<RoleMenu>lambdaQuery().eq(RoleMenu::getRoleId, id));
         roleDeptMapper.delete(Wrappers.<RoleDept>lambdaQuery().eq(RoleDept::getRoleId, id));
+        roleMapper.deleteById(id);
         translationService.removeAll("role", id);
     }
 }

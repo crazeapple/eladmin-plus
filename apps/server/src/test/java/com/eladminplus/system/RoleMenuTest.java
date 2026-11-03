@@ -1,6 +1,7 @@
 package com.eladminplus.system;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -105,5 +106,38 @@ class RoleMenuTest {
                 objectMapper.readTree(echo.getResponse().getContentAsString(StandardCharsets.UTF_8)).get("data");
         assertThat(echoIds.size()).isEqualTo(2);
         assertThat(echoIds.get(0).asLong()).isEqualTo(menuIds.get(0));
+    }
+
+    @Test
+    void 授权过的角色删除时菜单关联级联清理() throws Exception {
+        MvcResult createResult = mockMvc.perform(post("/roles")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new RoleSaveRequest(
+                                null, "ROLE_TEST_MENU", "级联清理测试角色", null, null, 60, "ALL", null, 1))))
+                .andExpect(status().isOk())
+                .andReturn();
+        Long roleId = objectMapper
+                .readTree(createResult.getResponse().getContentAsString())
+                .get("data")
+                .asLong();
+
+        mockMvc.perform(put("/roles/{id}/menus", roleId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(List.of(1L, 2L))))
+                .andExpect(status().isOk());
+        assertThat(roleMenuMapper
+                .selectCount(Wrappers.<RoleMenu>lambdaQuery().eq(RoleMenu::getRoleId, roleId)))
+                .isEqualTo(2);
+
+        // 授权关联不清即触发外键约束（回归位：角色删除须级联清 role_menu）
+        mockMvc.perform(delete("/roles/{id}", roleId)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk());
+        assertThat(roleMapper.selectById(roleId)).isNull();
+        assertThat(roleMenuMapper
+                .selectCount(Wrappers.<RoleMenu>lambdaQuery().eq(RoleMenu::getRoleId, roleId)))
+                .isZero();
     }
 }
