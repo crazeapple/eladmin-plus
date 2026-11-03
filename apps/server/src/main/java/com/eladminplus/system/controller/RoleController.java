@@ -4,8 +4,10 @@ import com.eladminplus.common.R;
 import com.eladminplus.common.data.PageResult;
 import com.eladminplus.system.dto.RoleSaveRequest;
 import com.eladminplus.system.dto.RoleView;
+import com.eladminplus.auth.session.MenuTreeService;
 import com.eladminplus.system.service.RoleService;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,9 +25,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class RoleController {
 
     private final RoleService roleService;
+    private final MenuTreeService menuTreeService;
 
-    public RoleController(RoleService roleService) {
+    public RoleController(RoleService roleService, MenuTreeService menuTreeService) {
         this.roleService = roleService;
+        this.menuTreeService = menuTreeService;
     }
 
     @GetMapping
@@ -57,6 +61,19 @@ public class RoleController {
                 request.dataScope(),
                 request.customDeptIds(),
                 request.enabled()));
+        return R.ok();
+    }
+
+    @GetMapping("/{id}/menus")
+    @PreAuthorize("hasAuthority('system:role:edit') || hasAuthority('ROLE_ROOT')")
+    public R<List<Long>> menuIdsOfRole(@PathVariable Long id) {
+        return R.ok(menuTreeService.menuIdsOfRole(id));
+    }
+
+    @PutMapping("/{id}/menus")
+    @PreAuthorize("hasAuthority('system:role:edit') || hasAuthority('ROLE_ROOT')")
+    public R<Void> saveRoleMenus(@PathVariable Long id, @RequestBody List<Long> menuIds) {
+        menuTreeService.saveRoleMenus(id, menuIds);
         return R.ok();
     }
 
