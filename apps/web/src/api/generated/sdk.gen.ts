@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { OverviewData, OverviewResponses } from './types.gen';
+import type { CaptchaData, CaptchaResponses, CheckData, CheckResponses, Create1Data, Create1Responses, Create2Data, Create2Responses, Create3Data, Create3Responses, CreateData, CreateResponses, LoginData, LoginResponses, LogoutData, LogoutResponses, MeData, MenuIdsOfRoleData, MenuIdsOfRoleResponses, MeResponses, OverviewData, OverviewResponses, Page1Data, Page1Responses, Page2Data, Page2Responses, PageData, PageResponses, PublicKeyData, PublicKeyResponses, RefreshData, RefreshResponses, Remove1Data, Remove1Responses, Remove2Data, Remove2Responses, RemoveBatchData, RemoveBatchResponses, RemoveData, RemoveResponses, ResetPasswordsData, ResetPasswordsResponses, SaveRoleMenusData, SaveRoleMenusResponses, SetEnabledData, SetEnabledResponses, Tree1Data, Tree1Responses, TreeData, TreeResponses, Update1Data, Update1Responses, Update2Data, Update2Responses, Update3Data, Update3Responses, UpdateData, UpdateResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -18,4 +18,151 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
     meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
 
+export const update = <ThrowOnError extends boolean = false>(options: Options<UpdateData, ThrowOnError>): RequestResult<UpdateResponses, unknown, ThrowOnError> => (options.client ?? client).put<UpdateResponses, unknown, ThrowOnError>({
+    url: '/users/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const setEnabled = <ThrowOnError extends boolean = false>(options: Options<SetEnabledData, ThrowOnError>): RequestResult<SetEnabledResponses, unknown, ThrowOnError> => (options.client ?? client).put<SetEnabledResponses, unknown, ThrowOnError>({ url: '/users/{id}/enabled/{value}', ...options });
+
+export const resetPasswords = <ThrowOnError extends boolean = false>(options: Options<ResetPasswordsData, ThrowOnError>): RequestResult<ResetPasswordsResponses, unknown, ThrowOnError> => (options.client ?? client).put<ResetPasswordsResponses, unknown, ThrowOnError>({
+    url: '/users/password',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const remove = <ThrowOnError extends boolean = false>(options: Options<RemoveData, ThrowOnError>): RequestResult<RemoveResponses, unknown, ThrowOnError> => (options.client ?? client).delete<RemoveResponses, unknown, ThrowOnError>({ url: '/roles/{id}', ...options });
+
+export const update1 = <ThrowOnError extends boolean = false>(options: Options<Update1Data, ThrowOnError>): RequestResult<Update1Responses, unknown, ThrowOnError> => (options.client ?? client).put<Update1Responses, unknown, ThrowOnError>({
+    url: '/roles/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const menuIdsOfRole = <ThrowOnError extends boolean = false>(options: Options<MenuIdsOfRoleData, ThrowOnError>): RequestResult<MenuIdsOfRoleResponses, unknown, ThrowOnError> => (options.client ?? client).get<MenuIdsOfRoleResponses, unknown, ThrowOnError>({ url: '/roles/{id}/menus', ...options });
+
+export const saveRoleMenus = <ThrowOnError extends boolean = false>(options: Options<SaveRoleMenusData, ThrowOnError>): RequestResult<SaveRoleMenusResponses, unknown, ThrowOnError> => (options.client ?? client).put<SaveRoleMenusResponses, unknown, ThrowOnError>({
+    url: '/roles/{id}/menus',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const remove1 = <ThrowOnError extends boolean = false>(options: Options<Remove1Data, ThrowOnError>): RequestResult<Remove1Responses, unknown, ThrowOnError> => (options.client ?? client).delete<Remove1Responses, unknown, ThrowOnError>({ url: '/jobs/{id}', ...options });
+
+export const update2 = <ThrowOnError extends boolean = false>(options: Options<Update2Data, ThrowOnError>): RequestResult<Update2Responses, unknown, ThrowOnError> => (options.client ?? client).put<Update2Responses, unknown, ThrowOnError>({
+    url: '/jobs/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const remove2 = <ThrowOnError extends boolean = false>(options: Options<Remove2Data, ThrowOnError>): RequestResult<Remove2Responses, unknown, ThrowOnError> => (options.client ?? client).delete<Remove2Responses, unknown, ThrowOnError>({ url: '/depts/{id}', ...options });
+
+export const update3 = <ThrowOnError extends boolean = false>(options: Options<Update3Data, ThrowOnError>): RequestResult<Update3Responses, unknown, ThrowOnError> => (options.client ?? client).put<Update3Responses, unknown, ThrowOnError>({
+    url: '/depts/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const removeBatch = <ThrowOnError extends boolean = false>(options: Options<RemoveBatchData, ThrowOnError>): RequestResult<RemoveBatchResponses, unknown, ThrowOnError> => (options.client ?? client).delete<RemoveBatchResponses, unknown, ThrowOnError>({
+    url: '/users',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const page = <ThrowOnError extends boolean = false>(options: Options<PageData, ThrowOnError>): RequestResult<PageResponses, unknown, ThrowOnError> => (options.client ?? client).get<PageResponses, unknown, ThrowOnError>({ url: '/users', ...options });
+
+export const create = <ThrowOnError extends boolean = false>(options: Options<CreateData, ThrowOnError>): RequestResult<CreateResponses, unknown, ThrowOnError> => (options.client ?? client).post<CreateResponses, unknown, ThrowOnError>({
+    url: '/users',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const page1 = <ThrowOnError extends boolean = false>(options?: Options<Page1Data, ThrowOnError>): RequestResult<Page1Responses, unknown, ThrowOnError> => (options?.client ?? client).get<Page1Responses, unknown, ThrowOnError>({ url: '/roles', ...options });
+
+export const create1 = <ThrowOnError extends boolean = false>(options: Options<Create1Data, ThrowOnError>): RequestResult<Create1Responses, unknown, ThrowOnError> => (options.client ?? client).post<Create1Responses, unknown, ThrowOnError>({
+    url: '/roles',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const page2 = <ThrowOnError extends boolean = false>(options?: Options<Page2Data, ThrowOnError>): RequestResult<Page2Responses, unknown, ThrowOnError> => (options?.client ?? client).get<Page2Responses, unknown, ThrowOnError>({ url: '/jobs', ...options });
+
+export const create2 = <ThrowOnError extends boolean = false>(options: Options<Create2Data, ThrowOnError>): RequestResult<Create2Responses, unknown, ThrowOnError> => (options.client ?? client).post<Create2Responses, unknown, ThrowOnError>({
+    url: '/jobs',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const create3 = <ThrowOnError extends boolean = false>(options: Options<Create3Data, ThrowOnError>): RequestResult<Create3Responses, unknown, ThrowOnError> => (options.client ?? client).post<Create3Responses, unknown, ThrowOnError>({
+    url: '/depts',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const refresh = <ThrowOnError extends boolean = false>(options?: Options<RefreshData, ThrowOnError>): RequestResult<RefreshResponses, unknown, ThrowOnError> => (options?.client ?? client).post<RefreshResponses, unknown, ThrowOnError>({ url: '/auth/refresh', ...options });
+
+export const logout = <ThrowOnError extends boolean = false>(options?: Options<LogoutData, ThrowOnError>): RequestResult<LogoutResponses, unknown, ThrowOnError> => (options?.client ?? client).post<LogoutResponses, unknown, ThrowOnError>({ url: '/auth/logout', ...options });
+
+export const login = <ThrowOnError extends boolean = false>(options: Options<LoginData, ThrowOnError>): RequestResult<LoginResponses, unknown, ThrowOnError> => (options.client ?? client).post<LoginResponses, unknown, ThrowOnError>({
+    url: '/auth/login',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const check = <ThrowOnError extends boolean = false>(options: Options<CheckData, ThrowOnError>): RequestResult<CheckResponses, unknown, ThrowOnError> => (options.client ?? client).post<CheckResponses, unknown, ThrowOnError>({
+    url: '/auth/captcha/check',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
 export const overview = <ThrowOnError extends boolean = false>(options?: Options<OverviewData, ThrowOnError>): RequestResult<OverviewResponses, unknown, ThrowOnError> => (options?.client ?? client).get<OverviewResponses, unknown, ThrowOnError>({ url: '/stats/overview', ...options });
+
+export const tree = <ThrowOnError extends boolean = false>(options?: Options<TreeData, ThrowOnError>): RequestResult<TreeResponses, unknown, ThrowOnError> => (options?.client ?? client).get<TreeResponses, unknown, ThrowOnError>({ url: '/menus/tree', ...options });
+
+export const tree1 = <ThrowOnError extends boolean = false>(options?: Options<Tree1Data, ThrowOnError>): RequestResult<Tree1Responses, unknown, ThrowOnError> => (options?.client ?? client).get<Tree1Responses, unknown, ThrowOnError>({ url: '/depts/tree', ...options });
+
+export const publicKey = <ThrowOnError extends boolean = false>(options?: Options<PublicKeyData, ThrowOnError>): RequestResult<PublicKeyResponses, unknown, ThrowOnError> => (options?.client ?? client).get<PublicKeyResponses, unknown, ThrowOnError>({ url: '/auth/public-key', ...options });
+
+export const me = <ThrowOnError extends boolean = false>(options?: Options<MeData, ThrowOnError>): RequestResult<MeResponses, unknown, ThrowOnError> => (options?.client ?? client).get<MeResponses, unknown, ThrowOnError>({ url: '/auth/me', ...options });
+
+export const captcha = <ThrowOnError extends boolean = false>(options?: Options<CaptchaData, ThrowOnError>): RequestResult<CaptchaResponses, unknown, ThrowOnError> => (options?.client ?? client).get<CaptchaResponses, unknown, ThrowOnError>({ url: '/auth/captcha', ...options });

@@ -4,6 +4,129 @@ export type ClientOptions = {
     baseUrl: 'http://localhost:8080' | (string & {});
 };
 
+export type UserSaveRequest = {
+    id?: number;
+    username: string;
+    nickName?: string;
+    email: string;
+    phone?: string;
+    gender?: number;
+    enabled: number;
+    deptId?: number;
+    password?: string;
+    roleIds?: Array<number>;
+    jobIds?: Array<number>;
+};
+
+export type RVoid = {
+    code?: number;
+    message?: string;
+    data?: unknown;
+};
+
+export type RoleSaveRequest = {
+    id?: number;
+    code: string;
+    name: string;
+    nameEn?: string;
+    description?: string;
+    level?: number;
+    dataScope: string;
+    customDeptIds?: Array<number>;
+    enabled?: number;
+};
+
+export type JobSaveRequest = {
+    id?: number;
+    name: string;
+    nameEn?: string;
+    sort?: number;
+    enabled: number;
+};
+
+export type DeptSaveRequest = {
+    id?: number;
+    parentId?: number;
+    name: string;
+    nameEn?: string;
+    sort?: number;
+    enabled: number;
+};
+
+export type RLong = {
+    code?: number;
+    message?: string;
+    data?: number;
+};
+
+export type RMapStringObject = {
+    code?: number;
+    message?: string;
+    data?: {
+        [key: string]: unknown;
+    };
+};
+
+export type LoginRequest = {
+    username?: string;
+    password?: string;
+    keyId?: string;
+    ticket?: string;
+};
+
+export type CaptchaCheckRequest = {
+    token?: string;
+    moveDistance?: number;
+};
+
+export type RMapStringString = {
+    code?: number;
+    message?: string;
+    data?: {
+        [key: string]: string;
+    };
+};
+
+export type UserPageQuery = {
+    page?: number;
+    size?: number;
+    deptId?: number;
+    name?: string;
+    email?: string;
+    enabled?: number;
+    startTime?: string;
+    endTime?: string;
+};
+
+export type PageResultUserView = {
+    content?: Array<UserView>;
+    total?: number;
+    page?: number;
+    size?: number;
+};
+
+export type RPageResultUserView = {
+    code?: number;
+    message?: string;
+    data?: PageResultUserView;
+};
+
+export type UserView = {
+    id?: number;
+    username?: string;
+    nickName?: string;
+    email?: string;
+    phone?: string;
+    gender?: number;
+    enabled?: number;
+    createdAt?: string;
+    deptId?: number;
+    deptName?: string;
+    roleIds?: Array<number>;
+    jobIds?: Array<number>;
+    jobNames?: Array<string>;
+};
+
 export type OverviewStats = {
     userCount?: number;
     onlineCount?: number;
@@ -16,6 +139,526 @@ export type ROverviewStats = {
     message?: string;
     data?: OverviewStats;
 };
+
+export type PageResultRoleView = {
+    content?: Array<RoleView>;
+    total?: number;
+    page?: number;
+    size?: number;
+};
+
+export type RPageResultRoleView = {
+    code?: number;
+    message?: string;
+    data?: PageResultRoleView;
+};
+
+export type RoleView = {
+    id?: number;
+    code?: string;
+    name?: string;
+    description?: string;
+    level?: number;
+    dataScope?: string;
+    customDeptIds?: Array<number>;
+    enabled?: number;
+    builtIn?: boolean;
+    createdAt?: string;
+};
+
+export type RListLong = {
+    code?: number;
+    message?: string;
+    data?: Array<number>;
+};
+
+export type MenuNode = {
+    id?: number;
+    parentId?: number;
+    type?: number;
+    permission?: string;
+    i18nKey?: string;
+    componentPathKey?: string;
+    noCache?: boolean;
+    sort?: number;
+    children?: Array<MenuNode>;
+};
+
+export type RListMenuNode = {
+    code?: number;
+    message?: string;
+    data?: Array<MenuNode>;
+};
+
+export type JobView = {
+    id?: number;
+    name?: string;
+    sort?: number;
+    enabled?: number;
+};
+
+export type PageResultJobView = {
+    content?: Array<JobView>;
+    total?: number;
+    page?: number;
+    size?: number;
+};
+
+export type RPageResultJobView = {
+    code?: number;
+    message?: string;
+    data?: PageResultJobView;
+};
+
+export type DeptTreeNode = {
+    id?: number;
+    parentId?: number;
+    name?: string;
+    sort?: number;
+    enabled?: number;
+    children?: Array<DeptTreeNode>;
+};
+
+export type RListDeptTreeNode = {
+    code?: number;
+    message?: string;
+    data?: Array<DeptTreeNode>;
+};
+
+export type MeResponse = {
+    user?: UserView;
+    roles?: Array<string>;
+    permissions?: Array<string>;
+    menus?: Array<MenuNode>;
+};
+
+export type RMeResponse = {
+    code?: number;
+    message?: string;
+    data?: MeResponse;
+};
+
+export type BlockPuzzle = {
+    token?: string;
+    back?: string;
+    jigsaw?: string;
+    jigsawY?: number;
+    imageWidth?: number;
+    imageHeight?: number;
+};
+
+export type RBlockPuzzle = {
+    code?: number;
+    message?: string;
+    data?: BlockPuzzle;
+};
+
+export type UpdateData = {
+    body: UserSaveRequest;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/users/{id}';
+};
+
+export type UpdateResponses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type UpdateResponse = UpdateResponses[keyof UpdateResponses];
+
+export type SetEnabledData = {
+    body?: never;
+    path: {
+        id: number;
+        value: number;
+    };
+    query?: never;
+    url: '/users/{id}/enabled/{value}';
+};
+
+export type SetEnabledResponses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type SetEnabledResponse = SetEnabledResponses[keyof SetEnabledResponses];
+
+export type ResetPasswordsData = {
+    body: Array<number>;
+    path?: never;
+    query?: never;
+    url: '/users/password';
+};
+
+export type ResetPasswordsResponses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type ResetPasswordsResponse = ResetPasswordsResponses[keyof ResetPasswordsResponses];
+
+export type RemoveData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/roles/{id}';
+};
+
+export type RemoveResponses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type RemoveResponse = RemoveResponses[keyof RemoveResponses];
+
+export type Update1Data = {
+    body: RoleSaveRequest;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/roles/{id}';
+};
+
+export type Update1Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type Update1Response = Update1Responses[keyof Update1Responses];
+
+export type MenuIdsOfRoleData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/roles/{id}/menus';
+};
+
+export type MenuIdsOfRoleResponses = {
+    /**
+     * OK
+     */
+    200: RListLong;
+};
+
+export type MenuIdsOfRoleResponse = MenuIdsOfRoleResponses[keyof MenuIdsOfRoleResponses];
+
+export type SaveRoleMenusData = {
+    body: Array<number>;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/roles/{id}/menus';
+};
+
+export type SaveRoleMenusResponses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type SaveRoleMenusResponse = SaveRoleMenusResponses[keyof SaveRoleMenusResponses];
+
+export type Remove1Data = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/jobs/{id}';
+};
+
+export type Remove1Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type Remove1Response = Remove1Responses[keyof Remove1Responses];
+
+export type Update2Data = {
+    body: JobSaveRequest;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/jobs/{id}';
+};
+
+export type Update2Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type Update2Response = Update2Responses[keyof Update2Responses];
+
+export type Remove2Data = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/depts/{id}';
+};
+
+export type Remove2Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type Remove2Response = Remove2Responses[keyof Remove2Responses];
+
+export type Update3Data = {
+    body: DeptSaveRequest;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/depts/{id}';
+};
+
+export type Update3Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type Update3Response = Update3Responses[keyof Update3Responses];
+
+export type RemoveBatchData = {
+    body: Array<number>;
+    path?: never;
+    query?: never;
+    url: '/users';
+};
+
+export type RemoveBatchResponses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type RemoveBatchResponse = RemoveBatchResponses[keyof RemoveBatchResponses];
+
+export type PageData = {
+    body?: never;
+    path?: never;
+    query: {
+        query: UserPageQuery;
+    };
+    url: '/users';
+};
+
+export type PageResponses = {
+    /**
+     * OK
+     */
+    200: RPageResultUserView;
+};
+
+export type PageResponse = PageResponses[keyof PageResponses];
+
+export type CreateData = {
+    body: UserSaveRequest;
+    path?: never;
+    query?: never;
+    url: '/users';
+};
+
+export type CreateResponses = {
+    /**
+     * OK
+     */
+    200: RLong;
+};
+
+export type CreateResponse = CreateResponses[keyof CreateResponses];
+
+export type Page1Data = {
+    body?: never;
+    path?: never;
+    query?: {
+        page?: number;
+        size?: number;
+        name?: string;
+        enabled?: number;
+    };
+    url: '/roles';
+};
+
+export type Page1Responses = {
+    /**
+     * OK
+     */
+    200: RPageResultRoleView;
+};
+
+export type Page1Response = Page1Responses[keyof Page1Responses];
+
+export type Create1Data = {
+    body: RoleSaveRequest;
+    path?: never;
+    query?: never;
+    url: '/roles';
+};
+
+export type Create1Responses = {
+    /**
+     * OK
+     */
+    200: RLong;
+};
+
+export type Create1Response = Create1Responses[keyof Create1Responses];
+
+export type Page2Data = {
+    body?: never;
+    path?: never;
+    query?: {
+        page?: number;
+        size?: number;
+        name?: string;
+        enabled?: number;
+    };
+    url: '/jobs';
+};
+
+export type Page2Responses = {
+    /**
+     * OK
+     */
+    200: RPageResultJobView;
+};
+
+export type Page2Response = Page2Responses[keyof Page2Responses];
+
+export type Create2Data = {
+    body: JobSaveRequest;
+    path?: never;
+    query?: never;
+    url: '/jobs';
+};
+
+export type Create2Responses = {
+    /**
+     * OK
+     */
+    200: RLong;
+};
+
+export type Create2Response = Create2Responses[keyof Create2Responses];
+
+export type Create3Data = {
+    body: DeptSaveRequest;
+    path?: never;
+    query?: never;
+    url: '/depts';
+};
+
+export type Create3Responses = {
+    /**
+     * OK
+     */
+    200: RLong;
+};
+
+export type Create3Response = Create3Responses[keyof Create3Responses];
+
+export type RefreshData = {
+    body?: never;
+    headers?: {
+        'X-Requested-With'?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/auth/refresh';
+};
+
+export type RefreshResponses = {
+    /**
+     * OK
+     */
+    200: RMapStringObject;
+};
+
+export type RefreshResponse = RefreshResponses[keyof RefreshResponses];
+
+export type LogoutData = {
+    body?: never;
+    headers?: {
+        Authorization?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/auth/logout';
+};
+
+export type LogoutResponses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type LogoutResponse = LogoutResponses[keyof LogoutResponses];
+
+export type LoginData = {
+    body: LoginRequest;
+    path?: never;
+    query?: never;
+    url: '/auth/login';
+};
+
+export type LoginResponses = {
+    /**
+     * OK
+     */
+    200: RMapStringObject;
+};
+
+export type LoginResponse = LoginResponses[keyof LoginResponses];
+
+export type CheckData = {
+    body: CaptchaCheckRequest;
+    path?: never;
+    query?: never;
+    url: '/auth/captcha/check';
+};
+
+export type CheckResponses = {
+    /**
+     * OK
+     */
+    200: RMapStringString;
+};
+
+export type CheckResponse = CheckResponses[keyof CheckResponses];
 
 export type OverviewData = {
     body?: never;
@@ -32,3 +675,83 @@ export type OverviewResponses = {
 };
 
 export type OverviewResponse = OverviewResponses[keyof OverviewResponses];
+
+export type TreeData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/menus/tree';
+};
+
+export type TreeResponses = {
+    /**
+     * OK
+     */
+    200: RListMenuNode;
+};
+
+export type TreeResponse = TreeResponses[keyof TreeResponses];
+
+export type Tree1Data = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/depts/tree';
+};
+
+export type Tree1Responses = {
+    /**
+     * OK
+     */
+    200: RListDeptTreeNode;
+};
+
+export type Tree1Response = Tree1Responses[keyof Tree1Responses];
+
+export type PublicKeyData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/auth/public-key';
+};
+
+export type PublicKeyResponses = {
+    /**
+     * OK
+     */
+    200: RMapStringString;
+};
+
+export type PublicKeyResponse = PublicKeyResponses[keyof PublicKeyResponses];
+
+export type MeData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/auth/me';
+};
+
+export type MeResponses = {
+    /**
+     * OK
+     */
+    200: RMeResponse;
+};
+
+export type MeResponse2 = MeResponses[keyof MeResponses];
+
+export type CaptchaData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/auth/captcha';
+};
+
+export type CaptchaResponses = {
+    /**
+     * OK
+     */
+    200: RBlockPuzzle;
+};
+
+export type CaptchaResponse = CaptchaResponses[keyof CaptchaResponses];
