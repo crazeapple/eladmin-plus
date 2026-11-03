@@ -44,12 +44,15 @@ class RbacSeedTest {
     }
 
     @Test
-    void 初始菜单三条且字段齐全() {
-        List<Menu> menus = menuMapper.selectList(new LambdaQueryWrapper<Menu>().orderByAsc(Menu::getSort));
+    void 初始菜单三条页面在册且字段齐全() {
+        // V4 起菜单表含目录与按钮权限点行，本用例只断言 V2 的三条根级页面菜单
+        List<Menu> menus = menuMapper.selectList(new LambdaQueryWrapper<Menu>()
+                .eq(Menu::getType, Menu.TYPE_MENU)
+                .isNull(Menu::getParentId)
+                .orderByAsc(Menu::getSort));
         assertThat(menus).extracting(Menu::getComponentPathKey)
                 .containsExactly("home/index", "demo/cached", "demo/no-cache");
         assertThat(menus).allSatisfy(menu -> {
-            assertThat(menu.getType()).isEqualTo(Menu.TYPE_MENU);
             assertThat(menu.getI18nKey()).startsWith("routes.");
             assertThat(menu.getSort()).isPositive();
         });

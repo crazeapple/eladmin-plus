@@ -35,12 +35,12 @@ class MeTest extends RefreshLogoutTest {
         assertThat(data.get("user").has("password")).isFalse();
         // 角色码（ROLE_ROOT 内置位）
         assertThat(data.get("roles").toString()).contains("ROLE_ROOT");
-        // 权限点清单存在（种子无按钮权限点，应为空数组）
+        // 权限点清单存在（V4 起种子含 18 条按钮权限点，ROLE_ROOT 直通全量）
         assertThat(data.get("permissions").isArray()).isTrue();
 
-        // 菜单树：三条一级菜单，字段齐全、按 sort 升序
+        // 菜单树：三条一级页面 + 系统管理目录（V4），按 sort 升序
         JsonNode menus = data.get("menus");
-        assertThat(menus.size()).isEqualTo(3);
+        assertThat(menus.size()).isEqualTo(4);
         assertThat(menus.get(0).get("i18nKey").asText()).isEqualTo("routes.home");
         assertThat(menus.get(0).get("componentPathKey").asText()).isEqualTo("home/index");
         assertThat(menus.get(0).get("noCache").asBoolean()).isFalse();
@@ -48,6 +48,10 @@ class MeTest extends RefreshLogoutTest {
         assertThat(menus.get(2).get("componentPathKey").asText()).isEqualTo("demo/no-cache");
         assertThat(menus.get(2).get("noCache").asBoolean()).isTrue();
         assertThat(menus.get(0).get("sort").asInt()).isLessThan(menus.get(2).get("sort").asInt());
+        // 末位为系统管理目录（type=0），四个子菜单挂其下
+        assertThat(menus.get(3).get("type").asInt()).isEqualTo(0);
+        assertThat(menus.get(3).get("i18nKey").asText()).isEqualTo("routes.system");
+        assertThat(menus.get(3).get("children").size()).isEqualTo(4);
     }
 
     @Test
