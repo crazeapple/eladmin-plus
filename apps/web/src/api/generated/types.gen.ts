@@ -24,6 +24,16 @@ export type RVoid = {
     data?: unknown;
 };
 
+export type TaskSaveRequest = {
+    id?: number;
+    name: string;
+    beanName: string;
+    methodName: string;
+    param?: string;
+    cron: string;
+    status?: number;
+};
+
 export type RoleSaveRequest = {
     id?: number;
     code: string;
@@ -36,12 +46,38 @@ export type RoleSaveRequest = {
     enabled?: number;
 };
 
+export type MenuSaveRequest = {
+    id?: number;
+    parentId?: number;
+    type: number;
+    permission?: string;
+    i18nKey?: string;
+    componentPathKey?: string;
+    icon?: string;
+    hidden?: boolean;
+    noCache?: boolean;
+    sort?: number;
+};
+
 export type JobSaveRequest = {
     id?: number;
     name: string;
     nameEn?: string;
     sort?: number;
     enabled: number;
+};
+
+export type DictSaveRequest = {
+    id?: number;
+    name: string;
+    description?: string;
+};
+
+export type DictDetailSaveRequest = {
+    id?: number;
+    label: string;
+    value: string;
+    sort?: number;
 };
 
 export type DeptSaveRequest = {
@@ -127,6 +163,59 @@ export type UserView = {
     jobNames?: Array<string>;
 };
 
+export type RListTaskView = {
+    code?: number;
+    message?: string;
+    data?: Array<TaskView>;
+};
+
+export type TaskView = {
+    id?: number;
+    name?: string;
+    beanName?: string;
+    methodName?: string;
+    param?: string;
+    cron?: string;
+    status?: number;
+    scheduleState?: string;
+};
+
+export type PageResultTaskLog = {
+    content?: Array<TaskLog>;
+    total?: number;
+    page?: number;
+    size?: number;
+};
+
+export type RPageResultTaskLog = {
+    code?: number;
+    message?: string;
+    data?: PageResultTaskLog;
+};
+
+export type TaskLog = {
+    id?: number;
+    taskId?: number;
+    executeTime?: string;
+    success?: number;
+    durationMs?: number;
+    errorMsg?: string;
+    createdAt?: string;
+    updatedAt?: string;
+};
+
+export type RListTaskTargetView = {
+    code?: number;
+    message?: string;
+    data?: Array<TaskTargetView>;
+};
+
+export type TaskTargetView = {
+    beanName?: string;
+    methodName?: string;
+    param?: string;
+};
+
 export type OverviewStats = {
     userCount?: number;
     onlineCount?: number;
@@ -179,6 +268,8 @@ export type MenuNode = {
     permission?: string;
     i18nKey?: string;
     componentPathKey?: string;
+    icon?: string;
+    hidden?: boolean;
     noCache?: boolean;
     sort?: number;
     children?: Array<MenuNode>;
@@ -208,6 +299,48 @@ export type RPageResultJobView = {
     code?: number;
     message?: string;
     data?: PageResultJobView;
+};
+
+export type Dict = {
+    id?: number;
+    name?: string;
+    description?: string;
+    createdAt?: string;
+    updatedAt?: string;
+};
+
+export type RListDict = {
+    code?: number;
+    message?: string;
+    data?: Array<Dict>;
+};
+
+export type DictItemView = {
+    label?: string;
+    value?: string;
+    sort?: number;
+};
+
+export type RListDictItemView = {
+    code?: number;
+    message?: string;
+    data?: Array<DictItemView>;
+};
+
+export type DictDetail = {
+    id?: number;
+    dictId?: number;
+    label?: string;
+    value?: string;
+    sort?: number;
+    createdAt?: string;
+    updatedAt?: string;
+};
+
+export type RListDictDetail = {
+    code?: number;
+    message?: string;
+    data?: Array<DictDetail>;
 };
 
 export type DeptTreeNode = {
@@ -312,7 +445,7 @@ export type RemoveData = {
         id: number;
     };
     query?: never;
-    url: '/roles/{id}';
+    url: '/tasks/{id}';
 };
 
 export type RemoveResponses = {
@@ -325,12 +458,12 @@ export type RemoveResponses = {
 export type RemoveResponse = RemoveResponses[keyof RemoveResponses];
 
 export type Update1Data = {
-    body: RoleSaveRequest;
+    body: TaskSaveRequest;
     path: {
         id: number;
     };
     query?: never;
-    url: '/roles/{id}';
+    url: '/tasks/{id}';
 };
 
 export type Update1Responses = {
@@ -341,6 +474,42 @@ export type Update1Responses = {
 };
 
 export type Update1Response = Update1Responses[keyof Update1Responses];
+
+export type Remove1Data = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/roles/{id}';
+};
+
+export type Remove1Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type Remove1Response = Remove1Responses[keyof Remove1Responses];
+
+export type Update2Data = {
+    body: RoleSaveRequest;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/roles/{id}';
+};
+
+export type Update2Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type Update2Response = Update2Responses[keyof Update2Responses];
 
 export type MenuIdsOfRoleData = {
     body?: never;
@@ -378,49 +547,13 @@ export type SaveRoleMenusResponses = {
 
 export type SaveRoleMenusResponse = SaveRoleMenusResponses[keyof SaveRoleMenusResponses];
 
-export type Remove1Data = {
-    body?: never;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/jobs/{id}';
-};
-
-export type Remove1Responses = {
-    /**
-     * OK
-     */
-    200: RVoid;
-};
-
-export type Remove1Response = Remove1Responses[keyof Remove1Responses];
-
-export type Update2Data = {
-    body: JobSaveRequest;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/jobs/{id}';
-};
-
-export type Update2Responses = {
-    /**
-     * OK
-     */
-    200: RVoid;
-};
-
-export type Update2Response = Update2Responses[keyof Update2Responses];
-
 export type Remove2Data = {
     body?: never;
     path: {
         id: number;
     };
     query?: never;
-    url: '/depts/{id}';
+    url: '/menus/{id}';
 };
 
 export type Remove2Responses = {
@@ -433,12 +566,12 @@ export type Remove2Responses = {
 export type Remove2Response = Remove2Responses[keyof Remove2Responses];
 
 export type Update3Data = {
-    body: DeptSaveRequest;
+    body: MenuSaveRequest;
     path: {
         id: number;
     };
     query?: never;
-    url: '/depts/{id}';
+    url: '/menus/{id}';
 };
 
 export type Update3Responses = {
@@ -449,6 +582,152 @@ export type Update3Responses = {
 };
 
 export type Update3Response = Update3Responses[keyof Update3Responses];
+
+export type Remove3Data = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/jobs/{id}';
+};
+
+export type Remove3Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type Remove3Response = Remove3Responses[keyof Remove3Responses];
+
+export type Update4Data = {
+    body: JobSaveRequest;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/jobs/{id}';
+};
+
+export type Update4Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type Update4Response = Update4Responses[keyof Update4Responses];
+
+export type Remove4Data = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/dicts/{id}';
+};
+
+export type Remove4Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type Remove4Response = Remove4Responses[keyof Remove4Responses];
+
+export type Update5Data = {
+    body: DictSaveRequest;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/dicts/{id}';
+};
+
+export type Update5Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type Update5Response = Update5Responses[keyof Update5Responses];
+
+export type RemoveDetailData = {
+    body?: never;
+    path: {
+        dictId: number;
+        detailId: number;
+    };
+    query?: never;
+    url: '/dicts/{dictId}/details/{detailId}';
+};
+
+export type RemoveDetailResponses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type RemoveDetailResponse = RemoveDetailResponses[keyof RemoveDetailResponses];
+
+export type UpdateDetailData = {
+    body: DictDetailSaveRequest;
+    path: {
+        dictId: number;
+        detailId: number;
+    };
+    query?: never;
+    url: '/dicts/{dictId}/details/{detailId}';
+};
+
+export type UpdateDetailResponses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type UpdateDetailResponse = UpdateDetailResponses[keyof UpdateDetailResponses];
+
+export type Remove5Data = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/depts/{id}';
+};
+
+export type Remove5Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type Remove5Response = Remove5Responses[keyof Remove5Responses];
+
+export type Update6Data = {
+    body: DeptSaveRequest;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/depts/{id}';
+};
+
+export type Update6Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type Update6Response = Update6Responses[keyof Update6Responses];
 
 export type RemoveBatchData = {
     body: Array<number>;
@@ -500,6 +779,92 @@ export type CreateResponses = {
 
 export type CreateResponse = CreateResponses[keyof CreateResponses];
 
+export type ListData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/tasks';
+};
+
+export type ListResponses = {
+    /**
+     * OK
+     */
+    200: RListTaskView;
+};
+
+export type ListResponse = ListResponses[keyof ListResponses];
+
+export type Create1Data = {
+    body: TaskSaveRequest;
+    path?: never;
+    query?: never;
+    url: '/tasks';
+};
+
+export type Create1Responses = {
+    /**
+     * OK
+     */
+    200: RLong;
+};
+
+export type Create1Response = Create1Responses[keyof Create1Responses];
+
+export type ResumeData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/tasks/{id}/resume';
+};
+
+export type ResumeResponses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type ResumeResponse = ResumeResponses[keyof ResumeResponses];
+
+export type PauseData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/tasks/{id}/pause';
+};
+
+export type PauseResponses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type PauseResponse = PauseResponses[keyof PauseResponses];
+
+export type ExecuteOnceData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/tasks/{id}/exec';
+};
+
+export type ExecuteOnceResponses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type ExecuteOnceResponse = ExecuteOnceResponses[keyof ExecuteOnceResponses];
+
 export type Page1Data = {
     body?: never;
     path?: never;
@@ -521,21 +886,37 @@ export type Page1Responses = {
 
 export type Page1Response = Page1Responses[keyof Page1Responses];
 
-export type Create1Data = {
+export type Create2Data = {
     body: RoleSaveRequest;
     path?: never;
     query?: never;
     url: '/roles';
 };
 
-export type Create1Responses = {
+export type Create2Responses = {
     /**
      * OK
      */
     200: RLong;
 };
 
-export type Create1Response = Create1Responses[keyof Create1Responses];
+export type Create2Response = Create2Responses[keyof Create2Responses];
+
+export type Create3Data = {
+    body: MenuSaveRequest;
+    path?: never;
+    query?: never;
+    url: '/menus';
+};
+
+export type Create3Responses = {
+    /**
+     * OK
+     */
+    200: RLong;
+};
+
+export type Create3Response = Create3Responses[keyof Create3Responses];
 
 export type Page2Data = {
     body?: never;
@@ -558,37 +939,105 @@ export type Page2Responses = {
 
 export type Page2Response = Page2Responses[keyof Page2Responses];
 
-export type Create2Data = {
+export type Create4Data = {
     body: JobSaveRequest;
     path?: never;
     query?: never;
     url: '/jobs';
 };
 
-export type Create2Responses = {
+export type Create4Responses = {
     /**
      * OK
      */
     200: RLong;
 };
 
-export type Create2Response = Create2Responses[keyof Create2Responses];
+export type Create4Response = Create4Responses[keyof Create4Responses];
 
-export type Create3Data = {
+export type List1Data = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/dicts';
+};
+
+export type List1Responses = {
+    /**
+     * OK
+     */
+    200: RListDict;
+};
+
+export type List1Response = List1Responses[keyof List1Responses];
+
+export type Create5Data = {
+    body: DictSaveRequest;
+    path?: never;
+    query?: never;
+    url: '/dicts';
+};
+
+export type Create5Responses = {
+    /**
+     * OK
+     */
+    200: RLong;
+};
+
+export type Create5Response = Create5Responses[keyof Create5Responses];
+
+export type ListDetailsData = {
+    body?: never;
+    path: {
+        dictId: number;
+    };
+    query?: never;
+    url: '/dicts/{dictId}/details';
+};
+
+export type ListDetailsResponses = {
+    /**
+     * OK
+     */
+    200: RListDictDetail;
+};
+
+export type ListDetailsResponse = ListDetailsResponses[keyof ListDetailsResponses];
+
+export type CreateDetailData = {
+    body: DictDetailSaveRequest;
+    path: {
+        dictId: number;
+    };
+    query?: never;
+    url: '/dicts/{dictId}/details';
+};
+
+export type CreateDetailResponses = {
+    /**
+     * OK
+     */
+    200: RLong;
+};
+
+export type CreateDetailResponse = CreateDetailResponses[keyof CreateDetailResponses];
+
+export type Create6Data = {
     body: DeptSaveRequest;
     path?: never;
     query?: never;
     url: '/depts';
 };
 
-export type Create3Responses = {
+export type Create6Responses = {
     /**
      * OK
      */
     200: RLong;
 };
 
-export type Create3Response = Create3Responses[keyof Create3Responses];
+export type Create6Response = Create6Responses[keyof Create6Responses];
 
 export type RefreshData = {
     body?: never;
@@ -660,6 +1109,43 @@ export type CheckResponses = {
 
 export type CheckResponse = CheckResponses[keyof CheckResponses];
 
+export type LogsData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: {
+        page?: number;
+        size?: number;
+    };
+    url: '/tasks/{id}/logs';
+};
+
+export type LogsResponses = {
+    /**
+     * OK
+     */
+    200: RPageResultTaskLog;
+};
+
+export type LogsResponse = LogsResponses[keyof LogsResponses];
+
+export type TargetsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/tasks/targets';
+};
+
+export type TargetsResponses = {
+    /**
+     * OK
+     */
+    200: RListTaskTargetView;
+};
+
+export type TargetsResponse = TargetsResponses[keyof TargetsResponses];
+
 export type OverviewData = {
     body?: never;
     path?: never;
@@ -691,6 +1177,24 @@ export type TreeResponses = {
 };
 
 export type TreeResponse = TreeResponses[keyof TreeResponses];
+
+export type ByNameData = {
+    body?: never;
+    path: {
+        name: string;
+    };
+    query?: never;
+    url: '/dicts/{name}';
+};
+
+export type ByNameResponses = {
+    /**
+     * OK
+     */
+    200: RListDictItemView;
+};
+
+export type ByNameResponse = ByNameResponses[keyof ByNameResponses];
 
 export type Tree1Data = {
     body?: never;

@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { CaptchaData, CaptchaResponses, CheckData, CheckResponses, Create1Data, Create1Responses, Create2Data, Create2Responses, Create3Data, Create3Responses, CreateData, CreateResponses, LoginData, LoginResponses, LogoutData, LogoutResponses, MeData, MenuIdsOfRoleData, MenuIdsOfRoleResponses, MeResponses, OverviewData, OverviewResponses, Page1Data, Page1Responses, Page2Data, Page2Responses, PageData, PageResponses, PublicKeyData, PublicKeyResponses, RefreshData, RefreshResponses, Remove1Data, Remove1Responses, Remove2Data, Remove2Responses, RemoveBatchData, RemoveBatchResponses, RemoveData, RemoveResponses, ResetPasswordsData, ResetPasswordsResponses, SaveRoleMenusData, SaveRoleMenusResponses, SetEnabledData, SetEnabledResponses, Tree1Data, Tree1Responses, TreeData, TreeResponses, Update1Data, Update1Responses, Update2Data, Update2Responses, Update3Data, Update3Responses, UpdateData, UpdateResponses } from './types.gen';
+import type { ByNameData, ByNameResponses, CaptchaData, CaptchaResponses, CheckData, CheckResponses, Create1Data, Create1Responses, Create2Data, Create2Responses, Create3Data, Create3Responses, Create4Data, Create4Responses, Create5Data, Create5Responses, Create6Data, Create6Responses, CreateData, CreateDetailData, CreateDetailResponses, CreateResponses, ExecuteOnceData, ExecuteOnceResponses, List1Data, List1Responses, ListData, ListDetailsData, ListDetailsResponses, ListResponses, LoginData, LoginResponses, LogoutData, LogoutResponses, LogsData, LogsResponses, MeData, MenuIdsOfRoleData, MenuIdsOfRoleResponses, MeResponses, OverviewData, OverviewResponses, Page1Data, Page1Responses, Page2Data, Page2Responses, PageData, PageResponses, PauseData, PauseResponses, PublicKeyData, PublicKeyResponses, RefreshData, RefreshResponses, Remove1Data, Remove1Responses, Remove2Data, Remove2Responses, Remove3Data, Remove3Responses, Remove4Data, Remove4Responses, Remove5Data, Remove5Responses, RemoveBatchData, RemoveBatchResponses, RemoveData, RemoveDetailData, RemoveDetailResponses, RemoveResponses, ResetPasswordsData, ResetPasswordsResponses, ResumeData, ResumeResponses, SaveRoleMenusData, SaveRoleMenusResponses, SetEnabledData, SetEnabledResponses, TargetsData, TargetsResponses, Tree1Data, Tree1Responses, TreeData, TreeResponses, Update1Data, Update1Responses, Update2Data, Update2Responses, Update3Data, Update3Responses, Update4Data, Update4Responses, Update5Data, Update5Responses, Update6Data, Update6Responses, UpdateData, UpdateDetailData, UpdateDetailResponses, UpdateResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -38,9 +38,20 @@ export const resetPasswords = <ThrowOnError extends boolean = false>(options: Op
     }
 });
 
-export const remove = <ThrowOnError extends boolean = false>(options: Options<RemoveData, ThrowOnError>): RequestResult<RemoveResponses, unknown, ThrowOnError> => (options.client ?? client).delete<RemoveResponses, unknown, ThrowOnError>({ url: '/roles/{id}', ...options });
+export const remove = <ThrowOnError extends boolean = false>(options: Options<RemoveData, ThrowOnError>): RequestResult<RemoveResponses, unknown, ThrowOnError> => (options.client ?? client).delete<RemoveResponses, unknown, ThrowOnError>({ url: '/tasks/{id}', ...options });
 
 export const update1 = <ThrowOnError extends boolean = false>(options: Options<Update1Data, ThrowOnError>): RequestResult<Update1Responses, unknown, ThrowOnError> => (options.client ?? client).put<Update1Responses, unknown, ThrowOnError>({
+    url: '/tasks/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const remove1 = <ThrowOnError extends boolean = false>(options: Options<Remove1Data, ThrowOnError>): RequestResult<Remove1Responses, unknown, ThrowOnError> => (options.client ?? client).delete<Remove1Responses, unknown, ThrowOnError>({ url: '/roles/{id}', ...options });
+
+export const update2 = <ThrowOnError extends boolean = false>(options: Options<Update2Data, ThrowOnError>): RequestResult<Update2Responses, unknown, ThrowOnError> => (options.client ?? client).put<Update2Responses, unknown, ThrowOnError>({
     url: '/roles/{id}',
     ...options,
     headers: {
@@ -60,9 +71,20 @@ export const saveRoleMenus = <ThrowOnError extends boolean = false>(options: Opt
     }
 });
 
-export const remove1 = <ThrowOnError extends boolean = false>(options: Options<Remove1Data, ThrowOnError>): RequestResult<Remove1Responses, unknown, ThrowOnError> => (options.client ?? client).delete<Remove1Responses, unknown, ThrowOnError>({ url: '/jobs/{id}', ...options });
+export const remove2 = <ThrowOnError extends boolean = false>(options: Options<Remove2Data, ThrowOnError>): RequestResult<Remove2Responses, unknown, ThrowOnError> => (options.client ?? client).delete<Remove2Responses, unknown, ThrowOnError>({ url: '/menus/{id}', ...options });
 
-export const update2 = <ThrowOnError extends boolean = false>(options: Options<Update2Data, ThrowOnError>): RequestResult<Update2Responses, unknown, ThrowOnError> => (options.client ?? client).put<Update2Responses, unknown, ThrowOnError>({
+export const update3 = <ThrowOnError extends boolean = false>(options: Options<Update3Data, ThrowOnError>): RequestResult<Update3Responses, unknown, ThrowOnError> => (options.client ?? client).put<Update3Responses, unknown, ThrowOnError>({
+    url: '/menus/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const remove3 = <ThrowOnError extends boolean = false>(options: Options<Remove3Data, ThrowOnError>): RequestResult<Remove3Responses, unknown, ThrowOnError> => (options.client ?? client).delete<Remove3Responses, unknown, ThrowOnError>({ url: '/jobs/{id}', ...options });
+
+export const update4 = <ThrowOnError extends boolean = false>(options: Options<Update4Data, ThrowOnError>): RequestResult<Update4Responses, unknown, ThrowOnError> => (options.client ?? client).put<Update4Responses, unknown, ThrowOnError>({
     url: '/jobs/{id}',
     ...options,
     headers: {
@@ -71,9 +93,31 @@ export const update2 = <ThrowOnError extends boolean = false>(options: Options<U
     }
 });
 
-export const remove2 = <ThrowOnError extends boolean = false>(options: Options<Remove2Data, ThrowOnError>): RequestResult<Remove2Responses, unknown, ThrowOnError> => (options.client ?? client).delete<Remove2Responses, unknown, ThrowOnError>({ url: '/depts/{id}', ...options });
+export const remove4 = <ThrowOnError extends boolean = false>(options: Options<Remove4Data, ThrowOnError>): RequestResult<Remove4Responses, unknown, ThrowOnError> => (options.client ?? client).delete<Remove4Responses, unknown, ThrowOnError>({ url: '/dicts/{id}', ...options });
 
-export const update3 = <ThrowOnError extends boolean = false>(options: Options<Update3Data, ThrowOnError>): RequestResult<Update3Responses, unknown, ThrowOnError> => (options.client ?? client).put<Update3Responses, unknown, ThrowOnError>({
+export const update5 = <ThrowOnError extends boolean = false>(options: Options<Update5Data, ThrowOnError>): RequestResult<Update5Responses, unknown, ThrowOnError> => (options.client ?? client).put<Update5Responses, unknown, ThrowOnError>({
+    url: '/dicts/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const removeDetail = <ThrowOnError extends boolean = false>(options: Options<RemoveDetailData, ThrowOnError>): RequestResult<RemoveDetailResponses, unknown, ThrowOnError> => (options.client ?? client).delete<RemoveDetailResponses, unknown, ThrowOnError>({ url: '/dicts/{dictId}/details/{detailId}', ...options });
+
+export const updateDetail = <ThrowOnError extends boolean = false>(options: Options<UpdateDetailData, ThrowOnError>): RequestResult<UpdateDetailResponses, unknown, ThrowOnError> => (options.client ?? client).put<UpdateDetailResponses, unknown, ThrowOnError>({
+    url: '/dicts/{dictId}/details/{detailId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const remove5 = <ThrowOnError extends boolean = false>(options: Options<Remove5Data, ThrowOnError>): RequestResult<Remove5Responses, unknown, ThrowOnError> => (options.client ?? client).delete<Remove5Responses, unknown, ThrowOnError>({ url: '/depts/{id}', ...options });
+
+export const update6 = <ThrowOnError extends boolean = false>(options: Options<Update6Data, ThrowOnError>): RequestResult<Update6Responses, unknown, ThrowOnError> => (options.client ?? client).put<Update6Responses, unknown, ThrowOnError>({
     url: '/depts/{id}',
     ...options,
     headers: {
@@ -102,10 +146,36 @@ export const create = <ThrowOnError extends boolean = false>(options: Options<Cr
     }
 });
 
-export const page1 = <ThrowOnError extends boolean = false>(options?: Options<Page1Data, ThrowOnError>): RequestResult<Page1Responses, unknown, ThrowOnError> => (options?.client ?? client).get<Page1Responses, unknown, ThrowOnError>({ url: '/roles', ...options });
+export const list = <ThrowOnError extends boolean = false>(options?: Options<ListData, ThrowOnError>): RequestResult<ListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ListResponses, unknown, ThrowOnError>({ url: '/tasks', ...options });
 
 export const create1 = <ThrowOnError extends boolean = false>(options: Options<Create1Data, ThrowOnError>): RequestResult<Create1Responses, unknown, ThrowOnError> => (options.client ?? client).post<Create1Responses, unknown, ThrowOnError>({
+    url: '/tasks',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const resume = <ThrowOnError extends boolean = false>(options: Options<ResumeData, ThrowOnError>): RequestResult<ResumeResponses, unknown, ThrowOnError> => (options.client ?? client).post<ResumeResponses, unknown, ThrowOnError>({ url: '/tasks/{id}/resume', ...options });
+
+export const pause = <ThrowOnError extends boolean = false>(options: Options<PauseData, ThrowOnError>): RequestResult<PauseResponses, unknown, ThrowOnError> => (options.client ?? client).post<PauseResponses, unknown, ThrowOnError>({ url: '/tasks/{id}/pause', ...options });
+
+export const executeOnce = <ThrowOnError extends boolean = false>(options: Options<ExecuteOnceData, ThrowOnError>): RequestResult<ExecuteOnceResponses, unknown, ThrowOnError> => (options.client ?? client).post<ExecuteOnceResponses, unknown, ThrowOnError>({ url: '/tasks/{id}/exec', ...options });
+
+export const page1 = <ThrowOnError extends boolean = false>(options?: Options<Page1Data, ThrowOnError>): RequestResult<Page1Responses, unknown, ThrowOnError> => (options?.client ?? client).get<Page1Responses, unknown, ThrowOnError>({ url: '/roles', ...options });
+
+export const create2 = <ThrowOnError extends boolean = false>(options: Options<Create2Data, ThrowOnError>): RequestResult<Create2Responses, unknown, ThrowOnError> => (options.client ?? client).post<Create2Responses, unknown, ThrowOnError>({
     url: '/roles',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const create3 = <ThrowOnError extends boolean = false>(options: Options<Create3Data, ThrowOnError>): RequestResult<Create3Responses, unknown, ThrowOnError> => (options.client ?? client).post<Create3Responses, unknown, ThrowOnError>({
+    url: '/menus',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -115,7 +185,7 @@ export const create1 = <ThrowOnError extends boolean = false>(options: Options<C
 
 export const page2 = <ThrowOnError extends boolean = false>(options?: Options<Page2Data, ThrowOnError>): RequestResult<Page2Responses, unknown, ThrowOnError> => (options?.client ?? client).get<Page2Responses, unknown, ThrowOnError>({ url: '/jobs', ...options });
 
-export const create2 = <ThrowOnError extends boolean = false>(options: Options<Create2Data, ThrowOnError>): RequestResult<Create2Responses, unknown, ThrowOnError> => (options.client ?? client).post<Create2Responses, unknown, ThrowOnError>({
+export const create4 = <ThrowOnError extends boolean = false>(options: Options<Create4Data, ThrowOnError>): RequestResult<Create4Responses, unknown, ThrowOnError> => (options.client ?? client).post<Create4Responses, unknown, ThrowOnError>({
     url: '/jobs',
     ...options,
     headers: {
@@ -124,7 +194,29 @@ export const create2 = <ThrowOnError extends boolean = false>(options: Options<C
     }
 });
 
-export const create3 = <ThrowOnError extends boolean = false>(options: Options<Create3Data, ThrowOnError>): RequestResult<Create3Responses, unknown, ThrowOnError> => (options.client ?? client).post<Create3Responses, unknown, ThrowOnError>({
+export const list1 = <ThrowOnError extends boolean = false>(options?: Options<List1Data, ThrowOnError>): RequestResult<List1Responses, unknown, ThrowOnError> => (options?.client ?? client).get<List1Responses, unknown, ThrowOnError>({ url: '/dicts', ...options });
+
+export const create5 = <ThrowOnError extends boolean = false>(options: Options<Create5Data, ThrowOnError>): RequestResult<Create5Responses, unknown, ThrowOnError> => (options.client ?? client).post<Create5Responses, unknown, ThrowOnError>({
+    url: '/dicts',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const listDetails = <ThrowOnError extends boolean = false>(options: Options<ListDetailsData, ThrowOnError>): RequestResult<ListDetailsResponses, unknown, ThrowOnError> => (options.client ?? client).get<ListDetailsResponses, unknown, ThrowOnError>({ url: '/dicts/{dictId}/details', ...options });
+
+export const createDetail = <ThrowOnError extends boolean = false>(options: Options<CreateDetailData, ThrowOnError>): RequestResult<CreateDetailResponses, unknown, ThrowOnError> => (options.client ?? client).post<CreateDetailResponses, unknown, ThrowOnError>({
+    url: '/dicts/{dictId}/details',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const create6 = <ThrowOnError extends boolean = false>(options: Options<Create6Data, ThrowOnError>): RequestResult<Create6Responses, unknown, ThrowOnError> => (options.client ?? client).post<Create6Responses, unknown, ThrowOnError>({
     url: '/depts',
     ...options,
     headers: {
@@ -155,9 +247,15 @@ export const check = <ThrowOnError extends boolean = false>(options: Options<Che
     }
 });
 
+export const logs = <ThrowOnError extends boolean = false>(options: Options<LogsData, ThrowOnError>): RequestResult<LogsResponses, unknown, ThrowOnError> => (options.client ?? client).get<LogsResponses, unknown, ThrowOnError>({ url: '/tasks/{id}/logs', ...options });
+
+export const targets = <ThrowOnError extends boolean = false>(options?: Options<TargetsData, ThrowOnError>): RequestResult<TargetsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<TargetsResponses, unknown, ThrowOnError>({ url: '/tasks/targets', ...options });
+
 export const overview = <ThrowOnError extends boolean = false>(options?: Options<OverviewData, ThrowOnError>): RequestResult<OverviewResponses, unknown, ThrowOnError> => (options?.client ?? client).get<OverviewResponses, unknown, ThrowOnError>({ url: '/stats/overview', ...options });
 
 export const tree = <ThrowOnError extends boolean = false>(options?: Options<TreeData, ThrowOnError>): RequestResult<TreeResponses, unknown, ThrowOnError> => (options?.client ?? client).get<TreeResponses, unknown, ThrowOnError>({ url: '/menus/tree', ...options });
+
+export const byName = <ThrowOnError extends boolean = false>(options: Options<ByNameData, ThrowOnError>): RequestResult<ByNameResponses, unknown, ThrowOnError> => (options.client ?? client).get<ByNameResponses, unknown, ThrowOnError>({ url: '/dicts/{name}', ...options });
 
 export const tree1 = <ThrowOnError extends boolean = false>(options?: Options<Tree1Data, ThrowOnError>): RequestResult<Tree1Responses, unknown, ThrowOnError> => (options?.client ?? client).get<Tree1Responses, unknown, ThrowOnError>({ url: '/depts/tree', ...options });
 

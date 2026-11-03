@@ -22,6 +22,16 @@ export const zRVoid = z.object({
     data: z.unknown().optional()
 });
 
+export const zTaskSaveRequest = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    name: z.string().min(0).max(64),
+    beanName: z.string().min(0).max(128),
+    methodName: z.string().min(0).max(128),
+    param: z.string().min(0).max(255).optional(),
+    cron: z.string().min(0).max(128),
+    status: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional()
+});
+
 export const zRoleSaveRequest = z.object({
     id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
     code: z.string().min(0).max(64).regex(/^[A-Z0-9_]+$/),
@@ -34,12 +44,38 @@ export const zRoleSaveRequest = z.object({
     enabled: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional()
 });
 
+export const zMenuSaveRequest = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    parentId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    type: z.int().gte(0).lte(2),
+    permission: z.string().min(0).max(128).optional(),
+    i18nKey: z.string().min(0).max(128).optional(),
+    componentPathKey: z.string().min(0).max(128).optional(),
+    icon: z.string().min(0).max(128).optional(),
+    hidden: z.boolean().optional(),
+    noCache: z.boolean().optional(),
+    sort: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional()
+});
+
 export const zJobSaveRequest = z.object({
     id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
     name: z.string().min(0).max(64),
     nameEn: z.string().min(0).max(255).optional(),
     sort: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
     enabled: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' })
+});
+
+export const zDictSaveRequest = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    name: z.string().min(0).max(64),
+    description: z.string().min(0).max(255).optional()
+});
+
+export const zDictDetailSaveRequest = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    label: z.string().min(0).max(512),
+    value: z.string().min(0).max(128),
+    sort: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional()
 });
 
 export const zDeptSaveRequest = z.object({
@@ -121,6 +157,59 @@ export const zRPageResultUserView = z.object({
     data: zPageResultUserView.optional()
 });
 
+export const zTaskView = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    name: z.string().optional(),
+    beanName: z.string().optional(),
+    methodName: z.string().optional(),
+    param: z.string().optional(),
+    cron: z.string().optional(),
+    status: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
+    scheduleState: z.string().optional()
+});
+
+export const zRListTaskView = z.object({
+    code: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
+    message: z.string().optional(),
+    data: z.array(zTaskView).optional()
+});
+
+export const zTaskLog = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    taskId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    executeTime: z.iso.datetime().optional(),
+    success: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
+    durationMs: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    errorMsg: z.string().optional(),
+    createdAt: z.iso.datetime().optional(),
+    updatedAt: z.iso.datetime().optional()
+});
+
+export const zPageResultTaskLog = z.object({
+    content: z.array(zTaskLog).optional(),
+    total: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    page: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
+    size: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional()
+});
+
+export const zRPageResultTaskLog = z.object({
+    code: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
+    message: z.string().optional(),
+    data: zPageResultTaskLog.optional()
+});
+
+export const zTaskTargetView = z.object({
+    beanName: z.string().optional(),
+    methodName: z.string().optional(),
+    param: z.string().optional()
+});
+
+export const zRListTaskTargetView = z.object({
+    code: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
+    message: z.string().optional(),
+    data: z.array(zTaskTargetView).optional()
+});
+
 export const zOverviewStats = z.object({
     userCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
     onlineCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
@@ -173,6 +262,8 @@ export const zMenuNode = z.object({
     permission: z.string().optional(),
     i18nKey: z.string().optional(),
     componentPathKey: z.string().optional(),
+    icon: z.string().optional(),
+    hidden: z.boolean().optional(),
     noCache: z.boolean().optional(),
     sort: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
     children: z.array(z.lazy((): any => zMenuNode)).optional()
@@ -202,6 +293,48 @@ export const zRPageResultJobView = z.object({
     code: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
     message: z.string().optional(),
     data: zPageResultJobView.optional()
+});
+
+export const zDict = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    name: z.string().optional(),
+    description: z.string().optional(),
+    createdAt: z.iso.datetime().optional(),
+    updatedAt: z.iso.datetime().optional()
+});
+
+export const zRListDict = z.object({
+    code: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
+    message: z.string().optional(),
+    data: z.array(zDict).optional()
+});
+
+export const zDictItemView = z.object({
+    label: z.string().optional(),
+    value: z.string().optional(),
+    sort: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional()
+});
+
+export const zRListDictItemView = z.object({
+    code: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
+    message: z.string().optional(),
+    data: z.array(zDictItemView).optional()
+});
+
+export const zDictDetail = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    dictId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    label: z.string().optional(),
+    value: z.string().optional(),
+    sort: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
+    createdAt: z.iso.datetime().optional(),
+    updatedAt: z.iso.datetime().optional()
+});
+
+export const zRListDictDetail = z.object({
+    code: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
+    message: z.string().optional(),
+    data: z.array(zDictDetail).optional()
 });
 
 export const zDeptTreeNode = z.object({
@@ -284,7 +417,7 @@ export const zRemovePath = z.object({
  */
 export const zRemoveResponse = zRVoid;
 
-export const zUpdate1Body = zRoleSaveRequest;
+export const zUpdate1Body = zTaskSaveRequest;
 
 export const zUpdate1Path = z.object({
     id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
@@ -294,6 +427,26 @@ export const zUpdate1Path = z.object({
  * OK
  */
 export const zUpdate1Response = zRVoid;
+
+export const zRemove1Path = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+});
+
+/**
+ * OK
+ */
+export const zRemove1Response = zRVoid;
+
+export const zUpdate2Body = zRoleSaveRequest;
+
+export const zUpdate2Path = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+});
+
+/**
+ * OK
+ */
+export const zUpdate2Response = zRVoid;
 
 export const zMenuIdsOfRolePath = z.object({
     id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
@@ -315,26 +468,6 @@ export const zSaveRoleMenusPath = z.object({
  */
 export const zSaveRoleMenusResponse = zRVoid;
 
-export const zRemove1Path = z.object({
-    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
-});
-
-/**
- * OK
- */
-export const zRemove1Response = zRVoid;
-
-export const zUpdate2Body = zJobSaveRequest;
-
-export const zUpdate2Path = z.object({
-    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
-});
-
-/**
- * OK
- */
-export const zUpdate2Response = zRVoid;
-
 export const zRemove2Path = z.object({
     id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
 });
@@ -344,7 +477,7 @@ export const zRemove2Path = z.object({
  */
 export const zRemove2Response = zRVoid;
 
-export const zUpdate3Body = zDeptSaveRequest;
+export const zUpdate3Body = zMenuSaveRequest;
 
 export const zUpdate3Path = z.object({
     id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
@@ -354,6 +487,88 @@ export const zUpdate3Path = z.object({
  * OK
  */
 export const zUpdate3Response = zRVoid;
+
+export const zRemove3Path = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+});
+
+/**
+ * OK
+ */
+export const zRemove3Response = zRVoid;
+
+export const zUpdate4Body = zJobSaveRequest;
+
+export const zUpdate4Path = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+});
+
+/**
+ * OK
+ */
+export const zUpdate4Response = zRVoid;
+
+export const zRemove4Path = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+});
+
+/**
+ * OK
+ */
+export const zRemove4Response = zRVoid;
+
+export const zUpdate5Body = zDictSaveRequest;
+
+export const zUpdate5Path = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+});
+
+/**
+ * OK
+ */
+export const zUpdate5Response = zRVoid;
+
+export const zRemoveDetailPath = z.object({
+    dictId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }),
+    detailId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+});
+
+/**
+ * OK
+ */
+export const zRemoveDetailResponse = zRVoid;
+
+export const zUpdateDetailBody = zDictDetailSaveRequest;
+
+export const zUpdateDetailPath = z.object({
+    dictId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }),
+    detailId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+});
+
+/**
+ * OK
+ */
+export const zUpdateDetailResponse = zRVoid;
+
+export const zRemove5Path = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+});
+
+/**
+ * OK
+ */
+export const zRemove5Response = zRVoid;
+
+export const zUpdate6Body = zDeptSaveRequest;
+
+export const zUpdate6Path = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+});
+
+/**
+ * OK
+ */
+export const zUpdate6Response = zRVoid;
 
 export const zRemoveBatchBody = z.array(z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }));
 
@@ -378,6 +593,45 @@ export const zCreateBody = zUserSaveRequest;
  */
 export const zCreateResponse = zRLong;
 
+/**
+ * OK
+ */
+export const zListResponse = zRListTaskView;
+
+export const zCreate1Body = zTaskSaveRequest;
+
+/**
+ * OK
+ */
+export const zCreate1Response = zRLong;
+
+export const zResumePath = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+});
+
+/**
+ * OK
+ */
+export const zResumeResponse = zRVoid;
+
+export const zPausePath = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+});
+
+/**
+ * OK
+ */
+export const zPauseResponse = zRVoid;
+
+export const zExecuteOncePath = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+});
+
+/**
+ * OK
+ */
+export const zExecuteOnceResponse = zRVoid;
+
 export const zPage1Query = z.object({
     page: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional().default(0),
     size: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional().default(10),
@@ -390,12 +644,19 @@ export const zPage1Query = z.object({
  */
 export const zPage1Response = zRPageResultRoleView;
 
-export const zCreate1Body = zRoleSaveRequest;
+export const zCreate2Body = zRoleSaveRequest;
 
 /**
  * OK
  */
-export const zCreate1Response = zRLong;
+export const zCreate2Response = zRLong;
+
+export const zCreate3Body = zMenuSaveRequest;
+
+/**
+ * OK
+ */
+export const zCreate3Response = zRLong;
 
 export const zPage2Query = z.object({
     page: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional().default(0),
@@ -409,19 +670,51 @@ export const zPage2Query = z.object({
  */
 export const zPage2Response = zRPageResultJobView;
 
-export const zCreate2Body = zJobSaveRequest;
+export const zCreate4Body = zJobSaveRequest;
 
 /**
  * OK
  */
-export const zCreate2Response = zRLong;
-
-export const zCreate3Body = zDeptSaveRequest;
+export const zCreate4Response = zRLong;
 
 /**
  * OK
  */
-export const zCreate3Response = zRLong;
+export const zList1Response = zRListDict;
+
+export const zCreate5Body = zDictSaveRequest;
+
+/**
+ * OK
+ */
+export const zCreate5Response = zRLong;
+
+export const zListDetailsPath = z.object({
+    dictId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+});
+
+/**
+ * OK
+ */
+export const zListDetailsResponse = zRListDictDetail;
+
+export const zCreateDetailBody = zDictDetailSaveRequest;
+
+export const zCreateDetailPath = z.object({
+    dictId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+});
+
+/**
+ * OK
+ */
+export const zCreateDetailResponse = zRLong;
+
+export const zCreate6Body = zDeptSaveRequest;
+
+/**
+ * OK
+ */
+export const zCreate6Response = zRLong;
 
 export const zRefreshHeaders = z.object({
     'X-Requested-With': z.string().optional()
@@ -455,6 +748,25 @@ export const zCheckBody = zCaptchaCheckRequest;
  */
 export const zCheckResponse = zRMapStringString;
 
+export const zLogsPath = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+});
+
+export const zLogsQuery = z.object({
+    page: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional().default(0),
+    size: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional().default(10)
+});
+
+/**
+ * OK
+ */
+export const zLogsResponse = zRPageResultTaskLog;
+
+/**
+ * OK
+ */
+export const zTargetsResponse = zRListTaskTargetView;
+
 /**
  * OK
  */
@@ -464,6 +776,15 @@ export const zOverviewResponse = zROverviewStats;
  * OK
  */
 export const zTreeResponse = zRListMenuNode;
+
+export const zByNamePath = z.object({
+    name: z.string()
+});
+
+/**
+ * OK
+ */
+export const zByNameResponse = zRListDictItemView;
 
 /**
  * OK
