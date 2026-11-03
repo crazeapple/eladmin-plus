@@ -77,7 +77,8 @@ ALTER TABLE `user`
     ADD CONSTRAINT fk_user_dept FOREIGN KEY (dept_id) REFERENCES dept (id);
 
 ALTER TABLE role
-    ADD COLUMN level      INT         NOT NULL DEFAULT 999 COMMENT '角色级别，越小权限越大' AFTER name,
+    ADD COLUMN description VARCHAR(255) NULL COMMENT '描述' AFTER name,
+    ADD COLUMN level      INT         NOT NULL DEFAULT 999 COMMENT '角色级别，越小权限越大' AFTER description,
     ADD COLUMN data_scope VARCHAR(16) NOT NULL DEFAULT 'ALL' COMMENT '数据范围：ALL 全部 / DEPT 本级含子级 / CUSTOM 自定义' AFTER level,
     ADD COLUMN enabled  TINYINT     NOT NULL DEFAULT 1 COMMENT '状态：1 启用 0 停用' AFTER data_scope;
 

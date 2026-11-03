@@ -18,6 +18,8 @@ public class Role {
 
     private String name;
 
+    private String description;
+
     /** 角色级别，越小权限越大 */
     private Integer level;
 
