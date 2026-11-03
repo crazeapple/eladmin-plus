@@ -24,3 +24,6 @@ playwright-report/
 
 # 备份产物
 backups/
+
+# E2E 会话态产物
+.auth/

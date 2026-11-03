@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
-// 首版生产栈冒烟：首页可达渲染、主题 / 语言切换、深链刷新（history 回退）、
-// 静态资产 gzip_static、无控制台错误。登录与各模块主链路随对应提案扩充进清单。
+// 生产栈冒烟（持会话组，登录守卫上线后页面均需会话）：首页渲染、主题 / 语言切换、
+// 深链刷新（history 回退）、无控制台错误。各模块主链路随对应提案扩充进清单。
 
 test('首页可达且渲染', async ({ page }) => {
   await page.goto('/')
@@ -33,16 +33,6 @@ test('深链刷新不 404（history 回退）', async ({ page }) => {
   await expect(page.locator('.layout')).toBeVisible()
   await page.reload()
   await expect(page.locator('[data-test="settings-trigger"]')).toBeVisible()
-})
-
-test('静态资产经 gzip_static 提供压缩', async ({ request }) => {
-  const home = await request.get('/')
-  const asset = (await home.text()).match(/\/assets\/[^"']+\.js/)?.[0]
-  expect(asset).toBeTruthy()
-
-  const compressed = await request.get(asset!, { headers: { 'Accept-Encoding': 'gzip' } })
-  expect(compressed.status()).toBe(200)
-  expect(compressed.headers()['content-encoding']).toBe('gzip')
 })
 
 test('无控制台错误', async ({ page }) => {
