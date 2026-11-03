@@ -35,6 +35,8 @@ dependencies {
     // 数据库迁移：Boot 4 模块化后自动配置在 spring-boot-flyway；MySQL 方言支持在独立构件（版本随 Boot BOM）
     implementation("org.springframework.boot:spring-boot-flyway")
     implementation("org.flywaydb:flyway-mysql")
+    // 定时任务：Boot 4 模块化后自动配置在 spring-boot-quartz；JDBC JobStore 表组由 Flyway 管理
+    implementation("org.springframework.boot:spring-boot-quartz")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-webmvc-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
