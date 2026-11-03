@@ -59,6 +59,18 @@ public class AuthContextService {
     }
 
     /** 按钮型权限点清单（绑菜单树，type=2） */
+    /** 当前请求的会话上下文（过滤链装配的 details）；无认证态抛 401 语义 */
+    public TokenService.SessionContext currentSession() {
+        var authentication = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication();
+        if (authentication != null
+                && authentication.getDetails() instanceof TokenService.SessionContext context) {
+            return context;
+        }
+        throw new com.eladminplus.common.error.BusinessException(
+                org.springframework.http.HttpStatus.UNAUTHORIZED, "error.auth.unauthorized");
+    }
+
     public List<String> permissionsOf(Long userId) {
         List<Long> roleIds = userRoleMapper
                 .selectList(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUserId, userId))
