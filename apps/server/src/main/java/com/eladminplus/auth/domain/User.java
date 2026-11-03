@@ -21,6 +21,18 @@ public class User {
 
     private String nickName;
 
+    private String email;
+
+    private String phone;
+
+    /** 性别：0 未知 1 男 2 女 */
+    private Integer gender;
+
+    /** 状态：1 启用 0 停用 */
+    private Integer enabled;
+
+    private Long deptId;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;

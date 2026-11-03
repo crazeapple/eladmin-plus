@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
  * MyBatis-Plus 装配：mapper 扫描与分页插件；自动填充等扩展随实体落地再引入。
  */
 @Configuration
-@MapperScan("com.eladminplus.**.mapper")
+@MapperScan({"com.eladminplus.**.mapper", "com.eladminplus.common.translation"})
 public class MybatisPlusConfig {
 
     @Bean
