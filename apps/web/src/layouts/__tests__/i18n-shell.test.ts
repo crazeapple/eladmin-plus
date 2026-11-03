@@ -1,3 +1,4 @@
+import { useMenusStore } from '@/stores/menus'
 import { VueQueryPlugin } from '@tanstack/vue-query'
 import { cleanup, render, within } from '@testing-library/vue'
 import { createPinia, setActivePinia } from 'pinia'
@@ -57,6 +58,8 @@ describe('壳层多语言', () => {
   it('语言切换后菜单、面包屑、页签文案即时随动', async () => {
     const pinia = createPinia()
     setActivePinia(pinia)
+    // 侧栏菜单来自后端菜单树（store），渲染前经全局桩 load 就位
+    await useMenusStore().load()
     const router = createRouter({ history: createMemoryHistory(), routes })
     await router.push('/demo/cached')
     await router.isReady()

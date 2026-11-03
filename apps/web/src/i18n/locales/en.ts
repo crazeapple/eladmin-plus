@@ -86,6 +86,11 @@ export default {
     home: 'Home',
     demoCached: 'Demo · Cached',
     demoNoCache: 'Demo · Not cached',
+    system: 'System',
+    systemUsers: 'Users',
+    systemRoles: 'Roles',
+    systemDepts: 'Depts',
+    systemJobs: 'Jobs',
     notFound: '404',
   },
 }

@@ -7,10 +7,9 @@ import { useRoute, useRouter } from 'vue-router'
 
 import AppIcon from '@/components/AppIcon.vue'
 import SettingsDrawer from '@/components/settings/SettingsDrawer.vue'
-import { routes } from '@/router'
 import { logout } from '@/api/auth'
 import { broadcastLogout } from '@/api/auth-sync'
-import { useMenusStore } from '@/stores/menus'
+import { useMenusStore, type MenuNode } from '@/stores/menus'
 import { useSessionStore } from '@/stores/session'
 import { useTagsViewStore } from '@/stores/tags-view'
 
@@ -57,17 +56,82 @@ async function onUserCommand(command: string | number | object) {
   await router.push('/login')
 }
 
-const menuItems = computed(() =>
-  (routes[0].children ?? []).map((child) => ({
-    path: `/${(child.path as string).replace(/^\//, '')}`,
-    title: child.meta?.title ?? '',
-    icon: child.meta?.icon,
-  })),
-)
+/**
+ * 菜单 icon 前端映射：menu 表无 icon 列（后端菜单是唯一真相），展示图标按
+ * i18n key 在前端映射；P-013 菜单管理引入 icon 载体后切后端下发。
+ */
+const ICON_BY_I18N_KEY: Record<string, string> = {
+  'routes.home': 'index',
+  'routes.demoCached': 'tab',
+  'routes.demoNoCache': 'edit',
+  'routes.system': 'system',
+  'routes.systemUsers': 'user',
+  'routes.systemRoles': 'role',
+  'routes.systemDepts': 'dept',
+  'routes.systemJobs': 'people',
+}
 
-// 面包屑按静态路由 matched 生成（title 存 i18n key，渲染处 t()），首页常驻首项
+/** 侧栏节点：目录（type=0）带子级，页面（type=1）可点；按钮（type=2）不进侧栏 */
+interface NavNode {
+  key: string
+  title: string
+  icon?: string
+  path?: string
+  children?: NavNode[]
+}
+
+const navNodes = computed<NavNode[]>(() => {
+  const toNode = (menu: MenuNode): NavNode | null => {
+    if (menu.type !== 0 && menu.type !== 1) {
+      return null
+    }
+    const node: NavNode = {
+      key: `${menu.type}:${menu.i18nKey ?? menu.id}`,
+      title: menu.i18nKey ?? '',
+      icon: ICON_BY_I18N_KEY[menu.i18nKey ?? ''],
+    }
+    if (menu.type === 1) {
+      if (!menu.componentPathKey) {
+        return null
+      }
+      node.path = `/${menu.componentPathKey}`
+    } else {
+      node.children = (menu.children ?? [])
+        .map(toNode)
+        .filter((child): child is NavNode => child !== null)
+      if (!node.children.length) {
+        return null
+      }
+    }
+    return node
+  }
+  return menusStore.menus.map(toNode).filter((node): node is NavNode => node !== null)
+})
+
+/**
+ * 面包屑：菜单树路径链（目录 → 页面）优先；未在树中的页面回退静态路由 matched。
+ * 首页常驻首项，目录级无路由为纯文本。
+ */
 const breadcrumbItems = computed(() => {
-  const items = [{ title: 'routes.home', path: '/home' }]
+  const items: { title: string; path?: string }[] = [{ title: 'routes.home', path: '/home' }]
+  const chain: { title: string; path?: string }[] = []
+  const walk = (nodes: MenuNode[], trail: { title: string }[]): boolean => {
+    for (const node of nodes) {
+      const step = { title: node.i18nKey ?? '' }
+      if (node.type === 1 && node.componentPathKey && `/${node.componentPathKey}` === route.path) {
+        chain.push(...trail, { title: step.title, path: `/${node.componentPathKey}` })
+        return true
+      }
+      if (node.children?.length && walk(node.children, [...trail, step])) {
+        return true
+      }
+    }
+    return false
+  }
+  if (walk(menusStore.menus, [])) {
+    items.push(...chain.filter((seg) => seg.path !== '/home'))
+    return items
+  }
   for (const record of route.matched) {
     if (record.meta?.title && record.path !== '/' && record.path !== '/home') {
       items.push({ title: record.meta.title, path: record.path })
@@ -117,10 +181,22 @@ function onMenuSelect() {
         class="layout__menu"
         @select="onMenuSelect"
       >
-        <el-menu-item v-for="item in menuItems" :key="item.path" :index="item.path">
-          <app-icon v-if="item.icon" :name="item.icon" />
-          <template #title>{{ t(item.title) }}</template>
-        </el-menu-item>
+        <template v-for="item in navNodes" :key="item.key">
+          <el-sub-menu v-if="item.children" :index="item.key">
+            <template #title>
+              <app-icon v-if="item.icon" :name="item.icon" />
+              <span>{{ t(item.title) }}</span>
+            </template>
+            <el-menu-item v-for="child in item.children" :key="child.key" :index="child.path!">
+              <app-icon v-if="child.icon" :name="child.icon" />
+              <template #title>{{ t(child.title) }}</template>
+            </el-menu-item>
+          </el-sub-menu>
+          <el-menu-item v-else :index="item.path!">
+            <app-icon v-if="item.icon" :name="item.icon" />
+            <template #title>{{ t(item.title) }}</template>
+          </el-menu-item>
+        </template>
       </el-menu>
     </aside>
     <el-container class="layout__body">

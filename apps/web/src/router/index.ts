@@ -17,6 +17,7 @@ declare module 'vue-router' {
 export const routes: RouteRecordRaw[] = [
   {
     path: '/',
+    name: 'Layout',
     component: Layout,
     redirect: '/home',
     children: [

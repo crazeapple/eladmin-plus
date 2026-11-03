@@ -1,3 +1,4 @@
+import { useMenusStore } from '@/stores/menus'
 import { VueQueryPlugin } from '@tanstack/vue-query'
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/vue'
 import { createPinia, setActivePinia } from 'pinia'
@@ -38,6 +39,8 @@ afterEach(() => {
 async function renderApp(path = '/home') {
   const pinia = createPinia()
   setActivePinia(pinia)
+  // 侧栏菜单来自后端菜单树（store），渲染前经全局桩 load 就位
+  await useMenusStore().load()
   const router = createRouter({ history: createMemoryHistory(), routes })
   await router.push(path)
   await router.isReady()

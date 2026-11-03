@@ -5,7 +5,7 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { buildI18n } from '@/i18n'
-import Layout from '@/layouts/Layout.vue'
+import App from '@/App.vue'
 import { routes } from '@/router'
 
 beforeEach(() => {
@@ -39,7 +39,7 @@ async function renderLayout(path = '/home') {
   const router = createRouter({ history: createMemoryHistory(), routes })
   await router.push(path)
   await router.isReady()
-  render(Layout, {
+  render(App, {
     global: { plugins: [createPinia(), router, buildI18n('zh-CN'), VueQueryPlugin] },
   })
 }

@@ -85,6 +85,11 @@ export default {
     home: '首页',
     demoCached: '演示·缓存',
     demoNoCache: '演示·不缓存',
+    system: '系统管理',
+    systemUsers: '用户管理',
+    systemRoles: '角色管理',
+    systemDepts: '部门管理',
+    systemJobs: '岗位管理',
     notFound: '404',
   },
 }
