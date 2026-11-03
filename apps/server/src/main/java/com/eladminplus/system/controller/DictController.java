@@ -4,6 +4,7 @@ import com.eladminplus.common.R;
 import com.eladminplus.system.domain.Dict;
 import com.eladminplus.system.domain.DictDetail;
 import com.eladminplus.system.dto.DictDetailSaveRequest;
+import com.eladminplus.system.dto.DictItemView;
 import com.eladminplus.system.dto.DictSaveRequest;
 import com.eladminplus.system.service.DictService;
 import jakarta.validation.Valid;
@@ -59,6 +60,12 @@ public class DictController {
     @PreAuthorize("hasAuthority('system:dict:list') || hasAuthority('ROLE_ROOT')")
     public R<List<DictDetail>> listDetails(@PathVariable Long dictId) {
         return R.ok(dictService.listDetails(dictId));
+    }
+
+    /** 消费端点：按字典名取明细数组（认证即可，useDict 全应用消费，不挂字典管理权限点） */
+    @GetMapping("/{name}")
+    public R<List<DictItemView>> byName(@PathVariable String name) {
+        return R.ok(dictService.byName(name));
     }
 
     @PostMapping("/{dictId}/details")

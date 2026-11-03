@@ -5,6 +5,7 @@ import com.eladminplus.common.error.BusinessException;
 import com.eladminplus.system.domain.Dict;
 import com.eladminplus.system.domain.DictDetail;
 import com.eladminplus.system.dto.DictDetailSaveRequest;
+import com.eladminplus.system.dto.DictItemView;
 import com.eladminplus.system.dto.DictSaveRequest;
 import com.eladminplus.system.mapper.DictDetailMapper;
 import com.eladminplus.system.mapper.DictMapper;
@@ -74,9 +75,24 @@ public class DictService {
         dictMapper.deleteById(id);
     }
 
-    /** 字典明细全量（管理端编辑与消费端点共用；sort 升序、id 兜底稳定序） */
+    /** 字典明细全量（管理端编辑；sort 升序、id 兜底稳定序） */
     public List<DictDetail> listDetails(Long dictId) {
         requireDict(dictId);
+        return detailsOf(dictId);
+    }
+
+    /** 消费端点：按字典名取明细数组（label JSON 原样下发；字典不存在 404） */
+    public List<DictItemView> byName(String name) {
+        Dict dict = dictMapper.selectOne(Wrappers.<Dict>lambdaQuery().eq(Dict::getName, name));
+        if (dict == null) {
+            throw new BusinessException(HttpStatus.NOT_FOUND, "error.system.not-found");
+        }
+        return detailsOf(dict.getId()).stream()
+                .map(detail -> new DictItemView(detail.getLabel(), detail.getValue(), detail.getSort()))
+                .toList();
+    }
+
+    private List<DictDetail> detailsOf(Long dictId) {
         return dictDetailMapper.selectList(Wrappers.<DictDetail>lambdaQuery()
                 .eq(DictDetail::getDictId, dictId)
                 .orderByAsc(DictDetail::getSort)

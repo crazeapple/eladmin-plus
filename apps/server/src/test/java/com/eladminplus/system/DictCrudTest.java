@@ -212,4 +212,37 @@ class DictCrudTest {
                 .andExpect(status().isOk());
         assertThat(listDetails(dictId).size()).isZero();
     }
+
+    @Test
+    void 消费端点按名取明细数组sort序与label原样() throws Exception {
+        Long dictId = createDict(TEST_NAME_PREFIX + "consume", null);
+        createDetail(dictId, LABEL_ZH_FIRST, "1", 2);
+        createDetail(dictId, "{\"en\":\"Off\",\"zh-CN\":\"关\"}", "0", 1);
+
+        String body = mockMvc
+                .perform(get("/dicts/{name}", TEST_NAME_PREFIX + "consume")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andReturn()
+                .getResponse()
+                .getContentAsString(StandardCharsets.UTF_8);
+        JsonNode items = objectMapper.readTree(body).get("data");
+        assertThat(items.size()).isEqualTo(2);
+        // sort 升序；消费视图只含 label / value / sort，label 为 JSON 文本原样
+        assertThat(items.get(0).get("value").asText()).isEqualTo("0");
+        assertThat(items.get(0).get("label").asText()).isEqualTo("{\"en\":\"Off\",\"zh-CN\":\"关\"}");
+        assertThat(items.get(0).get("sort").asInt()).isEqualTo(1);
+        assertThat(items.get(1).get("label").asText()).isEqualTo(LABEL_ZH_FIRST);
+        assertThat(items.get(0).has("dictId")).isFalse();
+        assertThat(items.get(0).has("createdAt")).isFalse();
+    }
+
+    @Test
+    void 消费端点不存在字典404() throws Exception {
+        mockMvc.perform(get("/dicts/{name}", TEST_NAME_PREFIX + "missing")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("数据不存在或已被删除"));
+    }
 }
