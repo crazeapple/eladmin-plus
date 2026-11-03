@@ -77,6 +77,24 @@ public class DeptService {
         return dept.getId();
     }
 
+    /** 部门及其全部子级的 id 集合（含自身；数据权限 DEPT 档与部门过滤共用；全量加载内存递归） */
+    public List<Long> selfAndDescendantIds(Long deptId) {
+        List<Dept> all = deptMapper.selectList(Wrappers.emptyWrapper());
+        List<Long> result = new ArrayList<>();
+        result.add(deptId);
+        collectSubtree(all, deptId, result);
+        return result;
+    }
+
+    private void collectSubtree(List<Dept> all, Long parentId, List<Long> result) {
+        for (Dept dept : all) {
+            if (Objects.equals(dept.getParentId(), parentId)) {
+                result.add(dept.getId());
+                collectSubtree(all, dept.getId(), result);
+            }
+        }
+    }
+
     private boolean subtreeContains(Long ancestorId, Long targetId) {
         if (ancestorId.equals(targetId)) {
             return true;
