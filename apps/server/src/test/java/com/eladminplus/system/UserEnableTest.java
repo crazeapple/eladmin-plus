@@ -10,8 +10,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.eladminplus.auth.domain.User;
 import com.eladminplus.auth.mapper.UserMapper;
+import com.eladminplus.auth.LoginTestSupport;
 import com.eladminplus.auth.session.TokenService;
 import com.eladminplus.auth.session.TokenService.TokenPair;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import com.eladminplus.system.dto.UserSaveRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -39,6 +41,8 @@ class UserEnableTest {
     private TokenService tokenService;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private StringRedisTemplate redis;
 
     private String accessToken;
     private Long adminId;
@@ -72,11 +76,7 @@ class UserEnableTest {
     }
 
     private String loginOf(String username) throws Exception {
-        MvcResult result = mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(
-                                java.util.Map.of("username", username, "password", "123456"))))
-                .andReturn();
+        MvcResult result = LoginTestSupport.fullLogin(mockMvc, redis, username, "123456");
         return result.getResponse().getContentAsString(StandardCharsets.UTF_8);
     }
 

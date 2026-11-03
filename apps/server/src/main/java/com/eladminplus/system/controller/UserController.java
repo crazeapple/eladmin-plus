@@ -60,6 +60,13 @@ public class UserController {
         return R.ok();
     }
 
+    @PutMapping("/password")
+    @PreAuthorize("hasAuthority('system:user:resetPwd') || hasAuthority('ROLE_ROOT')")
+    public R<Void> resetPasswords(@RequestBody List<Long> ids) {
+        userService.resetPasswords(ids);
+        return R.ok();
+    }
+
     @PutMapping("/{id}/enabled/{value}")
     @PreAuthorize("hasAuthority('system:user:edit') || hasAuthority('ROLE_ROOT')")
     public R<Void> setEnabled(@PathVariable Long id, @PathVariable int value) {

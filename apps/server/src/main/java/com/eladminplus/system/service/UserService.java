@@ -306,6 +306,22 @@ public class UserService {
         }
     }
 
+    /**
+     * 批量重置为默认密码（与种子一致 123456，BCrypt 同强度）；
+     * 凭据变更即强退该批用户的既有会话（泄露处置语义）。
+     */
+    @Transactional
+    public void resetPasswords(List<Long> ids) {
+        String encoded = passwordEncoder.encode("123456");
+        for (Long id : ids) {
+            User update = new User();
+            update.setId(id);
+            update.setPassword(encoded);
+            userMapper.updateById(update);
+            tokenService.revokeAllForUser(id);
+        }
+    }
+
     /** 批量删除：自我保护（不能删自己）与 admin 保护；级联清理角色与岗位关联 */
     @Transactional
     public void removeBatch(List<Long> ids) {
