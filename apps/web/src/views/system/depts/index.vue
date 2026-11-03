@@ -212,9 +212,9 @@ const rows = computed(() => tree.value ?? [])
       data-test="depts-dialog"
     >
       <AutoForm
+        v-model="model"
         :schema="deptSchema"
         :fields="fields"
-        v-model="model"
         :submitting="submitting"
         :submit-text="t('depts.submit')"
         @submit="onSubmit"

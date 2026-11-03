@@ -252,9 +252,9 @@ const total = computed(() => data.value?.total ?? 0)
       data-test="jobs-dialog"
     >
       <AutoForm
+        v-model="model"
         :schema="jobSchema"
         :fields="fields"
-        v-model="model"
         :submitting="submitting"
         :submit-text="t('jobs.submit')"
         @submit="onSubmit"
