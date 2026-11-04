@@ -10,8 +10,11 @@ test('异常日志页冒烟：可达、空态与筛选交互', async ({ page }) 
   await expect(page.locator('[data-test="ex-logs-page"]')).toBeVisible()
 
   const rows = page.locator('[data-test="ex-logs-table"] tbody tr')
+  const empty = page.locator('[data-test="admin-table-empty"]')
+  // 先等表格出结果（数据行或空态占位二者其一可见）再分支——立即 count 会撞上数据加载竞态
+  await expect(rows.or(empty).first()).toBeVisible()
   if ((await rows.count()) === 0) {
-    await expect(page.locator('[data-test="admin-table-empty"]')).toBeVisible()
+    await expect(empty).toBeVisible()
   }
 
   // 筛选表单交互：消息模糊回车应用、重置回全量，全程列表在册

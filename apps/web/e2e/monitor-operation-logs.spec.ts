@@ -9,10 +9,12 @@ test('操作日志页冒烟：可达、空态与筛选交互', async ({ page }) 
   await gotoWithSession(page, '/monitor/operation-logs')
   await expect(page.locator('[data-test="op-logs-page"]')).toBeVisible()
 
-  // 无 @Log 数据源为空态；万一存在历史行也不炸（两态皆可）
+  // 无 @Log 数据源为空态；万一存在历史行也不炸（两态皆可）——先等其一可见再分支，消加载竞态
   const rows = page.locator('[data-test="op-logs-table"] tbody tr')
+  const empty = page.locator('[data-test="admin-table-empty"]')
+  await expect(rows.or(empty).first()).toBeVisible()
   if ((await rows.count()) === 0) {
-    await expect(page.locator('[data-test="admin-table-empty"]')).toBeVisible()
+    await expect(empty).toBeVisible()
   }
 
   // 筛选表单交互：操作人回车应用、重置回全量，全程列表在册
