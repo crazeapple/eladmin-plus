@@ -11,6 +11,11 @@ export const FALLBACK_LOCALE: AppLocale = 'zh-CN'
 
 export const LOCALE_MESSAGES = { 'zh-CN': zhCN, en } as const
 
+/** 语言注册表清单（label 动态语言行按它遍历生成；语言增减只动语言包与本注册表） */
+export function registeredLocales(): AppLocale[] {
+  return Object.keys(LOCALE_MESSAGES) as AppLocale[]
+}
+
 /** 构建应用 i18n 实例（main 与测试共用，locale 传偏好解析值；类型按 legacy: false 推断） */
 export function buildI18n(locale: AppLocale) {
   return createI18n({
