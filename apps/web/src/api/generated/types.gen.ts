@@ -261,6 +261,75 @@ export type RListLong = {
     data?: Array<number>;
 };
 
+export type OnlineUserView = {
+    userId?: number;
+    nickName?: string;
+    username?: string;
+    ip?: string;
+    loginAt?: string;
+    browser?: string;
+};
+
+export type RListOnlineUserView = {
+    code?: number;
+    message?: string;
+    data?: Array<OnlineUserView>;
+};
+
+export type CpuView = {
+    usedPercent?: number;
+    physicalCores?: number;
+    logicalCores?: number;
+};
+
+export type FileStoreView = {
+    mount?: string;
+    totalBytes?: number;
+    usableBytes?: number;
+};
+
+export type JvmView = {
+    heapMaxBytes?: number;
+    heapUsedBytes?: number;
+    heapCommittedBytes?: number;
+    threadCount?: number;
+};
+
+export type MemoryView = {
+    totalBytes?: number;
+    usedBytes?: number;
+    freeBytes?: number;
+    usedPercent?: number;
+};
+
+export type PoolView = {
+    active?: number;
+    idle?: number;
+    pending?: number;
+    max?: number;
+    allocated?: number;
+};
+
+export type RServerMonitorView = {
+    code?: number;
+    message?: string;
+    data?: ServerMonitorView;
+};
+
+export type ServerMonitorView = {
+    cpu?: CpuView;
+    memory?: MemoryView;
+    swap?: SwapView;
+    disks?: Array<FileStoreView>;
+    jvm?: JvmView;
+    pool?: PoolView;
+};
+
+export type SwapView = {
+    totalBytes?: number;
+    usedBytes?: number;
+};
+
 export type MenuNode = {
     id?: number;
     parentId?: number;
@@ -279,6 +348,74 @@ export type RListMenuNode = {
     code?: number;
     message?: string;
     data?: Array<MenuNode>;
+};
+
+export type OperationLogPageQuery = {
+    page?: number;
+    size?: number;
+    username?: string;
+    ip?: string;
+    description?: string;
+    startTime?: string;
+    endTime?: string;
+};
+
+export type OperationLog = {
+    id?: number;
+    username?: string;
+    ip?: string;
+    description?: string;
+    elapsedMs?: number;
+    requestParam?: string;
+    createdAt?: string;
+    updatedAt?: string;
+};
+
+export type PageResultOperationLog = {
+    content?: Array<OperationLog>;
+    total?: number;
+    page?: number;
+    size?: number;
+};
+
+export type RPageResultOperationLog = {
+    code?: number;
+    message?: string;
+    data?: PageResultOperationLog;
+};
+
+export type ExceptionLogPageQuery = {
+    page?: number;
+    size?: number;
+    username?: string;
+    ip?: string;
+    message?: string;
+    startTime?: string;
+    endTime?: string;
+};
+
+export type ExceptionLog = {
+    id?: number;
+    username?: string;
+    ip?: string;
+    name?: string;
+    message?: string;
+    stackTrace?: string;
+    createdAt?: string;
+    updatedAt?: string;
+};
+
+export type PageResultExceptionLog = {
+    content?: Array<ExceptionLog>;
+    total?: number;
+    page?: number;
+    size?: number;
+};
+
+export type RPageResultExceptionLog = {
+    code?: number;
+    message?: string;
+    data?: PageResultExceptionLog;
 };
 
 export type JobView = {
@@ -1162,6 +1299,38 @@ export type OverviewResponses = {
 
 export type OverviewResponse = OverviewResponses[keyof OverviewResponses];
 
+export type List2Data = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/online';
+};
+
+export type List2Responses = {
+    /**
+     * OK
+     */
+    200: RListOnlineUserView;
+};
+
+export type List2Response = List2Responses[keyof List2Responses];
+
+export type ServerData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/monitor/server';
+};
+
+export type ServerResponses = {
+    /**
+     * OK
+     */
+    200: RServerMonitorView;
+};
+
+export type ServerResponse = ServerResponses[keyof ServerResponses];
+
 export type TreeData = {
     body?: never;
     path?: never;
@@ -1177,6 +1346,110 @@ export type TreeResponses = {
 };
 
 export type TreeResponse = TreeResponses[keyof TreeResponses];
+
+export type RemoveBatch1Data = {
+    body: Array<number>;
+    path?: never;
+    query?: never;
+    url: '/logs/operations';
+};
+
+export type RemoveBatch1Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type RemoveBatch1Response = RemoveBatch1Responses[keyof RemoveBatch1Responses];
+
+export type Page3Data = {
+    body?: never;
+    path?: never;
+    query: {
+        query: OperationLogPageQuery;
+    };
+    url: '/logs/operations';
+};
+
+export type Page3Responses = {
+    /**
+     * OK
+     */
+    200: RPageResultOperationLog;
+};
+
+export type Page3Response = Page3Responses[keyof Page3Responses];
+
+export type ExportData = {
+    body?: never;
+    path?: never;
+    query: {
+        query: OperationLogPageQuery;
+    };
+    url: '/logs/operations/export';
+};
+
+export type ExportResponses = {
+    /**
+     * OK
+     */
+    200: string;
+};
+
+export type ExportResponse = ExportResponses[keyof ExportResponses];
+
+export type RemoveBatch2Data = {
+    body: Array<number>;
+    path?: never;
+    query?: never;
+    url: '/logs/exceptions';
+};
+
+export type RemoveBatch2Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type RemoveBatch2Response = RemoveBatch2Responses[keyof RemoveBatch2Responses];
+
+export type Page4Data = {
+    body?: never;
+    path?: never;
+    query: {
+        query: ExceptionLogPageQuery;
+    };
+    url: '/logs/exceptions';
+};
+
+export type Page4Responses = {
+    /**
+     * OK
+     */
+    200: RPageResultExceptionLog;
+};
+
+export type Page4Response = Page4Responses[keyof Page4Responses];
+
+export type Export1Data = {
+    body?: never;
+    path?: never;
+    query: {
+        query: ExceptionLogPageQuery;
+    };
+    url: '/logs/exceptions/export';
+};
+
+export type Export1Responses = {
+    /**
+     * OK
+     */
+    200: string;
+};
+
+export type Export1Response = Export1Responses[keyof Export1Responses];
 
 export type ByNameData = {
     body?: never;
@@ -1259,3 +1532,89 @@ export type CaptchaResponses = {
 };
 
 export type CaptchaResponse = CaptchaResponses[keyof CaptchaResponses];
+
+export type KickData = {
+    body?: never;
+    path: {
+        userId: number;
+    };
+    query?: never;
+    url: '/online/{userId}';
+};
+
+export type KickResponses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type KickResponse = KickResponses[keyof KickResponses];
+
+export type Remove6Data = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/logs/operations/{id}';
+};
+
+export type Remove6Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type Remove6Response = Remove6Responses[keyof Remove6Responses];
+
+export type ClearData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/logs/operations/all';
+};
+
+export type ClearResponses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type ClearResponse = ClearResponses[keyof ClearResponses];
+
+export type Remove7Data = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/logs/exceptions/{id}';
+};
+
+export type Remove7Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type Remove7Response = Remove7Responses[keyof Remove7Responses];
+
+export type Clear1Data = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/logs/exceptions/all';
+};
+
+export type Clear1Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type Clear1Response = Clear1Responses[keyof Clear1Responses];
