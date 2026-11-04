@@ -119,6 +119,15 @@ class TaskWhitelistTest {
     }
 
     @Test
+    void 演示任务Bean在册清单非空() throws Exception {
+        JsonNode targets = targets();
+        // 演示 Bean 保证生产白名单非空（任务表单下拉与主链路前置）
+        JsonNode sampleJob = findTarget(targets, "sampleJob", "run");
+        assertThat(sampleJob).isNotNull();
+        assertThat(sampleJob.get("param").asText()).isEqualTo("演示参数，原样打印到日志");
+    }
+
+    @Test
     void 无list权限403() throws Exception {
         User admin = userMapper.selectOne(Wrappers.<User>lambdaQuery().eq(User::getUsername, "admin"));
         String plainToken = tokenService.issue(admin, List.of(), List.of()).accessToken();

@@ -48,10 +48,10 @@ class MeTest extends RefreshLogoutTest {
         assertThat(menus.get(2).get("componentPathKey").asText()).isEqualTo("demo/no-cache");
         assertThat(menus.get(2).get("noCache").asBoolean()).isTrue();
         assertThat(menus.get(0).get("sort").asInt()).isLessThan(menus.get(2).get("sort").asInt());
-        // 末位为系统管理目录（type=0），四个子菜单挂其下
+        // 末位为系统管理目录（type=0），七个子菜单挂其下（V4 身份域四页 + V6 配置域三页）
         assertThat(menus.get(3).get("type").asInt()).isEqualTo(0);
         assertThat(menus.get(3).get("i18nKey").asText()).isEqualTo("routes.system");
-        assertThat(menus.get(3).get("children").size()).isEqualTo(4);
+        assertThat(menus.get(3).get("children").size()).isEqualTo(7);
     }
 
     @Test
