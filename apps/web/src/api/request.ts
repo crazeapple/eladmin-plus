@@ -15,8 +15,16 @@ export interface RequestOptions {
   body?: unknown
   /** 附加请求头（如 Accept-Language 指定语言取展示名）；与注入头合并 */
   headers?: Record<string, string>
+  /** 响应解析形态：blob 走文件下载（download.ts 消费），缺省 json */
+  parseAs?: 'blob'
   /** 401 重放标记：重放请求不再触发刷新（防循环），外部勿传 */
   authReplayed?: boolean
+}
+
+/** 请求全量结果：data 为 envelope 解包后负载，response 供读响应头（文件下载取文件名） */
+export interface RequestResult {
+  data: unknown
+  response: Response
 }
 
 let refreshing: Promise<string | null> | null = null
@@ -41,7 +49,8 @@ function ensureFreshToken(): Promise<string | null> {
   return refreshing
 }
 
-export async function request<T>(options: RequestOptions): Promise<T> {
+/** 认证业务请求一条通道（含 401 单飞刷新重放）：request 取 data，文件下载兼取 response */
+export async function send(options: RequestOptions): Promise<RequestResult> {
   const session = useSessionStore()
   const token = session.accessToken
   const headers: Record<string, string> = { 'X-Requested-With': 'XMLHttpRequest' }
@@ -49,14 +58,15 @@ export async function request<T>(options: RequestOptions): Promise<T> {
     headers.Authorization = `Bearer ${token}`
   }
   try {
-    const { data } = await client.request({
+    const { data, response } = await client.request({
       url: options.url,
       method: options.method ?? 'GET',
       body: options.body,
       headers: { ...headers, ...options.headers },
+      parseAs: options.parseAs,
       throwOnError: true,
     })
-    return data as T
+    return { data, response }
   } catch (error) {
     // 401：刷新后重放一次（防循环由 authReplayed 标记保证）
     if (!(error instanceof ApiError) || error.code !== 401 || options.authReplayed) {
@@ -66,15 +76,21 @@ export async function request<T>(options: RequestOptions): Promise<T> {
     if (!newToken) {
       throw error
     }
-    const { data } = await client.request({
+    const { data, response } = await client.request({
       url: options.url,
       method: options.method ?? 'GET',
       body: options.body,
       headers: { ...headers, Authorization: `Bearer ${newToken}` },
+      parseAs: options.parseAs,
       throwOnError: true,
     })
-    return data as T
+    return { data, response }
   }
+}
+
+export async function request<T>(options: RequestOptions): Promise<T> {
+  const { data } = await send(options)
+  return data as T
 }
 
 /** 供测试与手动重放使用的重放版包装 */
