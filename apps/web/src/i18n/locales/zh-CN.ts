@@ -322,6 +322,7 @@ export default {
     sort: '排序',
     detailTitle: '字典明细「{name}」',
     detailDeleteConfirm: '确认删除键值「{value}」？',
+    close: '关闭',
     submit: '保存',
     saveSuccess: '保存成功',
     saveFailed: '保存失败',

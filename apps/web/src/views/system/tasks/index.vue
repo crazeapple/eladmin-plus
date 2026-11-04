@@ -407,20 +407,21 @@ function refreshLogs() {
           <el-input v-model="model.name" data-test="tasks-name" />
         </el-form-item>
         <el-form-item :label="t('tasks.target')" data-field="target">
-          <el-select
-            v-model="model.target"
-            :disabled="!targetOptions.length"
-            :placeholder="t('tasks.noTargets')"
-            :teleported="false"
-            data-test="tasks-target"
-          >
-            <el-option
-              v-for="option in targetOptions"
-              :key="option.value"
-              :value="option.value"
-              :label="option.label"
-            />
-          </el-select>
+          <span data-test="tasks-target">
+            <el-select
+              v-model="model.target"
+              :disabled="!targetOptions.length"
+              :placeholder="t('tasks.noTargets')"
+              :teleported="false"
+            >
+              <el-option
+                v-for="option in targetOptions"
+                :key="option.value"
+                :value="option.value"
+                :label="option.label"
+              />
+            </el-select>
+          </span>
         </el-form-item>
         <el-form-item :label="t('tasks.param')" data-field="param">
           <el-input
@@ -434,21 +435,22 @@ function refreshLogs() {
           <span v-if="cronHintText" class="tasks__cron-hint" data-test="tasks-cron-hint">
             {{ cronHintText }}
           </span>
-          <el-select
-            v-model="preset"
-            clearable
-            :placeholder="t('tasks.cronPresetPlaceholder')"
-            :teleported="false"
-            data-test="tasks-cron-presets"
-            @change="onPresetChange"
-          >
-            <el-option
-              v-for="item in CRON_PRESETS"
-              :key="item.expression"
-              :value="item.expression"
-              :label="`${t(item.labelKey)}（${item.expression}）`"
-            />
-          </el-select>
+          <span data-test="tasks-cron-presets">
+            <el-select
+              v-model="preset"
+              clearable
+              :placeholder="t('tasks.cronPresetPlaceholder')"
+              :teleported="false"
+              @change="onPresetChange"
+            >
+              <el-option
+                v-for="item in CRON_PRESETS"
+                :key="item.expression"
+                :value="item.expression"
+                :label="`${t(item.labelKey)}（${item.expression}）`"
+              />
+            </el-select>
+          </span>
         </el-form-item>
         <el-form-item :label="t('tasks.status')" data-field="status">
           <el-radio-group v-model="model.status">

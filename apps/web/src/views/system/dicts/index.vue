@@ -340,6 +340,11 @@ function openDetails(row: Dict) {
         :loading="detailsLoading"
         data-test="dicts-detail-table"
       />
+      <template #footer>
+        <el-button data-test="dicts-detail-close" @click="detailDialogVisible = false">
+          {{ t('dicts.close') }}
+        </el-button>
+      </template>
     </el-dialog>
 
     <el-dialog

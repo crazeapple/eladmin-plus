@@ -324,6 +324,7 @@ export default {
     sort: 'Sort',
     detailTitle: 'Details of "{name}"',
     detailDeleteConfirm: 'Delete value "{value}"?',
+    close: 'Close',
     submit: 'Save',
     saveSuccess: 'Saved',
     saveFailed: 'Save failed',

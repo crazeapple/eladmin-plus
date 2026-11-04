@@ -293,15 +293,16 @@ async function onRemove(row: MenuNode) {
         </el-form-item>
 
         <el-form-item v-if="visible('parentId')" :label="t('menus.parent')" data-field="parentId">
-          <el-tree-select
-            v-model="model.parentId"
-            :data="parentOptions"
-            node-key="id"
-            check-strictly
-            clearable
-            :props="{ label: 'label', children: 'children' }"
-            data-test="menus-parent"
-          />
+          <span data-test="menus-parent">
+            <el-tree-select
+              v-model="model.parentId"
+              :data="parentOptions"
+              node-key="id"
+              check-strictly
+              clearable
+              :props="{ label: 'label', children: 'children' }"
+            />
+          </span>
         </el-form-item>
 
         <el-form-item
@@ -310,19 +311,20 @@ async function onRemove(row: MenuNode) {
           prop="i18nKey"
           data-field="i18nKey"
         >
-          <el-select
-            v-model="model.i18nKey"
-            filterable
-            :placeholder="t('menus.i18nKeyPlaceholder')"
-            data-test="menus-i18nkey"
-          >
-            <el-option
-              v-for="option in i18nOptions"
-              :key="option.value"
-              :value="option.value"
-              :label="option.label"
-            />
-          </el-select>
+          <span data-test="menus-i18nkey">
+            <el-select
+              v-model="model.i18nKey"
+              filterable
+              :placeholder="t('menus.i18nKeyPlaceholder')"
+            >
+              <el-option
+                v-for="option in i18nOptions"
+                :key="option.value"
+                :value="option.value"
+                :label="option.label"
+              />
+            </el-select>
+          </span>
         </el-form-item>
 
         <el-form-item
@@ -331,19 +333,20 @@ async function onRemove(row: MenuNode) {
           prop="componentPathKey"
           data-field="componentPathKey"
         >
-          <el-select
-            v-model="model.componentPathKey"
-            filterable
-            :placeholder="t('menus.componentPathPlaceholder')"
-            data-test="menus-component-path"
-          >
-            <el-option
-              v-for="option in pathOptions"
-              :key="option.value"
-              :value="option.value"
-              :label="option.label"
-            />
-          </el-select>
+          <span data-test="menus-component-path">
+            <el-select
+              v-model="model.componentPathKey"
+              filterable
+              :placeholder="t('menus.componentPathPlaceholder')"
+            >
+              <el-option
+                v-for="option in pathOptions"
+                :key="option.value"
+                :value="option.value"
+                :label="option.label"
+              />
+            </el-select>
+          </span>
         </el-form-item>
 
         <template v-if="model.type === 1">

@@ -2,16 +2,19 @@ import { expect, test } from '@playwright/test'
 
 import { gotoWithSession } from './helpers'
 
-// 打磨随行冒烟：身份域四页在移动端视口与深色主题下渲染正常、无控制台错误。
+// 打磨随行冒烟：身份域四页与配置域三页在移动端视口与深色主题下渲染正常、无控制台错误。
 
 const PAGES: Array<[string, string]> = [
   ['/system/users', 'users-page'],
   ['/system/roles', 'roles-page'],
   ['/system/depts', 'depts-page'],
   ['/system/jobs', 'jobs-page'],
+  ['/system/menus', 'menus-page'],
+  ['/system/dicts', 'dicts-page'],
+  ['/system/tasks', 'tasks-page'],
 ]
 
-test('移动端视口：四页渲染无控制台错误', async ({ page }) => {
+test('移动端视口：七页渲染无控制台错误', async ({ page }) => {
   const errors: string[] = []
   page.on('console', (msg) => {
     if (msg.type() === 'error') {
@@ -28,7 +31,7 @@ test('移动端视口：四页渲染无控制台错误', async ({ page }) => {
   expect(errors).toEqual([])
 })
 
-test('深色主题：四页渲染无控制台错误', async ({ page }) => {
+test('深色主题：七页渲染无控制台错误', async ({ page }) => {
   const errors: string[] = []
   page.on('console', (msg) => {
     if (msg.type() === 'error') {
