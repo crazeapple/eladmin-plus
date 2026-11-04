@@ -24,6 +24,11 @@ spring:
 server:
   port: 8080
 
+monitor:
+  log:
+    # 日志保留天数（操作 / 异常两表轮转，清理任务每日凌晨执行）；非法值（非正整数）清理抛错不误删
+    retention-days: 30
+
 auth:
   rsa:
     key-size: 2048
