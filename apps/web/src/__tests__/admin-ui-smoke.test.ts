@@ -42,8 +42,14 @@ describe('admin-ui 消费冒烟', () => {
   it('useDict 契约与换源口子可用', async () => {
     expect(typeof setDictSource).toBe('function')
 
+    // mock 源已移除：未接源返回空数组，换源后即用新源
     const { options, loading } = useDict('sys_user_sex')
     await vi.waitFor(() => expect(loading.value).toBe(false))
-    expect(options.value).toHaveLength(3)
+    expect(options.value).toEqual([])
+
+    setDictSource(async () => [{ label: '冒烟', value: '1' }])
+    const switched = useDict('sys_dict_smoke')
+    await vi.waitFor(() => expect(switched.loading.value).toBe(false))
+    expect(switched.options.value).toEqual([{ label: '冒烟', value: '1' }])
   })
 })

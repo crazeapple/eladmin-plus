@@ -2,20 +2,8 @@ import { ref } from 'vue'
 import type { Ref } from 'vue'
 import type { DictOption, DictSource } from './types'
 
-/** 内置静态 mock 源：契约先行，真实字典归 P-013 / P-014 */
-const mockDicts: Record<string, DictOption[]> = {
-  sys_normal_disable: [
-    { label: '正常', value: '0' },
-    { label: '停用', value: '1' },
-  ],
-  sys_user_sex: [
-    { label: '男', value: '0' },
-    { label: '女', value: '1' },
-    { label: '未知', value: '2' },
-  ],
-}
-
-let dictSource: DictSource = async (type) => mockDicts[type] ?? []
+// 数据源由应用注入（setDictSource）：未接源时返回空数组（真实字典归配置域数据源接线）
+let dictSource: DictSource = async () => []
 
 /** 注入字典数据源；已入缓存不自动清，需要时对相应 type 调 invalidate */
 export function setDictSource(source: DictSource): void {

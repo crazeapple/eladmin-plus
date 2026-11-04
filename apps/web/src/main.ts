@@ -5,6 +5,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import { bindLocaleHeader } from './api/locale'
 import { onAuthBroadcast } from './api/auth-sync'
+import { setupDictSource } from './api/dicts'
 import { buildI18n } from './i18n'
 import router from './router'
 import { useMenusStore } from './stores/menus'
@@ -50,6 +51,9 @@ app.use(i18n)
 
 // 请求默认头随偏好语言联动（后端消息本地化）
 bindLocaleHeader()
+
+// 字典消费走真实数据源：按名取端点 + label 按 locale 解析（useDict 缓存语义不变）
+setupDictSource()
 
 app.use(VueQueryPlugin, { queryClient })
 app.use(router)

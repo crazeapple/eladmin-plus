@@ -11,14 +11,11 @@ function deferred<T>() {
 }
 
 describe('useDict', () => {
-  it('内置 mock 源开箱可用', async () => {
+  it('未接源时返回空数组（数据源由应用注入）', async () => {
     const { options, loading } = useDict('sys_normal_disable')
 
     await vi.waitFor(() => expect(loading.value).toBe(false))
-    expect(options.value).toEqual([
-      { label: '正常', value: '0' },
-      { label: '停用', value: '1' },
-    ])
+    expect(options.value).toEqual([])
   })
 
   it('Map 缓存命中：同 type 二次调用不再请求数据源', async () => {
