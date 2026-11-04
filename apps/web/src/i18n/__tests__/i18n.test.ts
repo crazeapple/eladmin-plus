@@ -6,6 +6,8 @@ import {
   applyLocale,
   buildI18n,
   elementPlusLocale,
+  localeKeys,
+  registeredLocales,
 } from '../index'
 
 /** 递归拍平语言包，产出点分 key 列表 */
@@ -44,5 +46,57 @@ describe('i18n 框架', () => {
   it('EP 组件文案语言包随 locale 取用', () => {
     expect(elementPlusLocale('zh-CN').name).toBe('zh-cn')
     expect(elementPlusLocale('en').name).toBe('en')
+  })
+})
+
+describe('配置域词条收口', () => {
+  it('路由种子与三页命名空间双包在册', () => {
+    for (const locale of ['zh-CN', 'en'] as const) {
+      const keys = localeKeys(locale)
+      // 身份域四页 + 配置域三页种子路由 key
+      for (const route of [
+        'routes.systemUsers',
+        'routes.systemRoles',
+        'routes.systemDepts',
+        'routes.systemJobs',
+        'routes.systemMenus',
+        'routes.systemDicts',
+        'routes.systemTasks',
+      ]) {
+        expect(keys).toContain(route)
+      }
+      // 配置域三页命名空间在册
+      for (const namespace of ['menus', 'dicts', 'tasks']) {
+        expect(keys.some((key) => key.startsWith(`${namespace}.`))).toBe(true)
+      }
+    }
+  })
+
+  it('按钮权限点文案 29 条在册（与菜单种子权限点数一致）', () => {
+    for (const locale of ['zh-CN', 'en'] as const) {
+      const permKeys = localeKeys(locale).filter((key) => key.startsWith('perms.'))
+      expect(permKeys).toHaveLength(29)
+      for (const key of [
+        'perms.systemMenuList',
+        'perms.systemDictDel',
+        'perms.systemTaskEdit',
+        'perms.systemUserResetPwd',
+      ]) {
+        expect(permKeys).toContain(key)
+      }
+    }
+  })
+
+  it('label 动态语言行消费语言注册表：注册表键与语言包键一致', () => {
+    expect(registeredLocales()).toEqual(Object.keys(LOCALE_MESSAGES))
+    expect(registeredLocales()).toContain(FALLBACK_LOCALE)
+  })
+
+  it('语言切换页面文案即时跟随（同实例切换 locale 取值即换）', () => {
+    const i18n = buildI18n('zh-CN')
+    expect(i18n.global.t('routes.systemMenus')).toBe('菜单管理')
+    applyLocale(i18n.global, 'en')
+    expect(i18n.global.t('routes.systemMenus')).toBe('Menus')
+    expect(i18n.global.t('tasks.execConfirm', { name: 'demo' })).toContain('demo')
   })
 })

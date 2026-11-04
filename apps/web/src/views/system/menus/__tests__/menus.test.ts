@@ -97,7 +97,25 @@ async function renderPage() {
   render(Menus, { global: { plugins: [pinia, buildI18n('zh-CN'), VueQueryPlugin] } })
 }
 
+/** en 实例渲染：配置域词条随实例语言即时跟随 */
+async function renderPageEn() {
+  const pinia = createPinia()
+  setActivePinia(pinia)
+  useMenusStore(pinia).roles = ['ROLE_ROOT']
+  render(Menus, { global: { plugins: [pinia, buildI18n('en'), VueQueryPlugin] } })
+}
+
 describe('菜单管理页', () => {
+  it('en 实例下页面文案取 en 包（语言跟随）', async () => {
+    await renderPageEn()
+    await waitFor(() => {
+      // 树节点标题（System / Users）与工具栏按钮（Add Menu）均取 en 包
+      expect(document.body.textContent).toContain('System')
+      expect(document.body.textContent).toContain('Users')
+      expect(document.body.textContent).toContain('Add Menu')
+    })
+  })
+
   it('三型节点区分渲染：目录 / 页面 / 按钮各具标识与元信息', async () => {
     await renderPage()
     // 目录型带目录标识
