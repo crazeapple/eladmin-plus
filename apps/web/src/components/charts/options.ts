@@ -145,3 +145,30 @@ export function buildRadarOption(params: {
     ],
   }
 }
+
+/** 环形仪表：单值百分比环形（监控页 CPU / 内存 / JVM 堆复用），余量段以浅主色垫底；占比文本由页面层呈现 */
+export function buildGaugeOption(params: {
+  palette: ChartPalette
+  name: string
+  percent: number
+}): ChartOption {
+  const value = Math.min(100, Math.max(0, params.percent))
+  return {
+    color: [params.palette.primary, params.palette.light7],
+    series: [
+      {
+        type: 'pie',
+        radius: ['58%', '78%'],
+        center: ['50%', '50%'],
+        avoidLabelOverlap: false,
+        label: { show: false },
+        labelLine: { show: false },
+        silent: true,
+        data: [
+          { name: params.name, value: Number(value.toFixed(1)) },
+          { name: 'rest', value: Number((100 - value).toFixed(1)) },
+        ],
+      },
+    ],
+  }
+}

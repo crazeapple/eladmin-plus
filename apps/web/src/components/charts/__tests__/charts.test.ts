@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   buildBarOption,
+  buildGaugeOption,
   buildLineOption,
   buildPieOption,
   buildRadarOption,
@@ -140,6 +141,27 @@ describe('option 构造', () => {
       type: 'radar',
       data: [
         { value: [160, 130, 150, 120, 180], name: '预算分配', areaStyle: { color: '#c6e2ff' } },
+      ],
+    })
+  })
+
+  it('环形仪表：占比段与余量段两数据、越界值收拢到 0~100', () => {
+    const option = buildGaugeOption({ palette, name: 'CPU', percent: 42.5 })
+    expect(option.color).toEqual(['#409eff', '#c6e2ff'])
+    const series = asArray(option.series)
+    expect(series).toHaveLength(1)
+    expect(series[0]).toMatchObject({
+      type: 'pie',
+      data: [
+        { name: 'CPU', value: 42.5 },
+        { name: 'rest', value: 57.5 },
+      ],
+    })
+    const clamped = buildGaugeOption({ palette, name: 'CPU', percent: 130 })
+    expect(asArray(clamped.series)[0]).toMatchObject({
+      data: [
+        { name: 'CPU', value: 100 },
+        { name: 'rest', value: 0 },
       ],
     })
   })
