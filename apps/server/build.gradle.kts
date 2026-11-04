@@ -37,6 +37,10 @@ dependencies {
     implementation("org.flywaydb:flyway-mysql")
     // 定时任务：Boot 4 模块化后自动配置在 spring-boot-quartz；JDBC JobStore 表组由 Flyway 管理
     implementation("org.springframework.boot:spring-boot-quartz")
+    // 监控域：Excel 导出（easyexcel）、系统与 JVM 指标采集（oshi-core）、连接池指标读取（micrometer-core）
+    implementation("com.alibaba:easyexcel:4.0.3")
+    implementation("com.github.oshi:oshi-core:6.8.2")
+    implementation("io.micrometer:micrometer-core")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-webmvc-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
