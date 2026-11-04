@@ -1,6 +1,7 @@
 package com.eladminplus.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.eladminplus.auth.domain.Menu;
@@ -11,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-/** 菜单种子（V4 身份域 + V6 配置域）：系统管理目录、七子菜单、29 条按钮权限点行，幂等在册。 */
+/** 菜单种子（V4 身份域 + V6 配置域 + V8 监控域）：两目录、十一子菜单、34 条按钮权限点行，幂等在册。 */
 @SpringBootTest
 class MenuSeedTest {
 
@@ -22,12 +23,14 @@ class MenuSeedTest {
     void 系统管理目录与七子菜单在册且组件路径对齐前端视图() {
         List<Menu> menus = menuMapper.selectList(null);
         Menu directory = menus.stream()
+                .filter(menu -> "routes.system".equals(menu.getI18nKey()))
                 .filter(menu -> menu.getType() == Menu.TYPE_DIRECTORY)
                 .findFirst().orElseThrow();
         assertThat(directory.getI18nKey()).isEqualTo("routes.system");
 
         List<String> pathKeys = menus.stream()
-                .filter(menu -> menu.getType() == Menu.TYPE_MENU && menu.getParentId() != null)
+                .filter(menu -> menu.getType() == Menu.TYPE_MENU)
+                .filter(menu -> directory.getId().equals(menu.getParentId()))
                 .map(Menu::getComponentPathKey)
                 .toList();
         assertThat(pathKeys).containsExactlyInAnyOrder(
@@ -70,7 +73,30 @@ class MenuSeedTest {
     }
 
     @Test
-    void 二十九条按钮权限点行与后端权限标识一致() {
+    void 监控域目录与四子菜单在册且组件路径对齐前端视图() {
+        List<Menu> menus = menuMapper.selectList(null);
+        Menu directory = menus.stream()
+                .filter(menu -> "routes.monitor".equals(menu.getI18nKey()))
+                .filter(menu -> menu.getType() == Menu.TYPE_DIRECTORY)
+                .findFirst().orElseThrow();
+        assertThat(directory.getIcon()).isEqualTo("svg:monitor");
+        assertThat(directory.getSort()).isEqualTo(5);
+
+        // 四子菜单挂监控目录之下：组件路径对齐前端视图、icon 库值入库、sort 1~4
+        assertThat(menus)
+                .filteredOn(menu -> menu.getType() == Menu.TYPE_MENU
+                        && directory.getId().equals(menu.getParentId()))
+                .extracting(Menu::getComponentPathKey, Menu::getI18nKey,
+                        Menu::getIcon, Menu::getSort)
+                .containsExactlyInAnyOrder(
+                        tuple("monitor/operation-logs", "routes.monitorOperationLogs", "svg:log", 1),
+                        tuple("monitor/exception-logs", "routes.monitorExceptionLogs", "svg:error", 2),
+                        tuple("monitor/online-users", "routes.monitorOnlineUsers", "svg:peoples", 3),
+                        tuple("monitor/server-info", "routes.monitorServerInfo", "svg:server", 4));
+    }
+
+    @Test
+    void 三十四条按钮权限点行与后端权限标识一致() {
         List<Menu> buttons = menuMapper.selectList(
                 new LambdaQueryWrapper<Menu>().eq(Menu::getType, Menu.TYPE_BUTTON));
         assertThat(buttons).extracting(Menu::getPermission).containsExactlyInAnyOrder(
@@ -81,12 +107,28 @@ class MenuSeedTest {
                 "system:role:list", "system:role:add", "system:role:edit", "system:role:del",
                 "system:menu:list", "system:menu:add", "system:menu:edit", "system:menu:del",
                 "system:dict:list", "system:dict:add", "system:dict:edit", "system:dict:del",
-                "system:task:list", "system:task:add", "system:task:edit", "system:task:del");
+                "system:task:list", "system:task:add", "system:task:edit", "system:task:del",
+                "monitor:log:list", "monitor:log:del",
+                "monitor:online:list", "monitor:online:del",
+                "monitor:monitor:list");
         // 每条按钮挂对应页面菜单、授权树文案 key 在册
         assertThat(buttons).allSatisfy(button -> {
             assertThat(button.getParentId()).isNotNull();
             assertThat(button.getI18nKey()).startsWith("perms.");
         });
+    }
+
+    @Test
+    void 监控域五个按钮权限点挂对应页面菜单且异常日志页不重复挂() {
+        List<Menu> menus = menuMapper.selectList(null);
+        // 操作日志页挂 log 组两点（异常日志页共用 log 组，不重复挂）
+        assertThat(buttonPermissionsOf(menus, "monitor/operation-logs")).containsExactlyInAnyOrder(
+                "monitor:log:list", "monitor:log:del");
+        assertThat(buttonPermissionsOf(menus, "monitor/exception-logs")).isEmpty();
+        assertThat(buttonPermissionsOf(menus, "monitor/online-users")).containsExactlyInAnyOrder(
+                "monitor:online:list", "monitor:online:del");
+        assertThat(buttonPermissionsOf(menus, "monitor/server-info")).containsExactlyInAnyOrder(
+                "monitor:monitor:list");
     }
 
     @Test
@@ -115,8 +157,8 @@ class MenuSeedTest {
 
     @Test
     void 迁移幂等不产生重复行() {
-        // 全表行数精确：V2 三条页面 + 目录 1 + 子菜单 7 + 按钮 29 = 40
-        assertThat(menuMapper.selectCount(null)).isEqualTo(40);
+        // 全表行数精确：V2 三条页面 + 目录 2 + 子菜单 11 + 按钮 34 = 50
+        assertThat(menuMapper.selectCount(null)).isEqualTo(50);
         // 权限点标识唯一（NOT EXISTS 守卫语义）
         List<Menu> menus = menuMapper.selectList(null);
         long distinctPermissions = menus.stream()
@@ -124,7 +166,7 @@ class MenuSeedTest {
                 .filter(Objects::nonNull)
                 .distinct()
                 .count();
-        assertThat(distinctPermissions).isEqualTo(29);
+        assertThat(distinctPermissions).isEqualTo(34);
     }
 
     private List<String> buttonPermissionsOf(List<Menu> menus, String componentPathKey) {
