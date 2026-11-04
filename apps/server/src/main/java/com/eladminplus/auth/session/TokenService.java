@@ -43,14 +43,22 @@ public class TokenService {
     public record SessionContext(
             Long userId, String username, String tokenId, List<String> roles, List<String> permissions, Instant loginAt) {}
 
-    /** 签发令牌对：会话与 refresh 同时落 Redis */
+    /** 签发令牌对：会话与 refresh 同时落 Redis（在线用户补落字段缺省为空串） */
     public TokenPair issue(User user, List<String> roles, List<String> permissions) {
+        return issue(user, roles, permissions, "", "");
+    }
+
+    /** 签发令牌对：随会话补落昵称、IP、浏览器 UA（在线用户域消费）；空值归一为空串 */
+    public TokenPair issue(User user, List<String> roles, List<String> permissions, String ip, String userAgent) {
         String accessToken = randomToken();
         String tokenId = UUID.randomUUID().toString();
 
         Map<String, String> session = new HashMap<>();
         session.put("userId", String.valueOf(user.getId()));
         session.put("username", user.getUsername());
+        session.put("nickname", orEmpty(user.getNickName()));
+        session.put("ip", orEmpty(ip));
+        session.put("userAgent", orEmpty(userAgent));
         session.put("tokenId", tokenId);
         session.put("roles", String.join(",", roles));
         session.put("permissions", String.join(",", permissions));
@@ -91,6 +99,11 @@ public class TokenService {
      * 键不存在或值不匹配（过期 / 伪造）返回 null。
      */
     public TokenPair rotate(Long userId, String tokenId, String random) {
+        return rotate(userId, tokenId, random, "", "");
+    }
+
+    /** 旋转重载：随新会话补落本次请求的 IP 与 UA（在线用户域保持最新） */
+    public TokenPair rotate(Long userId, String tokenId, String random, String ip, String userAgent) {
         String key = refreshKey(userId, tokenId);
         String stored = redis.opsForValue().get(key);
         if (stored == null || !stored.equals(random)) {
@@ -102,7 +115,7 @@ public class TokenService {
         }
         // 宽限窗口：旧键短命留存（从本次使用起计）
         redis.opsForValue().set(key, stored, props.graceWindow().getSeconds(), TimeUnit.SECONDS);
-        return issue(context.user(), context.roles(), context.permissions());
+        return issue(context.user(), context.roles(), context.permissions(), ip, userAgent);
     }
 
     /** 登出：删会话与其 refresh 键,并从用户会话索引移除 */
@@ -134,6 +147,10 @@ public class TokenService {
 
     public static String refreshKey(Long userId, String tokenId) {
         return REFRESH_PREFIX + userId + ":" + tokenId;
+    }
+
+    private static String orEmpty(String value) {
+        return value == null ? "" : value;
     }
 
     private static String randomToken() {

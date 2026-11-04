@@ -30,6 +30,13 @@ public final class LoginTestSupport {
     /** 走完整登录链;响应码与体由调用方断言(401 拒绝语义 / 200 成功形态)。 */
     public static MvcResult fullLogin(MockMvc mockMvc, StringRedisTemplate redis, String username, String password)
             throws Exception {
+        return fullLogin(mockMvc, redis, username, password, null, null);
+    }
+
+    /** 带转发头与 UA 的完整登录链（在线用户域断言 IP / UA 补落用；传 null 即不发该头）。 */
+    public static MvcResult fullLogin(
+            MockMvc mockMvc, StringRedisTemplate redis, String username, String password,
+            String forwardedFor, String userAgent) throws Exception {
         MvcResult captchaResult = mockMvc.perform(get("/auth/captcha")).andExpect(status().isOk()).andReturn();
         String captchaBody = captchaResult.getResponse().getContentAsString();
         String token = extractJsonField(captchaBody, "token");
@@ -51,7 +58,14 @@ public final class LoginTestSupport {
         String cipher = encrypt(publicKey, password);
         String body = "{\"username\":\"" + username + "\",\"password\":\"" + cipher + "\",\"keyId\":\"" + keyId
                 + "\",\"ticket\":\"" + ticket + "\"}";
-        return mockMvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON).content(body)).andReturn();
+        var request = post("/auth/login").contentType(MediaType.APPLICATION_JSON).content(body);
+        if (forwardedFor != null) {
+            request = request.header("X-Forwarded-For", forwardedFor);
+        }
+        if (userAgent != null) {
+            request = request.header("User-Agent", userAgent);
+        }
+        return mockMvc.perform(request).andReturn();
     }
 
     private static String encrypt(String publicKeyPem, String plain) {

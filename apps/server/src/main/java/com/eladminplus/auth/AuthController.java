@@ -5,6 +5,8 @@ import com.eladminplus.auth.session.LoginService;
 import com.eladminplus.auth.session.TokenService;
 import com.eladminplus.common.R;
 import com.eladminplus.common.error.BusinessException;
+import com.eladminplus.common.web.ClientIp;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -40,8 +42,15 @@ public class AuthController {
     public record LoginRequest(String username, String password, String keyId, String ticket) {}
 
     @PostMapping("/login")
-    public ResponseEntity<R<Map<String, Object>>> login(@RequestBody LoginRequest request) {
-        var result = loginService.login(request.username(), request.password(), request.keyId(), request.ticket());
+    public ResponseEntity<R<Map<String, Object>>> login(
+            @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+        var result = loginService.login(
+                request.username(),
+                request.password(),
+                request.keyId(),
+                request.ticket(),
+                ClientIp.resolve(httpRequest),
+                httpRequest.getHeader(HttpHeaders.USER_AGENT));
         return tokenResponse(result.tokens().accessToken(), result.tokens().expiresInSeconds(),
                 result.tokens().refreshCookieValue());
     }
@@ -49,7 +58,8 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<R<Map<String, Object>>> refresh(
             @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
-            @CookieValue(value = "${auth.session.cookie-name}", required = false) String refreshCookie) {
+            @CookieValue(value = "${auth.session.cookie-name}", required = false) String refreshCookie,
+            HttpServletRequest httpRequest) {
         // CSRF 附加层：自定义头缺失即拒绝（SameSite 已挡跨站携带，此为纵深）
         if (requestedWith == null || requestedWith.isBlank()) {
             throw new BusinessException(HttpStatus.FORBIDDEN, "error.auth.csrf-required");
@@ -68,7 +78,9 @@ public class AuthController {
         } catch (NumberFormatException e) {
             throw new BusinessException(HttpStatus.UNAUTHORIZED, "error.auth.refresh-missing");
         }
-        TokenService.TokenPair tokens = tokenService.rotate(userId, parts[1], parts[2]);
+        TokenService.TokenPair tokens = tokenService.rotate(
+                userId, parts[1], parts[2], ClientIp.resolve(httpRequest),
+                httpRequest.getHeader(HttpHeaders.USER_AGENT));
         if (tokens == null) {
             throw new BusinessException(HttpStatus.UNAUTHORIZED, "error.auth.refresh-invalid");
         }

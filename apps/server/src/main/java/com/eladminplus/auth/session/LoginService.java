@@ -42,7 +42,7 @@ public class LoginService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public LoginResult login(String username, String cipherText, String keyId, String ticket) {
+    public LoginResult login(String username, String cipherText, String keyId, String ticket, String ip, String userAgent) {
         // 票据一次性：消费失败即无效或重放
         if (!blockPuzzleService.consumeTicket(ticket)) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "error.auth.captcha-invalid");
@@ -57,7 +57,9 @@ public class LoginService {
             throw new BusinessException(HttpStatus.UNAUTHORIZED, "error.auth.login-failed");
         }
         var context = authContextService.load(user.getId());
-        TokenService.TokenPair tokens = tokenService.issue(context.user(), context.roles(), context.permissions());
+        // 随会话补落昵称、IP、UA（在线用户域消费）
+        TokenService.TokenPair tokens =
+                tokenService.issue(context.user(), context.roles(), context.permissions(), ip, userAgent);
         return new LoginResult(tokens, tokens.refreshCookieValue());
     }
 }
