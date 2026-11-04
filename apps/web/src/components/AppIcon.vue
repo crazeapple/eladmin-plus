@@ -1,40 +1,18 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-// 本地图标集 name→svg 映射（构建期静态枚举，与动态路由视图映射同构）
-const rawIcons = import.meta.glob<string>('../assets/icons/*.svg', {
-  eager: true,
-  query: '?raw',
-  import: 'default',
-})
-
-const iconMap: Record<string, string> = {}
-for (const [path, svg] of Object.entries(rawIcons)) {
-  const name = path
-    .split('/')
-    .pop()!
-    .replace(/\.svg$/, '')
-  iconMap[name] = sanitize(svg)
-}
+import { appIconSvg } from './app-icons'
 
 const props = defineProps<{ name: string }>()
 
 const svg = computed(() => {
-  const found = iconMap[props.name]
+  const found = appIconSvg(props.name)
   if (!found) {
     console.warn(`[AppIcon] 未找到图标：${props.name}`)
     return null
   }
   return found
 })
-
-// 本地文件本属可信内容，仍做一道去脚本与事件属性的通用消毒
-function sanitize(raw: string): string {
-  return raw
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/\son\w+\s*=\s*"[^"]*"/gi, '')
-    .replace(/\son\w+\s*=\s*'[^']*'/gi, '')
-}
 </script>
 
 <template>

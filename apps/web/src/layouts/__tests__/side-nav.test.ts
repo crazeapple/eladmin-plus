@@ -65,18 +65,18 @@ function menuTree(): MenuNode[] {
   ]
 }
 
-function seedMenus(pinia: ReturnType<typeof createPinia>) {
+function seedMenus(pinia: ReturnType<typeof createPinia>, tree: MenuNode[] = menuTree()) {
   const store = useMenusStore(pinia)
-  store.menus = menuTree()
+  store.menus = tree
   store.loaded = true
 }
 
 /** 渲染整个 App（顶层 router-view 语义与生产同构）；身份域视图用占位组件承载路由 */
-async function renderApp(path = '/home') {
+async function renderApp(path = '/home', tree: MenuNode[] = menuTree()) {
   document.body.innerHTML = ''
   const pinia = createPinia()
   setActivePinia(pinia)
-  seedMenus(pinia)
+  seedMenus(pinia, tree)
   const router = createRouter({ history: createMemoryHistory(), routes })
   installAuthGuard(router)
   router.addRoute('Layout', {
@@ -119,5 +119,60 @@ describe('侧栏目录渲染与面包屑', () => {
     expect(directory.classList.contains('is-link')).toBe(false)
     const pageItem = within(breadcrumb).getByText('用户管理')
     expect(pageItem.classList.contains('is-link')).toBe(true)
+  })
+})
+
+/** 图标解析四种形态的单页菜单树（顶层页面直渲染为菜单项） */
+function iconMenuTree(): MenuNode[] {
+  const page = (id: number, i18nKey: string, componentPathKey: string, icon?: string | null) =>
+    ({
+      id,
+      parentId: null,
+      type: 1,
+      permission: null,
+      i18nKey,
+      componentPathKey,
+      icon,
+      noCache: false,
+      sort: id,
+      children: [],
+    }) as MenuNode
+  return [
+    page(1, 'routes.systemUsers', 'system/users', 'svg:menu'),
+    page(2, 'routes.systemRoles', 'system/roles', 'user'),
+    page(3, 'routes.systemTasks', 'system/tasks', 'star'),
+    page(4, 'routes.systemDepts', 'system/depts', 'svg:no-such-icon'),
+    page(5, 'routes.systemMenus', 'system/menus', null),
+  ]
+}
+
+function itemHasSvg(title: string): boolean {
+  const item = screen.getByText(title).closest('li') as HTMLElement
+  return Boolean(item.querySelector('.app-icon svg'))
+}
+
+describe('侧栏图标库值优先', () => {
+  it('svg: 前缀在册名直渲染库值图标', async () => {
+    await renderApp('/', iconMenuTree())
+    await waitFor(() => expect(screen.getByText('用户管理')).toBeTruthy())
+    expect(itemHasSvg('用户管理')).toBe(true)
+  })
+
+  it('无前缀值与未知名回退 i18n key 静态映射', async () => {
+    await renderApp('/', iconMenuTree())
+    await waitFor(() => expect(screen.getByText('角色管理')).toBeTruthy())
+    // 无前缀值 star 不被采用，按 key 落映射 user 图标
+    expect(itemHasSvg('角色管理')).toBe(true)
+    // svg: 未知名回退映射 dept 图标
+    expect(itemHasSvg('部门管理')).toBe(true)
+  })
+
+  it('两处皆无不渲染图标', async () => {
+    await renderApp('/', iconMenuTree())
+    await waitFor(() => expect(screen.getByText('定时任务')).toBeTruthy())
+    // 无前缀未知名且 key 不在映射 → 不渲染
+    expect(itemHasSvg('定时任务')).toBe(false)
+    // icon 值残缺形态（null）且 key 不在映射 → 不渲染
+    expect(itemHasSvg('菜单管理')).toBe(false)
   })
 })

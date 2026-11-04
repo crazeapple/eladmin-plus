@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import AppIcon from '@/components/AppIcon.vue'
+import { hasAppIcon } from '@/components/app-icons'
 import SettingsDrawer from '@/components/settings/SettingsDrawer.vue'
 import { logout } from '@/api/auth'
 import { broadcastLogout } from '@/api/auth-sync'
@@ -57,8 +58,8 @@ async function onUserCommand(command: string | number | object) {
 }
 
 /**
- * 菜单 icon 前端映射：menu 表无 icon 列（后端菜单是唯一真相），展示图标按
- * i18n key 在前端映射；P-013 菜单管理引入 icon 载体后切后端下发。
+ * 菜单 icon 静态映射：i18n key → 前端图标名，库值缺失时的兜底通路
+ * （存量菜单无 icon 值照常渲染；库值优先，映射退位兜底）。
  */
 const ICON_BY_I18N_KEY: Record<string, string> = {
   'routes.home': 'index',
@@ -69,6 +70,20 @@ const ICON_BY_I18N_KEY: Record<string, string> = {
   'routes.systemRoles': 'role',
   'routes.systemDepts': 'dept',
   'routes.systemJobs': 'people',
+}
+
+/**
+ * 侧栏图标解析（库值优先）：icon 值 `svg:name` 且名在册 → 图标资产名；
+ * 无前缀或未知名 → i18n key 静态映射兜底；两处皆无 → undefined 不渲染。
+ */
+function navIcon(menu: MenuNode): string | undefined {
+  const byKey = () => ICON_BY_I18N_KEY[menu.i18nKey ?? '']
+  const value = menu.icon ?? ''
+  if (value.startsWith('svg:')) {
+    const name = value.slice('svg:'.length)
+    return name && hasAppIcon(name) ? name : byKey()
+  }
+  return byKey()
 }
 
 /** 侧栏节点：目录（type=0）带子级，页面（type=1）可点；按钮（type=2）不进侧栏 */
@@ -88,7 +103,7 @@ const navNodes = computed<NavNode[]>(() => {
     const node: NavNode = {
       key: `${menu.type}:${menu.i18nKey ?? menu.id}`,
       title: menu.i18nKey ?? '',
-      icon: ICON_BY_I18N_KEY[menu.i18nKey ?? ''],
+      icon: navIcon(menu),
     }
     if (menu.type === 1) {
       if (!menu.componentPathKey) {

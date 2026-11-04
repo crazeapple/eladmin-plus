@@ -10,6 +10,7 @@ export interface MenuNode {
   permission: string | null
   i18nKey: string | null
   componentPathKey: string | null
+  icon?: string | null
   noCache: boolean
   sort: number
   children: MenuNode[]
