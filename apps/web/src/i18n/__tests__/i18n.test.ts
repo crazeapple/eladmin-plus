@@ -72,15 +72,46 @@ describe('配置域词条收口', () => {
     }
   })
 
-  it('按钮权限点文案 29 条在册（与菜单种子权限点数一致）', () => {
+  it('监控域词条收口：目录与四页路由 key、四页命名空间、五条权限点双包在册', () => {
+    for (const locale of ['zh-CN', 'en'] as const) {
+      const keys = localeKeys(locale)
+      // V8 种子路由 key：监控目录 + 四子菜单
+      for (const route of [
+        'routes.monitor',
+        'routes.monitorOperationLogs',
+        'routes.monitorExceptionLogs',
+        'routes.monitorOnlineUsers',
+        'routes.monitorServerInfo',
+      ]) {
+        expect(keys).toContain(route)
+      }
+      // 监控四页命名空间在册
+      for (const namespace of ['operationLogs', 'exceptionLogs', 'onlineUsers', 'serverInfo']) {
+        expect(keys.some((key) => key.startsWith(`${namespace}.`))).toBe(true)
+      }
+      // V8 五条按钮权限点文案（i18n_key 与种子一致）
+      for (const key of [
+        'perms.monitorLogList',
+        'perms.monitorLogDel',
+        'perms.monitorOnlineList',
+        'perms.monitorOnlineDel',
+        'perms.monitorMonitorList',
+      ]) {
+        expect(keys).toContain(key)
+      }
+    }
+  })
+
+  it('按钮权限点文案 34 条在册（与菜单种子权限点数一致）', () => {
     for (const locale of ['zh-CN', 'en'] as const) {
       const permKeys = localeKeys(locale).filter((key) => key.startsWith('perms.'))
-      expect(permKeys).toHaveLength(29)
+      expect(permKeys).toHaveLength(34)
       for (const key of [
         'perms.systemMenuList',
         'perms.systemDictDel',
         'perms.systemTaskEdit',
         'perms.systemUserResetPwd',
+        'perms.monitorMonitorList',
       ]) {
         expect(permKeys).toContain(key)
       }

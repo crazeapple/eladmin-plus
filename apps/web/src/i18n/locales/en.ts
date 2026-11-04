@@ -131,6 +131,11 @@ export default {
     systemTaskAdd: 'Add Task',
     systemTaskEdit: 'Edit Task',
     systemTaskDel: 'Delete Task',
+    monitorLogList: 'Log List',
+    monitorLogDel: 'Log Delete',
+    monitorOnlineList: 'Online List',
+    monitorOnlineDel: 'Online Kick',
+    monitorMonitorList: 'Server Monitor',
   },
   menus: {
     create: 'Add Menu',

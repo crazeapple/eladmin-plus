@@ -130,6 +130,11 @@ export default {
     systemTaskAdd: '新增任务',
     systemTaskEdit: '编辑任务',
     systemTaskDel: '删除任务',
+    monitorLogList: '日志查询',
+    monitorLogDel: '日志删除',
+    monitorOnlineList: '在线查询',
+    monitorOnlineDel: '在线强退',
+    monitorMonitorList: '服务监控',
   },
   menus: {
     create: '新增菜单',
