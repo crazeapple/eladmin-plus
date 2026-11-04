@@ -125,6 +125,8 @@ public class TaskService {
         } catch (SchedulerException e) {
             throw new IllegalStateException("任务调度移除失败：" + id, e);
         }
+        // 执行日志无独立生命周期，随任务先清（task_log 外键引用 task，不清会阻断删除）
+        taskLogMapper.delete(Wrappers.<TaskLog>lambdaQuery().eq(TaskLog::getTaskId, id));
         taskMapper.deleteById(id);
     }
 

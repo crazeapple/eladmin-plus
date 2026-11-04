@@ -14,7 +14,9 @@ import com.eladminplus.auth.mapper.UserMapper;
 import com.eladminplus.auth.session.TokenService;
 import com.eladminplus.auth.session.TokenService.TokenPair;
 import com.eladminplus.system.domain.Task;
+import com.eladminplus.system.domain.TaskLog;
 import com.eladminplus.system.dto.TaskSaveRequest;
+import com.eladminplus.system.mapper.TaskLogMapper;
 import com.eladminplus.system.mapper.TaskMapper;
 import com.eladminplus.system.service.TaskService;
 import com.eladminplus.system.task.TaskMethod;
@@ -56,6 +58,8 @@ class TaskCrudTest {
     private UserMapper userMapper;
     @Autowired
     private TaskMapper taskMapper;
+    @Autowired
+    private TaskLogMapper taskLogMapper;
     @Autowired
     private Scheduler scheduler;
 
@@ -218,5 +222,26 @@ class TaskCrudTest {
                 .andExpect(status().isOk());
         assertThat(scheduler.checkExists(TaskService.jobKeyOf(id))).isFalse();
         assertThat(taskMapper.selectById(id)).isNull();
+    }
+
+    @Test
+    void 删除带执行日志的任务成功且日志随清() throws Exception {
+        Long id = create(validRequest(TEST_NAME_PREFIX + "removelogs", null));
+        TaskLog log = new TaskLog();
+        log.setTaskId(id);
+        log.setExecuteTime(java.time.LocalDateTime.now());
+        log.setSuccess(1);
+        log.setDurationMs(5L);
+        taskLogMapper.insert(log);
+        assertThat(taskLogMapper
+                .selectCount(Wrappers.<TaskLog>lambdaQuery().eq(TaskLog::getTaskId, id)))
+                .isEqualTo(1);
+
+        mockMvc.perform(delete("/tasks/{id}", id).header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk());
+        assertThat(taskMapper.selectById(id)).isNull();
+        assertThat(taskLogMapper
+                .selectCount(Wrappers.<TaskLog>lambdaQuery().eq(TaskLog::getTaskId, id)))
+                .isZero();
     }
 }
