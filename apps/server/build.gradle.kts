@@ -41,6 +41,8 @@ dependencies {
     implementation("com.alibaba:easyexcel:4.0.3")
     implementation("com.github.oshi:oshi-core:6.8.2")
     implementation("io.micrometer:micrometer-core")
+    // 操作日志切面：AspectJ 切点表达式由 aspectjweaver 解析（版本随 Boot BOM）
+    implementation("org.aspectj:aspectjweaver")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-webmvc-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
