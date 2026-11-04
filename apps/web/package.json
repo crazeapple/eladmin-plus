@@ -18,6 +18,7 @@
     "echarts": "^6.1.0",
     "element-plus": "^2.14.0",
     "pinia": "^4.0.0",
+    "ua-parser-js": "^2.0.10",
     "vue": "^3.5.0",
     "vue-echarts": "^8.3.2",
     "vue-i18n": "11.4.17",

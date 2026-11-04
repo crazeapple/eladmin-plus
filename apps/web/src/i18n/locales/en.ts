@@ -97,6 +97,7 @@ export default {
     monitor: 'Monitoring',
     monitorOperationLogs: 'Operation Logs',
     monitorExceptionLogs: 'Exception Logs',
+    monitorOnlineUsers: 'Online Users',
     notFound: '404',
   },
   perms: {
@@ -457,5 +458,24 @@ export default {
     removeFailed: 'Delete failed',
     exportSuccess: 'Exported {name}',
     exportFailed: 'Export failed',
+  },
+  onlineUsers: {
+    nickName: 'Nickname',
+    username: 'Username',
+    ip: 'Login IP',
+    loginAt: 'Login Time',
+    browser: 'Browser UA',
+    uaBrowser: 'Browser',
+    uaVersion: 'Version',
+    uaOs: 'OS',
+    actions: 'Actions',
+    kick: 'Kick',
+    kickTitle: 'Confirm Kick',
+    kickConfirm: 'Kick "{name}"? All their sessions will be invalidated immediately.',
+    kickSelfConfirm:
+      'Kick "{name}"? All their sessions will be invalidated immediately, and the current session will be logged out.',
+    kickSuccess: 'Kicked',
+    kickFailed: 'Kick failed',
+    onlineCount: '{count} user(s) online',
   },
 }
