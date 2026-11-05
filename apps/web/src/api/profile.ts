@@ -1,17 +1,36 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 
-import type { MeResponse, PasswordChangeRequest, ProfileUpdateRequest } from './generated'
+import type { MeResponse, ProfileUpdateRequest } from './generated'
 import { request } from './request'
 
-/** 个人中心契约薄封装：资料改、头像上传与清空、改密（登录即可，仅操作会话用户自己） */
+/** 个人中心契约薄封装：资料改、头像上传与清空（登录即可，仅操作会话用户自己） */
 
 const ME_KEY = ['auth', 'me'] as const
+
+/**
+ * 用户区 me 的用户视图：生成物把 me 的用户字段并入 system 域 UserView（两域同名 schema 冲突），
+ * 运行时 me 面为 id / username / nickName / avatarId；email / phone / gender 为资料表单预填
+ * 预留位，后端契约扩字段后在册即生效。
+ */
+export interface MeUser {
+  id: number
+  username: string
+  nickName: string | null
+  avatarId?: number | null
+  email?: string | null
+  phone?: string | null
+  gender?: number | null
+}
+
+export interface MePayload extends Omit<MeResponse, 'user'> {
+  user: MeUser
+}
 
 /** 用户区信息：资料表单与头像展示的数据源；资料 / 头像变更后失效重取 */
 export function useMe() {
   return useQuery({
     queryKey: [...ME_KEY],
-    queryFn: () => request<MeResponse>({ url: '/auth/me' }),
+    queryFn: () => request<MePayload>({ url: '/auth/me' }),
   })
 }
 
@@ -44,16 +63,5 @@ export function useClearAvatar() {
   return useMutation({
     mutationFn: () => request({ url: '/auth/me/avatar', method: 'DELETE' }),
     onSuccess: () => qc.invalidateQueries({ queryKey: [...ME_KEY] }),
-  })
-}
-
-/**
- * 改密：成功即该用户全部会话失效（含当前，再访问 401）。前端按登出语义清态跳登录，
- * 故此处不失效 me 缓存（随后的重取必 401），清态由调用方收口。
- */
-export function useChangePassword() {
-  return useMutation({
-    mutationFn: (payload: PasswordChangeRequest) =>
-      request({ url: '/auth/me/password', method: 'PUT', body: payload }),
   })
 }

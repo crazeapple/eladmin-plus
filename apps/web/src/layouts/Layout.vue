@@ -10,9 +10,11 @@ import { hasAppIcon } from '@/components/app-icons'
 import SettingsDrawer from '@/components/settings/SettingsDrawer.vue'
 import { logout } from '@/api/auth'
 import { broadcastLogout } from '@/api/auth-sync'
+import { useMe } from '@/api/profile'
 import { useMenusStore, type MenuNode } from '@/stores/menus'
 import { useSessionStore } from '@/stores/session'
 import { useTagsViewStore } from '@/stores/tags-view'
+import { useAvatarUrl } from '@/composables/use-avatar-url'
 
 import TagsView from '@/layouts/TagsView.vue'
 
@@ -37,6 +39,10 @@ const menusStore = useMenusStore()
 const sessionStore = useSessionStore()
 const tagsViewStore = useTagsViewStore()
 const username = computed(() => menusStore.user?.username ?? '')
+
+// 顶栏头像：用户区 me 的 avatarId（个人中心改头像后 me 缓存失效重取，此处随动）
+const { data: me } = useMe()
+const avatarUrl = useAvatarUrl(computed(() => me.value?.user?.avatarId))
 
 /** 顶栏下拉：个人中心进固定路由页；退出登录后端异常也继续清本地（登出的目的是离开） */
 async function onUserCommand(command: string | number | object) {
@@ -267,7 +273,14 @@ function onMenuSelect() {
               :title="username"
               data-test="user-avatar"
             >
-              <app-icon name="user" />
+              <img
+                v-if="avatarUrl"
+                :src="avatarUrl"
+                alt=""
+                class="layout__avatar-img"
+                data-test="user-avatar-img"
+              />
+              <app-icon v-else name="user" />
               <span>{{ username }}</span>
             </button>
             <template #dropdown>
@@ -394,12 +407,19 @@ function onMenuSelect() {
   }
 }
 
-/* 用户区触发器：图标 + 用户名，宽度随内容走，hover 行为与其余触发器一致 */
+/* 用户区触发器：图标（或头像）+ 用户名，宽度随内容走，hover 行为与其余触发器一致 */
 .layout__avatar {
   width: auto;
   gap: 4px;
   padding: 0 10px;
   font-size: 14px;
+}
+
+.layout__avatar-img {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .layout__breadcrumb {

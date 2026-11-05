@@ -53,16 +53,25 @@ function ensureFreshToken(): Promise<string | null> {
 export async function send(options: RequestOptions): Promise<RequestResult> {
   const session = useSessionStore()
   const token = session.accessToken
+  const isForm = options.body instanceof FormData
   const headers: Record<string, string> = { 'X-Requested-With': 'XMLHttpRequest' }
   if (token) {
     headers.Authorization = `Bearer ${token}`
+  }
+  const merged: Record<string, string | null> = { ...headers, ...options.headers }
+  // FormData 直通：去序列化（默认 bodySerializer 会当 JSON 编排）并抹去默认 Content-Type
+  // （multipart 边界交浏览器定，mergeHeaders 见 null 即删）
+  const formOverride = isForm ? { bodySerializer: null } : {}
+  if (isForm) {
+    merged['Content-Type'] = null
   }
   try {
     const { data, response } = await client.request({
       url: options.url,
       method: options.method ?? 'GET',
       body: options.body,
-      headers: { ...headers, ...options.headers },
+      ...formOverride,
+      headers: merged,
       parseAs: options.parseAs,
       throwOnError: true,
     })
@@ -80,7 +89,8 @@ export async function send(options: RequestOptions): Promise<RequestResult> {
       url: options.url,
       method: options.method ?? 'GET',
       body: options.body,
-      headers: { ...headers, Authorization: `Bearer ${newToken}` },
+      ...formOverride,
+      headers: { ...merged, Authorization: `Bearer ${newToken}` },
       parseAs: options.parseAs,
       throwOnError: true,
     })

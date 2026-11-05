@@ -20,6 +20,7 @@
     "pinia": "^4.0.0",
     "ua-parser-js": "^2.0.10",
     "vue": "^3.5.0",
+    "vue-cropper": "^1.1.4",
     "vue-echarts": "^8.3.2",
     "vue-i18n": "11.4.17",
     "vue-router": "^5.0.0",

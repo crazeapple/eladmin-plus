@@ -214,6 +214,9 @@ importers:
       vue:
         specifier: ^3.5.0
         version: 3.5.44(typescript@5.9.3)
+      vue-cropper:
+        specifier: ^1.1.4
+        version: 1.1.4
       vue-echarts:
         specifier: ^8.3.2
         version: 8.3.2(echarts@6.1.0)(vue@3.5.44(typescript@5.9.3))
@@ -3293,6 +3296,9 @@ packages:
   vue-component-type-helpers@3.3.14:
     resolution: {integrity: sha512-Pq3+OnbCiPCHk0R7KSZrx+j/XXaUn2kSQ1epxq60w8CPbByLjC1EJgV51n4WY851sTXUVzsNMuitywdkdVyKjA==}
 
+  vue-cropper@1.1.4:
+    resolution: {integrity: sha512-5m98vBsCEI9rbS4JxELxXidtAui3qNyTHLHg67Qbn7g8cg+E6LcnC+hh3SM/p94x6mFh6KRxT1ttnta+wCYqWA==}
+
   vue-demi@0.14.10:
     resolution: {integrity: sha512-nMZBOwuzabUO0nLgIcc6rycZEebF6eeUfaiQx9+WSk8e29IbLvPU9feI6tqW4kTo3hvoYAJkMh8n8D0fuISphg==}
     engines: {node: '>=12'}
@@ -6293,6 +6299,8 @@ snapshots:
   vscode-uri@3.2.0: {}
 
   vue-component-type-helpers@3.3.14: {}
+
+  vue-cropper@1.1.4: {}
 
   vue-demi@0.14.10(vue@3.5.44(typescript@5.9.3)):
     dependencies:
