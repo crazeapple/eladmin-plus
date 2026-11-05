@@ -2,6 +2,8 @@
 import { ElTabs, ElTabPane } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 
+import ConfigPanel from './config-panel.vue'
+
 defineOptions({ name: 'OpsDatabase' })
 
 const { t } = useI18n()
@@ -11,7 +13,7 @@ const { t } = useI18n()
   <div class="database" data-test="database-page">
     <el-tabs data-test="database-tabs">
       <el-tab-pane :label="t('database.configTab')" data-test="database-tab-config">
-        <div data-test="database-config-panel" />
+        <ConfigPanel />
       </el-tab-pane>
       <el-tab-pane :label="t('database.recordTab')" data-test="database-tab-record">
         <div data-test="database-record-panel" />
