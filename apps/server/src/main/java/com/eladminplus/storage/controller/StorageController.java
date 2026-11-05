@@ -2,7 +2,9 @@ package com.eladminplus.storage.controller;
 
 import com.eladminplus.auth.session.TokenService;
 import com.eladminplus.common.R;
+import com.eladminplus.common.data.PageResult;
 import com.eladminplus.storage.domain.StorageFile;
+import com.eladminplus.storage.dto.StorageFilePageQuery;
 import com.eladminplus.storage.dto.StorageFileView;
 import com.eladminplus.storage.service.StorageService;
 import java.io.InputStream;
@@ -24,8 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * 存储文件端点：上传 / 流式下载 / 删除（分页列表随列表任务另落）。
- * 权限点 storage:upload / storage:del（ROLE_ROOT 直通）；下载不设权限点，登录即可（头像展示同通路）。
+ * 存储文件端点：上传 / 分页列表 / 流式下载 / 删除。
+ * 权限点 storage:list / storage:upload / storage:del（ROLE_ROOT 直通）；下载不设权限点，登录即可（头像展示同通路）。
  */
 @RestController
 @RequestMapping("/storage/files")
@@ -43,6 +45,12 @@ public class StorageController {
         TokenService.SessionContext context = (TokenService.SessionContext) authentication.getDetails();
         StorageFile row = storageService.upload(file, context.username());
         return R.ok(StorageFileView.from(row));
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAuthority('storage:list') || hasAuthority('ROLE_ROOT')")
+    public R<PageResult<StorageFileView>> page(StorageFilePageQuery query) {
+        return R.ok(storageService.page(query));
     }
 
     @GetMapping("/{id}/download")

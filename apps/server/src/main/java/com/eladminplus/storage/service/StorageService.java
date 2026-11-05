@@ -1,8 +1,14 @@
 package com.eladminplus.storage.service;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.eladminplus.common.data.PageRequest;
+import com.eladminplus.common.data.PageResult;
 import com.eladminplus.common.error.BusinessException;
 import com.eladminplus.storage.StorageProperties;
 import com.eladminplus.storage.domain.StorageFile;
+import com.eladminplus.storage.dto.StorageFilePageQuery;
+import com.eladminplus.storage.dto.StorageFileView;
 import com.eladminplus.storage.engine.StorageObjectMissingException;
 import com.eladminplus.storage.engine.StoragePort;
 import com.eladminplus.storage.engine.StorageUnavailableException;
@@ -97,6 +103,39 @@ public class StorageService {
             throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "error.storage.unavailable");
         }
         storageFileMapper.deleteById(id);
+    }
+
+    /** 存储文件分页：原名模糊、上传人精确、创建时间范围筛选，新记录在前 */
+    public PageResult<StorageFileView> page(StorageFilePageQuery query) {
+        var wrapper = Wrappers.<StorageFile>lambdaQuery();
+        if (StringUtils.hasText(query.name())) {
+            wrapper.like(StorageFile::getName, query.name());
+        }
+        if (StringUtils.hasText(query.uploader())) {
+            wrapper.eq(StorageFile::getUploader, query.uploader());
+        }
+        if (query.startAt() != null) {
+            wrapper.ge(StorageFile::getCreatedAt, query.startAt());
+        }
+        if (query.endAt() != null) {
+            wrapper.le(StorageFile::getCreatedAt, query.endAt());
+        }
+        wrapper.orderByDesc(StorageFile::getId);
+        Page<StorageFile> result =
+                storageFileMapper.selectPage(new PageRequest(pageOf(query), sizeOf(query)).toMpPage(), wrapper);
+        return new PageResult<>(
+                result.getRecords().stream().map(StorageFileView::from).toList(),
+                result.getTotal(),
+                (int) (result.getCurrent() - 1),
+                (int) result.getSize());
+    }
+
+    private static int pageOf(StorageFilePageQuery query) {
+        return query.page() == null ? 0 : query.page();
+    }
+
+    private static int sizeOf(StorageFilePageQuery query) {
+        return query.size() == null ? 10 : query.size();
     }
 
     private StoragePort portOf(String engine) {
