@@ -24,6 +24,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,6 +32,9 @@ import org.springframework.web.multipart.MultipartFile;
 /** 存储域服务：上传落对象与行、下载与删除按行内引擎字段路由（混引擎历史可读）、删除先对象后行。 */
 @Service
 public class StorageService {
+
+    /** 备份文件来源标记（ops 备份链路内部打标，公开上传端点契约不动） */
+    public static final String SOURCE_BACKUP = "backup";
 
     /** 列容量截断上限：原名 255（VARCHAR），扩展名 32 */
     private static final int NAME_MAX = 255;
@@ -69,6 +73,30 @@ public class StorageService {
         row.setSize(file.getSize());
         row.setMime(mime);
         row.setEngine(properties.engine());
+        row.setUploader(uploader);
+        storageFileMapper.insert(row);
+        return row;
+    }
+
+    /** 备份落册（ops 备份链路内部入口）：流直存当前配置引擎，source 内部打标 backup，行名即备份原名 */
+    public StorageFile storeBackup(String fileName, InputStream in, long size, String uploader) {
+        // 对象元数据须带 content type（S3 端非空校验），sql 脚本归 octet-stream
+        String mime = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        String key = LocalDate.now().format(MONTH_FORMAT) + "/" + UUID.randomUUID() + ".sql";
+        try {
+            portOf(properties.engine()).store(key, in, size, mime);
+        } catch (StorageUnavailableException e) {
+            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "error.storage.unavailable");
+        }
+
+        StorageFile row = new StorageFile();
+        row.setName(truncate(fileName, NAME_MAX));
+        row.setStorageKey(key);
+        row.setExt("sql");
+        row.setSize(size);
+        row.setMime(mime);
+        row.setEngine(properties.engine());
+        row.setSource(SOURCE_BACKUP);
         row.setUploader(uploader);
         storageFileMapper.insert(row);
         return row;

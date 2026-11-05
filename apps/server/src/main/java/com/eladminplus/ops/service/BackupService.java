@@ -1,24 +1,23 @@
 package com.eladminplus.ops.service;
 
 import com.eladminplus.common.error.BusinessException;
-import com.eladminplus.ops.domain.BackupRecord;
 import com.eladminplus.ops.domain.DatabaseConfig;
-import com.eladminplus.ops.mapper.BackupRecordMapper;
 import com.eladminplus.ops.mapper.DatabaseConfigMapper;
+import com.eladminplus.storage.domain.StorageFile;
+import com.eladminplus.storage.service.StorageService;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 /**
- * 手动备份服务：目录不存在自动创建（mkdir 语义）、不可创建或不可写 5xx 明确报因 → 容器内 mysqldump
- * stdout 流直写目标文件 → 落 backup_record（大小取落盘实际字节数）。文件名 {库名}_{yyyyMMddHHmmss}.sql，
- * 同秒重复覆盖（概率极低不作防护）。执行失败 5xx 不落记录（记录表即成功备份账本），半截文件就地清理。
+ * 手动备份服务：容器内 mysqldump 的 stdout 流直写系统临时文件（先验 dump 退出码，失败不产生任何
+ * 存储对象与行），过验后经存储域上传落当前配置引擎并打标 source=backup，storage_file 行在册
+ * （原名 {库名}_{yyyyMMddHHmmss}.sql，大小取实际字节数）。存储键 uuid 唯一，无同名覆盖问题。
  */
 @Service
 public class BackupService {
@@ -26,73 +25,59 @@ public class BackupService {
     private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
     private final DatabaseConfigMapper databaseConfigMapper;
-    private final BackupRecordMapper backupRecordMapper;
+    private final StorageService storageService;
     private final MysqlDumpExecutor mysqlDumpExecutor;
 
     public BackupService(
-            DatabaseConfigMapper databaseConfigMapper,
-            BackupRecordMapper backupRecordMapper,
-            MysqlDumpExecutor mysqlDumpExecutor) {
+            DatabaseConfigMapper databaseConfigMapper, StorageService storageService, MysqlDumpExecutor mysqlDumpExecutor) {
         this.databaseConfigMapper = databaseConfigMapper;
-        this.backupRecordMapper = backupRecordMapper;
+        this.storageService = storageService;
         this.mysqlDumpExecutor = mysqlDumpExecutor;
     }
 
-    /** 备份：库名与连接凭据取自连接配置；连接配置无则 404 */
-    public BackupRecord backup(Long configId, String dir) {
+    /** 备份：库名与连接凭据取自连接配置；连接配置无则 404；执行失败 5xx 报「备份执行失败」原因，无行 */
+    public StorageFile backup(Long configId, String operator) {
         DatabaseConfig config = databaseConfigMapper.selectById(configId);
         if (config == null) {
             throw new BusinessException(HttpStatus.NOT_FOUND, "error.system.not-found");
         }
-        if (!StringUtils.hasText(dir)) {
-            throw new BusinessException(HttpStatus.BAD_REQUEST, "error.bad");
-        }
-        Path target = prepare(config.getName(), dir);
+        String fileName = config.getName() + "_" + LocalDateTime.now().format(TIMESTAMP_FORMAT) + ".sql";
+        Path staging = createStaging();
         try {
-            mysqlDumpExecutor.dump(config.getName(), config.getUserName(), config.getPassword(), target);
-        } catch (BusinessException e) {
-            deleteQuietly(target);
-            throw e;
+            mysqlDumpExecutor.dump(config.getName(), config.getUserName(), config.getPassword(), staging);
+            long size;
+            try {
+                size = Files.size(staging);
+            } catch (IOException e) {
+                throw new BusinessException(
+                        HttpStatus.INTERNAL_SERVER_ERROR, "备份执行失败：备份文件大小读取失败（" + e.getMessage() + "）");
+            }
+            try (InputStream in = Files.newInputStream(staging)) {
+                return storageService.storeBackup(fileName, in, size, operator);
+            } catch (IOException e) {
+                throw new BusinessException(
+                        HttpStatus.INTERNAL_SERVER_ERROR, "备份执行失败：备份文件读取失败（" + e.getMessage() + "）");
+            }
+        } finally {
+            deleteQuietly(staging);
         }
-        long size;
+    }
+
+    /** 中转文件：dump 全量过验后才经存储域上传，dump 失败不产生半截对象 */
+    private static Path createStaging() {
         try {
-            size = Files.size(target);
+            return Files.createTempFile("eladmin-backup-", ".sql");
         } catch (IOException e) {
-            deleteQuietly(target);
             throw new BusinessException(
-                    HttpStatus.INTERNAL_SERVER_ERROR, "备份执行失败：备份文件大小读取失败（" + e.getMessage() + "）");
+                    HttpStatus.INTERNAL_SERVER_ERROR, "备份执行失败：临时文件创建失败（" + e.getMessage() + "）");
         }
-
-        BackupRecord record = new BackupRecord();
-        record.setFileName(target.getFileName().toString());
-        record.setDir(target.getParent().toString());
-        record.setDbName(config.getName());
-        record.setSize(size);
-        backupRecordMapper.insert(record);
-        return record;
     }
 
-    /** 目标文件定位与目录保障：目录归一为绝对路径（记录自描述，删记录不依赖进程工作目录） */
-    private static Path prepare(String database, String dir) {
-        Path target;
+    private static void deleteQuietly(Path staging) {
         try {
-            Path base = Path.of(dir).toAbsolutePath().normalize();
-            target = base.resolve(database + "_" + LocalDateTime.now().format(TIMESTAMP_FORMAT) + ".sql");
-            Files.createDirectories(base);
-        } catch (InvalidPathException | IOException e) {
-            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "备份执行失败：备份目录不可创建（" + dir + "）");
-        }
-        if (!Files.isWritable(target.getParent())) {
-            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "备份执行失败：备份目录不可写（" + dir + "）");
-        }
-        return target;
-    }
-
-    private static void deleteQuietly(Path target) {
-        try {
-            Files.deleteIfExists(target);
+            Files.deleteIfExists(staging);
         } catch (IOException e) {
-            // 半截文件清理失败不阻断错误响应：记录未落库，文件无账目
+            // 中转文件残留不阻断响应：系统临时目录内，不影响账本与对象
         }
     }
 }

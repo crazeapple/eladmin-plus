@@ -1,14 +1,15 @@
 package com.eladminplus.ops.controller;
 
+import com.eladminplus.auth.session.TokenService;
 import com.eladminplus.common.R;
 import com.eladminplus.ops.dto.BackupRecordView;
-import com.eladminplus.ops.dto.BackupRequest;
 import com.eladminplus.ops.dto.DatabaseConfigSaveRequest;
 import com.eladminplus.ops.dto.DatabaseConfigView;
 import com.eladminplus.ops.service.BackupService;
 import com.eladminplus.ops.service.DatabaseConfigService;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -63,10 +64,11 @@ public class DatabaseConfigController {
         return R.ok();
     }
 
-    /** 手动备份：dir 指定落盘目录，成功返回备份记录（含文件名与实际大小） */
+    /** 手动备份：触发容器内 mysqldump 经存储域落册（当前配置引擎，source=backup），返回备份记录 */
     @PostMapping("/{id}/backup")
     @PreAuthorize("hasAuthority('database:backup') || hasAuthority('ROLE_ROOT')")
-    public R<BackupRecordView> backup(@PathVariable Long id, @RequestBody BackupRequest request) {
-        return R.ok(BackupRecordView.from(backupService.backup(id, request.dir())));
+    public R<BackupRecordView> backup(@PathVariable Long id, Authentication authentication) {
+        TokenService.SessionContext context = (TokenService.SessionContext) authentication.getDetails();
+        return R.ok(BackupRecordView.from(backupService.backup(id, context.username())));
     }
 }
