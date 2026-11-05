@@ -42,9 +42,9 @@ class MeTest extends RefreshLogoutTest {
         // 权限点清单存在（V4 起种子含 18 条按钮权限点，ROLE_ROOT 直通全量）
         assertThat(data.get("permissions").isArray()).isTrue();
 
-        // 菜单树：三条一级页面 + 系统管理目录（V4）+ 监控管理目录（V8）+ 工具目录（V10），按 sort 升序
+        // 菜单树：三条一级页面 + 系统管理目录（V4）+ 监控管理目录（V8）+ 工具目录（V10）+ 运维目录（V12），按 sort 升序
         JsonNode menus = data.get("menus");
-        assertThat(menus.size()).isEqualTo(6);
+        assertThat(menus.size()).isEqualTo(7);
         assertThat(menus.get(0).get("i18nKey").asText()).isEqualTo("routes.home");
         assertThat(menus.get(0).get("componentPathKey").asText()).isEqualTo("home/index");
         assertThat(menus.get(0).get("noCache").asBoolean()).isFalse();
@@ -60,10 +60,16 @@ class MeTest extends RefreshLogoutTest {
         assertThat(menus.get(4).get("type").asInt()).isEqualTo(0);
         assertThat(menus.get(4).get("i18nKey").asText()).isEqualTo("routes.monitor");
         assertThat(menus.get(4).get("children").size()).isEqualTo(4);
-        // 末位为工具目录（type=0），三个子菜单挂其下（V10 工具域三页）
+        // 工具目录（type=0），三个子菜单挂其下（V10 工具域三页）
         assertThat(menus.get(5).get("type").asInt()).isEqualTo(0);
         assertThat(menus.get(5).get("i18nKey").asText()).isEqualTo("routes.tools");
         assertThat(menus.get(5).get("children").size()).isEqualTo(3);
+        // 末位为运维目录（type=0），数据库管理单子菜单挂其下（V12 运维域一页两区块）
+        assertThat(menus.get(6).get("type").asInt()).isEqualTo(0);
+        assertThat(menus.get(6).get("i18nKey").asText()).isEqualTo("routes.ops");
+        assertThat(menus.get(6).get("children").size()).isEqualTo(1);
+        assertThat(menus.get(6).get("children").get(0).get("componentPathKey").asText())
+                .isEqualTo("database");
     }
 
     @Test
