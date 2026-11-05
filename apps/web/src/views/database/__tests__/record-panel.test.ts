@@ -56,10 +56,17 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-async function renderPanel() {
+async function renderPanel(permissions: string[] | 'root' = 'root') {
+  cleanup()
   const pinia = createPinia()
   setActivePinia(pinia)
-  useMenusStoreOf(pinia).roles = ['ROLE_ROOT']
+  const menus = useMenusStoreOf(pinia)
+  menus.user = { id: 1, username: 'admin', nickName: '系统管理员' }
+  if (permissions === 'root') {
+    menus.roles = ['ROLE_ROOT']
+  } else {
+    menus.permissions = permissions
+  }
   render(RecordPanel, { global: { plugins: [pinia, buildI18n('zh-CN'), VueQueryPlugin] } })
 }
 
@@ -183,5 +190,34 @@ describe('备份记录区块（列表、文件名筛选、行级导出与删除�
     await waitFor(() => expect(confirmMock).toHaveBeenCalledTimes(2))
     await waitFor(() => expect(removeMutateAsync).toHaveBeenCalledWith(1))
     await waitFor(() => expect(document.body.textContent).toContain('删除成功'))
+  })
+})
+
+describe('备份记录权限点藏显（database:backup / del）', () => {
+  const samplePage = {
+    content: [
+      {
+        id: 1,
+        fileName: 'eladmin_plus_20261106000000.sql',
+        dbName: 'eladmin_plus',
+        size: 1536,
+        createdAt: '2026-11-06T00:00:00',
+      },
+    ],
+    total: 1,
+  }
+
+  it('无对应权限点按钮不渲染', async () => {
+    listData.value = samplePage
+    await renderPanel(['database:list'])
+    expect(document.querySelectorAll('[data-test="database-record-export"]').length).toBe(0)
+    expect(document.querySelectorAll('[data-test="database-record-delete"]').length).toBe(0)
+  })
+
+  it('权限点齐备按钮全渲染', async () => {
+    listData.value = samplePage
+    await renderPanel(['database:list', 'database:backup', 'database:del'])
+    expect(byTest('database-record-export')).toBeTruthy()
+    expect(byTest('database-record-delete')).toBeTruthy()
   })
 })

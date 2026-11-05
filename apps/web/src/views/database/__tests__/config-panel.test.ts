@@ -65,10 +65,17 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-async function renderPanel() {
+async function renderPanel(permissions: string[] | 'root' = 'root') {
+  cleanup()
   const pinia = createPinia()
   setActivePinia(pinia)
-  useMenusStoreOf(pinia).roles = ['ROLE_ROOT']
+  const menus = useMenusStoreOf(pinia)
+  menus.user = { id: 1, username: 'admin', nickName: '系统管理员' }
+  if (permissions === 'root') {
+    menus.roles = ['ROLE_ROOT']
+  } else {
+    menus.permissions = permissions
+  }
   render(ConfigPanel, { global: { plugins: [pinia, buildI18n('zh-CN'), VueQueryPlugin] } })
 }
 
@@ -285,5 +292,43 @@ describe('连接配置区块（列表、新增 / 编辑弹窗、删除确认）'
     await waitFor(() => {
       expect(document.querySelectorAll('[data-test="database-backup-error"]').length).toBe(0)
     })
+  })
+})
+
+describe('连接配置权限点藏显（database:add / edit / del / backup）', () => {
+  const sampleRow = [
+    {
+      id: 7,
+      host: 'mysql-inner',
+      port: 3306,
+      name: 'eladmin_plus',
+      userName: 'root',
+      remark: '',
+      createdAt: '2026-11-05T09:30:00',
+    },
+  ]
+
+  it('无对应权限点按钮不渲染', async () => {
+    listData.value = sampleRow
+    await renderPanel(['database:list'])
+    expect(document.querySelectorAll('[data-test="database-config-create"]').length).toBe(0)
+    expect(document.querySelectorAll('[data-test="database-config-edit"]').length).toBe(0)
+    expect(document.querySelectorAll('[data-test="database-config-delete"]').length).toBe(0)
+    expect(document.querySelectorAll('[data-test="database-config-backup"]').length).toBe(0)
+  })
+
+  it('权限点齐备按钮全渲染', async () => {
+    listData.value = sampleRow
+    await renderPanel([
+      'database:list',
+      'database:add',
+      'database:edit',
+      'database:del',
+      'database:backup',
+    ])
+    expect(byTest('database-config-create')).toBeTruthy()
+    expect(byTest('database-config-edit')).toBeTruthy()
+    expect(byTest('database-config-delete')).toBeTruthy()
+    expect(byTest('database-config-backup')).toBeTruthy()
   })
 })

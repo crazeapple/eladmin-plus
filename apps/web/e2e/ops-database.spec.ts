@@ -20,6 +20,8 @@ test('运维菜单组：数据库管理入口可达且两区块 tabs 可切换',
   await expect(page.locator('[data-test="database-page"]')).toBeVisible()
   // 面包屑含运维目录链
   await expect(page.locator('.layout__breadcrumb')).toContainText('运维')
+  // 权限点全可见兜底（root）：新增按钮在册（行级四类按钮随配置 / 记录链用例逐一消费）
+  await expect(page.locator('[data-test="database-config-create"]')).toBeVisible()
 
   // 两区块 tabs：连接配置 / 备份记录，切换换选区（页签头无属性透传按角色定位；
   // 面板经 v-show 常驻，骨架期空占位零面积，以挂载与选区判定）
