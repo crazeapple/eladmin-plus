@@ -130,10 +130,32 @@ describe('配置域词条收口', () => {
     }
   })
 
-  it('按钮权限点文案 38 条在册（与菜单种子权限点数一致）', () => {
+  it('运维域词条收口：目录与单页路由 key、页面命名空间、五条权限点双包在册', () => {
+    for (const locale of ['zh-CN', 'en'] as const) {
+      const keys = localeKeys(locale)
+      // V12 种子路由 key：运维目录 + 数据库管理单子菜单
+      for (const route of ['routes.ops', 'routes.database']) {
+        expect(keys).toContain(route)
+      }
+      // 数据库管理页命名空间在册
+      expect(keys.some((key) => key.startsWith('database.'))).toBe(true)
+      // V12 五条按钮权限点文案（i18n_key 与种子一致）
+      for (const key of [
+        'perms.databaseList',
+        'perms.databaseAdd',
+        'perms.databaseEdit',
+        'perms.databaseDel',
+        'perms.databaseBackup',
+      ]) {
+        expect(keys).toContain(key)
+      }
+    }
+  })
+
+  it('按钮权限点文案 43 条在册（与菜单种子权限点数一致）', () => {
     for (const locale of ['zh-CN', 'en'] as const) {
       const permKeys = localeKeys(locale).filter((key) => key.startsWith('perms.'))
-      expect(permKeys).toHaveLength(38)
+      expect(permKeys).toHaveLength(43)
       for (const key of [
         'perms.systemMenuList',
         'perms.systemDictDel',
@@ -142,6 +164,7 @@ describe('配置域词条收口', () => {
         'perms.monitorMonitorList',
         'perms.storageList',
         'perms.emailSend',
+        'perms.databaseBackup',
       ]) {
         expect(permKeys).toContain(key)
       }
