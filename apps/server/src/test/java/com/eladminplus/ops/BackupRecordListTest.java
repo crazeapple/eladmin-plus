@@ -102,6 +102,31 @@ class BackupRecordListTest {
     }
 
     @Test
+    void 文件名模糊筛选生效() throws Exception {
+        String token = rootToken();
+        insertRow(TEST_PREFIX + "-季度报告.sql", 12L, false);
+        insertRow(TEST_PREFIX + "-README.sql", 34L, false);
+
+        MvcResult hit = mockMvc
+                .perform(get("/database/records").param("filename", "季度报告")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andReturn();
+        String hitBody = hit.getResponse().getContentAsString();
+        assertThat(hitBody).contains(TEST_PREFIX + "-季度报告.sql");
+        assertThat(hitBody).doesNotContain(TEST_PREFIX + "-README.sql");
+
+        MvcResult miss = mockMvc
+                .perform(get("/database/records").param("filename", "无此文件名").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andReturn();
+        String missBody = miss.getResponse().getContentAsString();
+        assertThat(missBody).doesNotContain(TEST_PREFIX + "-季度报告.sql");
+        assertThat(missBody).doesNotContain(TEST_PREFIX + "-README.sql");
+        assertThat(missBody).contains("\"total\":0");
+    }
+
+    @Test
     void 删除记录同删文件() throws Exception {
         String token = rootToken();
         String fileName = TEST_PREFIX + "-drop.sql";

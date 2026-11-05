@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /**
  * 备份记录服务：分页列表（新记录在前）；删除先删文件后删行——文件删除失败行保留（记录与文件一一对应，
@@ -29,11 +30,15 @@ public class BackupRecordService {
         this.backupRecordMapper = backupRecordMapper;
     }
 
-    /** 备份记录分页 */
+    /** 备份记录分页：文件名模糊、新记录在前 */
     public PageResult<BackupRecordView> page(BackupRecordPageQuery query) {
-        Page<BackupRecord> result = backupRecordMapper.selectPage(
-                new PageRequest(pageOf(query), sizeOf(query)).toMpPage(),
-                Wrappers.<BackupRecord>lambdaQuery().orderByDesc(BackupRecord::getId));
+        var wrapper = Wrappers.<BackupRecord>lambdaQuery();
+        if (StringUtils.hasText(query.filename())) {
+            wrapper.like(BackupRecord::getFileName, query.filename());
+        }
+        wrapper.orderByDesc(BackupRecord::getId);
+        Page<BackupRecord> result =
+                backupRecordMapper.selectPage(new PageRequest(pageOf(query), sizeOf(query)).toMpPage(), wrapper);
         return new PageResult<>(
                 result.getRecords().stream().map(BackupRecordView::from).toList(),
                 result.getTotal(),

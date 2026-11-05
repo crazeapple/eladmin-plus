@@ -584,6 +584,7 @@ export type RListDeptTreeNode = {
 export type BackupRecordPageQuery = {
     page?: number;
     size?: number;
+    filename?: string;
 };
 
 export type PageResultBackupRecordView = {
