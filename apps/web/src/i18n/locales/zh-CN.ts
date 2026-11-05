@@ -98,6 +98,10 @@ export default {
     monitorExceptionLogs: '异常日志',
     monitorOnlineUsers: '在线用户',
     monitorServerInfo: '服务监控',
+    tools: '工具',
+    toolsStorage: '存储管理',
+    toolsEmail: '邮件工具',
+    toolsAliPay: '支付宝工具',
     notFound: '404',
   },
   perms: {
@@ -135,6 +139,10 @@ export default {
     monitorOnlineList: '在线查询',
     monitorOnlineDel: '在线强退',
     monitorMonitorList: '服务监控',
+    storageList: '文件查询',
+    storageUpload: '文件上传',
+    storageDel: '文件删除',
+    emailSend: '邮件发送',
   },
   menus: {
     create: '新增菜单',

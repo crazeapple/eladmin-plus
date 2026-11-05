@@ -8,6 +8,7 @@ import type {
   PageResultOperationLog,
   ServerMonitorView,
 } from './generated'
+import { queryString } from './query-string'
 import { request } from './request'
 
 /** monitor 监控域四组契约薄封装：操作日志 / 异常日志 / 在线用户 / 服务监控 */
@@ -27,17 +28,6 @@ export interface LogPageQuery {
 
 export interface ExceptionLogQuery extends Omit<LogPageQuery, 'description'> {
   message?: string
-}
-
-/** 查询串构造：空值字段不入串（分页字段恒在） */
-function queryString(params: Record<string, string | number | undefined>): string {
-  const qs = new URLSearchParams()
-  for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined && value !== '') {
-      qs.set(key, String(value))
-    }
-  }
-  return qs.toString()
 }
 
 /** —— 操作日志（/logs/operations） —— */

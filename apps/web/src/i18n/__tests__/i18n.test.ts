@@ -102,16 +102,42 @@ describe('配置域词条收口', () => {
     }
   })
 
-  it('按钮权限点文案 34 条在册（与菜单种子权限点数一致）', () => {
+  it('工具域词条收口：目录与三页路由 key、四条权限点双包在册', () => {
+    for (const locale of ['zh-CN', 'en'] as const) {
+      const keys = localeKeys(locale)
+      // V10 种子路由 key：工具目录 + 三子菜单
+      for (const route of [
+        'routes.tools',
+        'routes.toolsStorage',
+        'routes.toolsEmail',
+        'routes.toolsAliPay',
+      ]) {
+        expect(keys).toContain(route)
+      }
+      // V10 四条按钮权限点文案（i18n_key 与种子一致）
+      for (const key of [
+        'perms.storageList',
+        'perms.storageUpload',
+        'perms.storageDel',
+        'perms.emailSend',
+      ]) {
+        expect(keys).toContain(key)
+      }
+    }
+  })
+
+  it('按钮权限点文案 38 条在册（与菜单种子权限点数一致）', () => {
     for (const locale of ['zh-CN', 'en'] as const) {
       const permKeys = localeKeys(locale).filter((key) => key.startsWith('perms.'))
-      expect(permKeys).toHaveLength(34)
+      expect(permKeys).toHaveLength(38)
       for (const key of [
         'perms.systemMenuList',
         'perms.systemDictDel',
         'perms.systemTaskEdit',
         'perms.systemUserResetPwd',
         'perms.monitorMonitorList',
+        'perms.storageList',
+        'perms.emailSend',
       ]) {
         expect(permKeys).toContain(key)
       }

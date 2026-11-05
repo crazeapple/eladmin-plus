@@ -99,6 +99,10 @@ export default {
     monitorExceptionLogs: 'Exception Logs',
     monitorOnlineUsers: 'Online Users',
     monitorServerInfo: 'Server Info',
+    tools: 'Tools',
+    toolsStorage: 'Storage',
+    toolsEmail: 'Email',
+    toolsAliPay: 'Alipay',
     notFound: '404',
   },
   perms: {
@@ -136,6 +140,10 @@ export default {
     monitorOnlineList: 'Online List',
     monitorOnlineDel: 'Online Kick',
     monitorMonitorList: 'Server Monitor',
+    storageList: 'File List',
+    storageUpload: 'Upload File',
+    storageDel: 'Delete File',
+    emailSend: 'Send Email',
   },
   menus: {
     create: 'Add Menu',
