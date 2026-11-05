@@ -14,6 +14,8 @@ RUN ./gradlew --no-daemon bootJar -q
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
+# 手动备份经容器执行（docker exec 调 mysqldump）：运行层需 docker CLI（sock 挂载见 deploy/compose.yaml）
+RUN apk add --no-cache docker-cli
 COPY --from=build /app/apps/server/build/libs/*.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
