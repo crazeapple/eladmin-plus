@@ -43,10 +43,14 @@ dependencies {
     implementation("io.micrometer:micrometer-core")
     // 存储域 rustfs 引擎：S3 兼容端点经 MinIO Java client 对接 RustFS
     implementation("io.minio:minio:8.5.17")
+    // 邮件工具：spring mail 真实发送（SMTP 配置后启用）
+    implementation("org.springframework.boot:spring-boot-starter-mail")
     // 操作日志切面：AspectJ 切点表达式由 aspectjweaver 解析（版本随 Boot BOM）
     implementation("org.aspectj:aspectjweaver")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-webmvc-test")
+    // 邮件工具协议级测试：内嵌 SMTP 服务（随机端口收信断言）
+    testImplementation("com.icegreen:greenmail:2.1.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
