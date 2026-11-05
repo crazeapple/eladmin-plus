@@ -41,6 +41,8 @@ dependencies {
     implementation("com.alibaba:easyexcel:4.0.3")
     implementation("com.github.oshi:oshi-core:6.8.2")
     implementation("io.micrometer:micrometer-core")
+    // 存储域 rustfs 引擎：S3 兼容端点经 MinIO Java client 对接 RustFS
+    implementation("io.minio:minio:8.5.17")
     // 操作日志切面：AspectJ 切点表达式由 aspectjweaver 解析（版本随 Boot BOM）
     implementation("org.aspectj:aspectjweaver")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
