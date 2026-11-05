@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 
-import type { MeResponse, PasswordChangeRequest, ProfileUpdateRequest } from './generated'
+import type { MeResponse, PasswordChangeRequest, ProfileUpdateRequest, UserView } from './generated'
 import { request } from './request'
 
 /** 个人中心契约薄封装：资料改、头像上传与清空、改密（登录即可，仅操作会话用户自己） */
@@ -8,19 +8,10 @@ import { request } from './request'
 const ME_KEY = ['auth', 'me'] as const
 
 /**
- * 用户区 me 的用户视图：生成物把 me 的用户字段并入 system 域 UserView（两域同名 schema 冲突），
- * 运行时 me 面为 id / username / nickName / avatarId；email / phone / gender 为资料表单预填
- * 预留位，后端契约扩字段后在册即生效。
+ * 用户区 me 的用户视图：生成物 UserView 与 system 域同名 schema 合并（含资料三字段），
+ * 唯 avatarId 未入声明（me 运行时在册）——本地补声明派生。
  */
-export interface MeUser {
-  id: number
-  username: string
-  nickName: string | null
-  avatarId?: number | null
-  email?: string | null
-  phone?: string | null
-  gender?: number | null
-}
+export type MeUser = UserView & { avatarId?: number | null }
 
 export interface MePayload extends Omit<MeResponse, 'user'> {
   user: MeUser
