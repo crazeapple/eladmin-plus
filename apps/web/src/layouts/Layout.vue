@@ -38,8 +38,12 @@ const sessionStore = useSessionStore()
 const tagsViewStore = useTagsViewStore()
 const username = computed(() => menusStore.user?.username ?? '')
 
-/** 退出登录：后端异常也继续清本地（登出的目的是离开）；页签与缓存回首页初始态 */
+/** 顶栏下拉：个人中心进固定路由页；退出登录后端异常也继续清本地（登出的目的是离开） */
 async function onUserCommand(command: string | number | object) {
+  if (command === 'profile') {
+    await router.push('/account')
+    return
+  }
   if (command !== 'logout') return
   const token = sessionStore.accessToken
   try {
@@ -268,7 +272,7 @@ function onMenuSelect() {
             </button>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item disabled data-test="user-profile">{{
+                <el-dropdown-item command="profile" data-test="user-profile">{{
                   t('layout.profile')
                 }}</el-dropdown-item>
                 <el-dropdown-item divided command="logout" data-test="user-logout">

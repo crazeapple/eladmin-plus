@@ -62,6 +62,11 @@ export default {
     closeOthers: 'Close others',
     closeAll: 'Close all',
   },
+  account: {
+    title: 'Account',
+    profileTab: 'Profile & Avatar',
+    passwordTab: 'Password',
+  },
   settings: {
     title: 'Settings',
     theme: 'Theme',

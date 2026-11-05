@@ -39,6 +39,13 @@ export const routes: RouteRecordRaw[] = [
         component: () => import('@/views/demo/no-cache/index.vue'),
         meta: { title: 'routes.demoNoCache', icon: 'edit', noCache: true },
       },
+      {
+        // 个人中心固定路由：顶栏下拉入口（全体登录用户功能，不进动态菜单不挂权限点）
+        path: 'account',
+        name: 'Account',
+        component: () => import('@/views/account/index.vue'),
+        meta: { title: 'account.title', noCache: true },
+      },
     ],
   },
   {

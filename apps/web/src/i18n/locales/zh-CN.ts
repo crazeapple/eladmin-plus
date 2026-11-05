@@ -61,6 +61,11 @@ export default {
     closeOthers: '关闭其他',
     closeAll: '关闭全部',
   },
+  account: {
+    title: '个人中心',
+    profileTab: '资料与头像',
+    passwordTab: '改密',
+  },
   settings: {
     title: '设置',
     theme: '主题',

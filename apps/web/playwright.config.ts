@@ -24,7 +24,7 @@ export default defineConfig({
     },
     {
       name: 'system',
-      testMatch: /(smoke|system[^/]*|monitor[^/]*)\.spec\.ts$/,
+      testMatch: /(smoke|system[^/]*|monitor[^/]*|tools[^/]*|account)\.spec\.ts$/,
       dependencies: ['setup'],
       use: { storageState: '.auth/state.json' },
     },
