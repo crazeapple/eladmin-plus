@@ -43,6 +43,12 @@ public class ProfileController {
         return R.ok();
     }
 
+    @PutMapping("/password")
+    public R<Void> changePassword(@RequestBody PasswordChangeRequest request, Authentication authentication) {
+        profileService.changePassword(currentUserId(authentication), request);
+        return R.ok();
+    }
+
     private static Long currentUserId(Authentication authentication) {
         return ((TokenService.SessionContext) authentication.getDetails()).userId();
     }

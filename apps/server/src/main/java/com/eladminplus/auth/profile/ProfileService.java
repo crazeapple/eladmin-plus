@@ -5,9 +5,11 @@ import com.eladminplus.auth.domain.User;
 import com.eladminplus.auth.mapper.UserMapper;
 import com.eladminplus.common.error.BusinessException;
 import com.eladminplus.storage.domain.StorageFile;
+import com.eladminplus.auth.session.TokenService;
 import com.eladminplus.storage.service.StorageService;
 import java.util.regex.Pattern;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,10 +23,18 @@ public class ProfileService {
 
     private final UserMapper userMapper;
     private final StorageService storageService;
+    private final PasswordEncoder passwordEncoder;
+    private final TokenService tokenService;
 
-    public ProfileService(UserMapper userMapper, StorageService storageService) {
+    public ProfileService(
+            UserMapper userMapper,
+            StorageService storageService,
+            PasswordEncoder passwordEncoder,
+            TokenService tokenService) {
         this.userMapper = userMapper;
         this.storageService = storageService;
+        this.passwordEncoder = passwordEncoder;
+        this.tokenService = tokenService;
     }
 
     /** 资料改：邮箱格式非法 422、重复 400；仅操作会话用户自己 */
@@ -63,6 +73,19 @@ public class ProfileService {
         userMapper.update(null, Wrappers.<User>lambdaUpdate()
                 .eq(User::getId, userId)
                 .set(User::getAvatar, null));
+    }
+
+    /** 改密：旧密码校验（错误 4xx 明确消息）→ 新密码生效 → 该用户全部会话失效（含当前，再访问 401） */
+    public void changePassword(Long userId, PasswordChangeRequest request) {
+        User user = requireUser(userId);
+        if (!passwordEncoder.matches(request.oldPassword(), user.getPassword())) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "error.profile.old-password-wrong");
+        }
+        User change = new User();
+        change.setId(userId);
+        change.setPassword(passwordEncoder.encode(request.newPassword()));
+        userMapper.updateById(change);
+        tokenService.revokeAllForUser(userId);
     }
 
     private User requireUser(Long userId) {
