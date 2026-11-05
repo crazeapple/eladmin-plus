@@ -12,7 +12,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-/** 菜单种子（V4 身份域 + V6 配置域 + V8 监控域 + V10 工具域）：三目录、十四子菜单、38 条按钮权限点行，幂等在册。 */
+/**
+ * 菜单种子（V4 身份域 + V6 配置域 + V8 监控域 + V10 工具域 + V12 运维域）：四目录、十五子菜单、
+ * 43 条按钮权限点行，幂等在册。
+ */
 @SpringBootTest
 class MenuSeedTest {
 
@@ -129,7 +132,33 @@ class MenuSeedTest {
     }
 
     @Test
-    void 三十八条按钮权限点行与后端权限标识一致() {
+    void 运维域目录与单子菜单在册且组件路径对齐前端视图() {
+        List<Menu> menus = menuMapper.selectList(null);
+        Menu directory = menus.stream()
+                .filter(menu -> "routes.ops".equals(menu.getI18nKey()))
+                .filter(menu -> menu.getType() == Menu.TYPE_DIRECTORY)
+                .findFirst().orElseThrow();
+        assertThat(directory.getIcon()).isEqualTo("svg:deploy");
+        assertThat(directory.getSort()).isEqualTo(7);
+
+        // 单子菜单挂运维目录之下：一页两区块（连接配置 / 备份记录）对应单菜单
+        assertThat(menus)
+                .filteredOn(menu -> menu.getType() == Menu.TYPE_MENU
+                        && directory.getId().equals(menu.getParentId()))
+                .extracting(Menu::getComponentPathKey, Menu::getI18nKey,
+                        Menu::getIcon, Menu::getSort)
+                .containsExactlyInAnyOrder(tuple("database", "routes.database", "svg:database", 1));
+    }
+
+    @Test
+    void 运维域五个按钮权限点挂数据库管理页() {
+        List<Menu> menus = menuMapper.selectList(null);
+        assertThat(buttonPermissionsOf(menus, "database")).containsExactlyInAnyOrder(
+                "database:list", "database:add", "database:edit", "database:del", "database:backup");
+    }
+
+    @Test
+    void 四十三条按钮权限点行与后端权限标识一致() {
         List<Menu> buttons = menuMapper.selectList(
                 new LambdaQueryWrapper<Menu>().eq(Menu::getType, Menu.TYPE_BUTTON));
         assertThat(buttons).extracting(Menu::getPermission).containsExactlyInAnyOrder(
@@ -145,7 +174,8 @@ class MenuSeedTest {
                 "monitor:online:list", "monitor:online:del",
                 "monitor:monitor:list",
                 "storage:list", "storage:upload", "storage:del",
-                "email:send");
+                "email:send",
+                "database:list", "database:add", "database:edit", "database:del", "database:backup");
         // 每条按钮挂对应页面菜单、授权树文案 key 在册
         assertThat(buttons).allSatisfy(button -> {
             assertThat(button.getParentId()).isNotNull();
@@ -192,8 +222,8 @@ class MenuSeedTest {
 
     @Test
     void 迁移幂等不产生重复行() {
-        // 全表行数精确：V2 三条页面 + 目录 3 + 子菜单 14 + 按钮 38 = 58
-        assertThat(menuMapper.selectCount(null)).isEqualTo(58);
+        // 全表行数精确：V2 三条页面 + 目录 4 + 子菜单 15 + 按钮 43 = 65
+        assertThat(menuMapper.selectCount(null)).isEqualTo(65);
         // 权限点标识唯一（NOT EXISTS 守卫语义）
         List<Menu> menus = menuMapper.selectList(null);
         long distinctPermissions = menus.stream()
@@ -201,7 +231,7 @@ class MenuSeedTest {
                 .filter(Objects::nonNull)
                 .distinct()
                 .count();
-        assertThat(distinctPermissions).isEqualTo(38);
+        assertThat(distinctPermissions).isEqualTo(43);
     }
 
     private List<String> buttonPermissionsOf(List<Menu> menus, String componentPathKey) {
