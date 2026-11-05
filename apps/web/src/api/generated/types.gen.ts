@@ -140,14 +140,9 @@ export type StorageFileView = {
     createdAt?: string;
 };
 
-export type BackupRequest = {
-    dir?: string;
-};
-
 export type BackupRecordView = {
     id?: number;
     fileName?: string;
-    dir?: string;
     dbName?: string;
     size?: number;
     createdAt?: string;
@@ -1475,7 +1470,7 @@ export type Create7Responses = {
 export type Create7Response = Create7Responses[keyof Create7Responses];
 
 export type BackupData = {
-    body: BackupRequest;
+    body?: never;
     path: {
         id: number;
     };
@@ -1870,6 +1865,24 @@ export type Page6Responses = {
 };
 
 export type Page6Response = Page6Responses[keyof Page6Responses];
+
+export type Export2Data = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/database/records/{id}/export';
+};
+
+export type Export2Responses = {
+    /**
+     * OK
+     */
+    200: Blob | File;
+};
+
+export type Export2Response = Export2Responses[keyof Export2Responses];
 
 export type PublicKeyData = {
     body?: never;

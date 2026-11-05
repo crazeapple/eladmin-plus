@@ -138,14 +138,9 @@ export const zRStorageFileView = z.object({
     data: zStorageFileView.optional()
 });
 
-export const zBackupRequest = z.object({
-    dir: z.string().optional()
-});
-
 export const zBackupRecordView = z.object({
     id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
     fileName: z.string().optional(),
-    dir: z.string().optional(),
     dbName: z.string().optional(),
     size: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
     createdAt: z.iso.datetime().optional()
@@ -1061,8 +1056,6 @@ export const zCreate7Body = zDatabaseConfigSaveRequest;
  */
 export const zCreate7Response = zRLong;
 
-export const zBackupBody = zBackupRequest;
-
 export const zBackupPath = z.object({
     id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
 });
@@ -1238,6 +1231,15 @@ export const zPage6Query = z.object({
  * OK
  */
 export const zPage6Response = zRPageResultBackupRecordView;
+
+export const zExport2Path = z.object({
+    id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+});
+
+/**
+ * OK
+ */
+export const zExport2Response = z.string();
 
 /**
  * OK
