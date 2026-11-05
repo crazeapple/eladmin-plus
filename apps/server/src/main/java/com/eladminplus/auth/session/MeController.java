@@ -24,7 +24,7 @@ public class MeController {
             List<String> permissions,
             List<MenuTreeService.MenuNode> menus) {}
 
-    public record UserView(Long id, String username, String nickName) {}
+    public record UserView(Long id, String username, String nickName, Long avatarId) {}
 
     private final UserMapper userMapper;
     private final MenuTreeService menuTreeService;
@@ -43,7 +43,7 @@ public class MeController {
         List<MenuTreeService.MenuNode> menus = menuTreeService.asTree(menuTreeService.menusOfUser(context));
 
         return R.ok(new MeResponse(
-                new UserView(user.getId(), user.getUsername(), user.getNickName()),
+                new UserView(user.getId(), user.getUsername(), user.getNickName(), user.getAvatar()),
                 context.roles(),
                 context.permissions(),
                 menus));

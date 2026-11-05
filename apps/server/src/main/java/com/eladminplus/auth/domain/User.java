@@ -28,6 +28,9 @@ public class User {
     /** 性别：0 未知 1 男 2 女 */
     private Integer gender;
 
+    /** 头像文件 id（storage_file），空即无头像 */
+    private Long avatar;
+
     /** 状态：1 启用 0 停用 */
     private Integer enabled;
 
