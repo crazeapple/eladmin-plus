@@ -57,16 +57,30 @@ test('资料改：昵称生效且 me 刷新回填；邮箱非法 422 页内提�
   expect(await saveAndWait()).toBe(200)
   await expect(nickname).toHaveValue('系统管理员E2E')
 
+  // 资料三字段保存后 me 刷新回填（me 响应契约扩展的运行时验证）
+  const email = page.locator('[data-test="account-profile-email"]')
+  const phone = page.locator('[data-test="account-profile-phone"]')
+  await email.fill('e2e-amend@example.com')
+  await phone.fill('13800000000')
+  await page.locator('[data-test="account-profile-gender"] .el-radio').first().click()
+  expect(await saveAndWait()).toBe(200)
+  await expect(email).toHaveValue('e2e-amend@example.com')
+  await expect(phone).toHaveValue('13800000000')
+
   // 邮箱非法（后端 422）：页内错误提示
-  await page.locator('[data-test="account-profile-email"]').fill('bad-email')
+  await email.fill('bad-email')
   expect(await saveAndWait()).toBe(422)
   await expect(page.locator('.el-message').filter({ hasText: '邮箱格式不合法' })).toBeVisible()
 
-  // 还原昵称，不污染共享开发数据
-  await page.locator('[data-test="account-profile-email"]').fill('')
+  // 还原资料，不污染共享开发数据
+  await email.fill('')
+  await phone.fill('')
+  await page.locator('[data-test="account-profile-gender"] .el-radio').nth(2).click()
   await nickname.fill('系统管理员')
   expect(await saveAndWait()).toBe(200)
   await expect(nickname).toHaveValue('系统管理员')
+  await expect(email).toHaveValue('')
+  await expect(phone).toHaveValue('')
 })
 
 test('昵称必填：清空昵称保存被拦且不调端点', async ({ page }) => {
