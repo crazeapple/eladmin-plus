@@ -1,8 +1,11 @@
 package com.eladminplus.ops.controller;
 
 import com.eladminplus.common.R;
+import com.eladminplus.ops.dto.BackupRecordView;
+import com.eladminplus.ops.dto.BackupRequest;
 import com.eladminplus.ops.dto.DatabaseConfigSaveRequest;
 import com.eladminplus.ops.dto.DatabaseConfigView;
+import com.eladminplus.ops.service.BackupService;
 import com.eladminplus.ops.service.DatabaseConfigService;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,15 +18,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** 连接配置端点：列表 / 详情 / 新增 / 更新 / 删除。权限点 database:list / add / edit / del（ROLE_ROOT 直通）。 */
+/** 连接配置端点：列表 / 详情 / 新增 / 更新 / 删除 / 手动备份。权限点 database:list / add / edit / del / backup（ROLE_ROOT 直通）。 */
 @RestController
 @RequestMapping("/database/configs")
 public class DatabaseConfigController {
 
     private final DatabaseConfigService databaseConfigService;
+    private final BackupService backupService;
 
-    public DatabaseConfigController(DatabaseConfigService databaseConfigService) {
+    public DatabaseConfigController(DatabaseConfigService databaseConfigService, BackupService backupService) {
         this.databaseConfigService = databaseConfigService;
+        this.backupService = backupService;
     }
 
     @GetMapping
@@ -56,5 +61,12 @@ public class DatabaseConfigController {
     public R<Void> remove(@PathVariable Long id) {
         databaseConfigService.remove(id);
         return R.ok();
+    }
+
+    /** 手动备份：dir 指定落盘目录，成功返回备份记录（含文件名与实际大小） */
+    @PostMapping("/{id}/backup")
+    @PreAuthorize("hasAuthority('database:backup') || hasAuthority('ROLE_ROOT')")
+    public R<BackupRecordView> backup(@PathVariable Long id, @RequestBody BackupRequest request) {
+        return R.ok(BackupRecordView.from(backupService.backup(id, request.dir())));
     }
 }
