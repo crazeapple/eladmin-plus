@@ -89,6 +89,15 @@ export type DeptSaveRequest = {
     enabled: number;
 };
 
+export type DatabaseConfigSaveRequest = {
+    host?: string;
+    port?: number;
+    name?: string;
+    userName?: string;
+    password?: string;
+    remark?: string;
+};
+
 export type ProfileUpdateRequest = {
     nickName?: string;
     email?: string;
@@ -129,6 +138,25 @@ export type StorageFileView = {
     engine?: string;
     uploader?: string;
     createdAt?: string;
+};
+
+export type BackupRequest = {
+    dir?: string;
+};
+
+export type BackupRecordView = {
+    id?: number;
+    fileName?: string;
+    dir?: string;
+    dbName?: string;
+    size?: number;
+    createdAt?: string;
+};
+
+export type RBackupRecordView = {
+    code?: number;
+    message?: string;
+    data?: BackupRecordView;
 };
 
 export type RMapStringObject = {
@@ -553,6 +581,47 @@ export type RListDeptTreeNode = {
     data?: Array<DeptTreeNode>;
 };
 
+export type BackupRecordPageQuery = {
+    page?: number;
+    size?: number;
+};
+
+export type PageResultBackupRecordView = {
+    content?: Array<BackupRecordView>;
+    total?: number;
+    page?: number;
+    size?: number;
+};
+
+export type RPageResultBackupRecordView = {
+    code?: number;
+    message?: string;
+    data?: PageResultBackupRecordView;
+};
+
+export type DatabaseConfigView = {
+    id?: number;
+    host?: string;
+    port?: number;
+    name?: string;
+    userName?: string;
+    remark?: string;
+    createdAt?: string;
+    updatedAt?: string;
+};
+
+export type RListDatabaseConfigView = {
+    code?: number;
+    message?: string;
+    data?: Array<DatabaseConfigView>;
+};
+
+export type RDatabaseConfigView = {
+    code?: number;
+    message?: string;
+    data?: DatabaseConfigView;
+};
+
 export type MeResponse = {
     user?: UserView;
     roles?: Array<string>;
@@ -923,6 +992,60 @@ export type Update6Responses = {
 };
 
 export type Update6Response = Update6Responses[keyof Update6Responses];
+
+export type Remove6Data = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/database/configs/{id}';
+};
+
+export type Remove6Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type Remove6Response = Remove6Responses[keyof Remove6Responses];
+
+export type DetailData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/database/configs/{id}';
+};
+
+export type DetailResponses = {
+    /**
+     * OK
+     */
+    200: RDatabaseConfigView;
+};
+
+export type DetailResponse = DetailResponses[keyof DetailResponses];
+
+export type Update7Data = {
+    body: DatabaseConfigSaveRequest;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/database/configs/{id}';
+};
+
+export type Update7Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type Update7Response = Update7Responses[keyof Update7Responses];
 
 export type UpdateProfileData = {
     body: ProfileUpdateRequest;
@@ -1318,6 +1441,56 @@ export type Create6Responses = {
 
 export type Create6Response = Create6Responses[keyof Create6Responses];
 
+export type List2Data = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/database/configs';
+};
+
+export type List2Responses = {
+    /**
+     * OK
+     */
+    200: RListDatabaseConfigView;
+};
+
+export type List2Response = List2Responses[keyof List2Responses];
+
+export type Create7Data = {
+    body: DatabaseConfigSaveRequest;
+    path?: never;
+    query?: never;
+    url: '/database/configs';
+};
+
+export type Create7Responses = {
+    /**
+     * OK
+     */
+    200: RLong;
+};
+
+export type Create7Response = Create7Responses[keyof Create7Responses];
+
+export type BackupData = {
+    body: BackupRequest;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/database/configs/{id}/backup';
+};
+
+export type BackupResponses = {
+    /**
+     * OK
+     */
+    200: RBackupRecordView;
+};
+
+export type BackupResponse = BackupResponses[keyof BackupResponses];
+
 export type RefreshData = {
     body?: never;
     headers?: {
@@ -1493,21 +1666,21 @@ export type OverviewResponses = {
 
 export type OverviewResponse = OverviewResponses[keyof OverviewResponses];
 
-export type List2Data = {
+export type List3Data = {
     body?: never;
     path?: never;
     query?: never;
     url: '/online';
 };
 
-export type List2Responses = {
+export type List3Responses = {
     /**
      * OK
      */
     200: RListOnlineUserView;
 };
 
-export type List2Response = List2Responses[keyof List2Responses];
+export type List3Response = List3Responses[keyof List3Responses];
 
 export type ServerData = {
     body?: never;
@@ -1679,6 +1852,24 @@ export type Tree1Responses = {
 
 export type Tree1Response = Tree1Responses[keyof Tree1Responses];
 
+export type Page6Data = {
+    body?: never;
+    path?: never;
+    query: {
+        query: BackupRecordPageQuery;
+    };
+    url: '/database/records';
+};
+
+export type Page6Responses = {
+    /**
+     * OK
+     */
+    200: RPageResultBackupRecordView;
+};
+
+export type Page6Response = Page6Responses[keyof Page6Responses];
+
 export type PublicKeyData = {
     body?: never;
     path?: never;
@@ -1727,7 +1918,7 @@ export type CaptchaResponses = {
 
 export type CaptchaResponse = CaptchaResponses[keyof CaptchaResponses];
 
-export type Remove6Data = {
+export type Remove7Data = {
     body?: never;
     path: {
         id: number;
@@ -1736,14 +1927,14 @@ export type Remove6Data = {
     url: '/storage/files/{id}';
 };
 
-export type Remove6Responses = {
+export type Remove7Responses = {
     /**
      * OK
      */
     200: RVoid;
 };
 
-export type Remove6Response = Remove6Responses[keyof Remove6Responses];
+export type Remove7Response = Remove7Responses[keyof Remove7Responses];
 
 export type KickData = {
     body?: never;
@@ -1763,7 +1954,7 @@ export type KickResponses = {
 
 export type KickResponse = KickResponses[keyof KickResponses];
 
-export type Remove7Data = {
+export type Remove8Data = {
     body?: never;
     path: {
         id: number;
@@ -1772,14 +1963,14 @@ export type Remove7Data = {
     url: '/logs/operations/{id}';
 };
 
-export type Remove7Responses = {
+export type Remove8Responses = {
     /**
      * OK
      */
     200: RVoid;
 };
 
-export type Remove7Response = Remove7Responses[keyof Remove7Responses];
+export type Remove8Response = Remove8Responses[keyof Remove8Responses];
 
 export type ClearData = {
     body?: never;
@@ -1797,7 +1988,7 @@ export type ClearResponses = {
 
 export type ClearResponse = ClearResponses[keyof ClearResponses];
 
-export type Remove8Data = {
+export type Remove9Data = {
     body?: never;
     path: {
         id: number;
@@ -1806,14 +1997,14 @@ export type Remove8Data = {
     url: '/logs/exceptions/{id}';
 };
 
-export type Remove8Responses = {
+export type Remove9Responses = {
     /**
      * OK
      */
     200: RVoid;
 };
 
-export type Remove8Response = Remove8Responses[keyof Remove8Responses];
+export type Remove9Response = Remove9Responses[keyof Remove9Responses];
 
 export type Clear1Data = {
     body?: never;
@@ -1830,3 +2021,21 @@ export type Clear1Responses = {
 };
 
 export type Clear1Response = Clear1Responses[keyof Clear1Responses];
+
+export type Remove10Data = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/database/records/{id}';
+};
+
+export type Remove10Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type Remove10Response = Remove10Responses[keyof Remove10Responses];
