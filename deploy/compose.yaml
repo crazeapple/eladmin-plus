@@ -46,6 +46,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    volumes:
+      # 手动备份经容器执行（docker exec 调 mysqldump）：应用容器需可调宿主机 docker
+      - /var/run/docker.sock:/var/run/docker.sock
     healthcheck:
       test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:8080/actuator/health']
       interval: 5s

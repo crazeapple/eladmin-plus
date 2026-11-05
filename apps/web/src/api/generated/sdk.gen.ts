@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { ByNameData, ByNameResponses, CaptchaData, CaptchaResponses, ChangePasswordData, ChangePasswordResponses, CheckData, CheckResponses, Clear1Data, Clear1Responses, ClearAvatarData, ClearAvatarResponses, ClearData, ClearResponses, Create1Data, Create1Responses, Create2Data, Create2Responses, Create3Data, Create3Responses, Create4Data, Create4Responses, Create5Data, Create5Responses, Create6Data, Create6Responses, CreateData, CreateDetailData, CreateDetailResponses, CreateResponses, DownloadData, DownloadResponses, ExecuteOnceData, ExecuteOnceResponses, Export1Data, Export1Responses, ExportData, ExportResponses, KickData, KickResponses, List1Data, List1Responses, List2Data, List2Responses, ListData, ListDetailsData, ListDetailsResponses, ListResponses, LoginData, LoginResponses, LogoutData, LogoutResponses, LogsData, LogsResponses, MeData, MenuIdsOfRoleData, MenuIdsOfRoleResponses, MeResponses, OverviewData, OverviewResponses, Page1Data, Page1Responses, Page2Data, Page2Responses, Page3Data, Page3Responses, Page4Data, Page4Responses, Page5Data, Page5Responses, PageData, PageResponses, PauseData, PauseResponses, PublicKeyData, PublicKeyResponses, RefreshData, RefreshResponses, Remove1Data, Remove1Responses, Remove2Data, Remove2Responses, Remove3Data, Remove3Responses, Remove4Data, Remove4Responses, Remove5Data, Remove5Responses, Remove6Data, Remove6Responses, Remove7Data, Remove7Responses, Remove8Data, Remove8Responses, RemoveBatch1Data, RemoveBatch1Responses, RemoveBatch2Data, RemoveBatch2Responses, RemoveBatchData, RemoveBatchResponses, RemoveData, RemoveDetailData, RemoveDetailResponses, RemoveResponses, ResetPasswordsData, ResetPasswordsResponses, ResumeData, ResumeResponses, SaveRoleMenusData, SaveRoleMenusResponses, SendData, SendResponses, ServerData, ServerResponses, SetEnabledData, SetEnabledResponses, TargetsData, TargetsResponses, Tree1Data, Tree1Responses, TreeData, TreeResponses, Update1Data, Update1Responses, Update2Data, Update2Responses, Update3Data, Update3Responses, Update4Data, Update4Responses, Update5Data, Update5Responses, Update6Data, Update6Responses, UpdateData, UpdateDetailData, UpdateDetailResponses, UpdateProfileData, UpdateProfileResponses, UpdateResponses, UploadAvatarData, UploadAvatarResponses, UploadData, UploadResponses } from './types.gen';
+import type { BackupData, BackupResponses, ByNameData, ByNameResponses, CaptchaData, CaptchaResponses, ChangePasswordData, ChangePasswordResponses, CheckData, CheckResponses, Clear1Data, Clear1Responses, ClearAvatarData, ClearAvatarResponses, ClearData, ClearResponses, Create1Data, Create1Responses, Create2Data, Create2Responses, Create3Data, Create3Responses, Create4Data, Create4Responses, Create5Data, Create5Responses, Create6Data, Create6Responses, Create7Data, Create7Responses, CreateData, CreateDetailData, CreateDetailResponses, CreateResponses, DetailData, DetailResponses, DownloadData, DownloadResponses, ExecuteOnceData, ExecuteOnceResponses, Export1Data, Export1Responses, Export2Data, Export2Responses, ExportData, ExportResponses, KickData, KickResponses, List1Data, List1Responses, List2Data, List2Responses, List3Data, List3Responses, ListData, ListDetailsData, ListDetailsResponses, ListResponses, LoginData, LoginResponses, LogoutData, LogoutResponses, LogsData, LogsResponses, MeData, MenuIdsOfRoleData, MenuIdsOfRoleResponses, MeResponses, OverviewData, OverviewResponses, Page1Data, Page1Responses, Page2Data, Page2Responses, Page3Data, Page3Responses, Page4Data, Page4Responses, Page5Data, Page5Responses, Page6Data, Page6Responses, PageData, PageResponses, PauseData, PauseResponses, PublicKeyData, PublicKeyResponses, RefreshData, RefreshResponses, Remove10Data, Remove10Responses, Remove1Data, Remove1Responses, Remove2Data, Remove2Responses, Remove3Data, Remove3Responses, Remove4Data, Remove4Responses, Remove5Data, Remove5Responses, Remove6Data, Remove6Responses, Remove7Data, Remove7Responses, Remove8Data, Remove8Responses, Remove9Data, Remove9Responses, RemoveBatch1Data, RemoveBatch1Responses, RemoveBatch2Data, RemoveBatch2Responses, RemoveBatchData, RemoveBatchResponses, RemoveData, RemoveDetailData, RemoveDetailResponses, RemoveResponses, ResetPasswordsData, ResetPasswordsResponses, ResumeData, ResumeResponses, SaveRoleMenusData, SaveRoleMenusResponses, SendData, SendResponses, ServerData, ServerResponses, SetEnabledData, SetEnabledResponses, TargetsData, TargetsResponses, Tree1Data, Tree1Responses, TreeData, TreeResponses, Update1Data, Update1Responses, Update2Data, Update2Responses, Update3Data, Update3Responses, Update4Data, Update4Responses, Update5Data, Update5Responses, Update6Data, Update6Responses, Update7Data, Update7Responses, UpdateData, UpdateDetailData, UpdateDetailResponses, UpdateProfileData, UpdateProfileResponses, UpdateResponses, UploadAvatarData, UploadAvatarResponses, UploadData, UploadResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -119,6 +119,19 @@ export const remove5 = <ThrowOnError extends boolean = false>(options: Options<R
 
 export const update6 = <ThrowOnError extends boolean = false>(options: Options<Update6Data, ThrowOnError>): RequestResult<Update6Responses, unknown, ThrowOnError> => (options.client ?? client).put<Update6Responses, unknown, ThrowOnError>({
     url: '/depts/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const remove6 = <ThrowOnError extends boolean = false>(options: Options<Remove6Data, ThrowOnError>): RequestResult<Remove6Responses, unknown, ThrowOnError> => (options.client ?? client).delete<Remove6Responses, unknown, ThrowOnError>({ url: '/database/configs/{id}', ...options });
+
+export const detail = <ThrowOnError extends boolean = false>(options: Options<DetailData, ThrowOnError>): RequestResult<DetailResponses, unknown, ThrowOnError> => (options.client ?? client).get<DetailResponses, unknown, ThrowOnError>({ url: '/database/configs/{id}', ...options });
+
+export const update7 = <ThrowOnError extends boolean = false>(options: Options<Update7Data, ThrowOnError>): RequestResult<Update7Responses, unknown, ThrowOnError> => (options.client ?? client).put<Update7Responses, unknown, ThrowOnError>({
+    url: '/database/configs/{id}',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -263,6 +276,19 @@ export const create6 = <ThrowOnError extends boolean = false>(options: Options<C
     }
 });
 
+export const list2 = <ThrowOnError extends boolean = false>(options?: Options<List2Data, ThrowOnError>): RequestResult<List2Responses, unknown, ThrowOnError> => (options?.client ?? client).get<List2Responses, unknown, ThrowOnError>({ url: '/database/configs', ...options });
+
+export const create7 = <ThrowOnError extends boolean = false>(options: Options<Create7Data, ThrowOnError>): RequestResult<Create7Responses, unknown, ThrowOnError> => (options.client ?? client).post<Create7Responses, unknown, ThrowOnError>({
+    url: '/database/configs',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const backup = <ThrowOnError extends boolean = false>(options: Options<BackupData, ThrowOnError>): RequestResult<BackupResponses, unknown, ThrowOnError> => (options.client ?? client).post<BackupResponses, unknown, ThrowOnError>({ url: '/database/configs/{id}/backup', ...options });
+
 export const refresh = <ThrowOnError extends boolean = false>(options?: Options<RefreshData, ThrowOnError>): RequestResult<RefreshResponses, unknown, ThrowOnError> => (options?.client ?? client).post<RefreshResponses, unknown, ThrowOnError>({ url: '/auth/refresh', ...options });
 
 export const clearAvatar = <ThrowOnError extends boolean = false>(options?: Options<ClearAvatarData, ThrowOnError>): RequestResult<ClearAvatarResponses, unknown, ThrowOnError> => (options?.client ?? client).delete<ClearAvatarResponses, unknown, ThrowOnError>({ url: '/auth/me/avatar', ...options });
@@ -304,7 +330,7 @@ export const download = <ThrowOnError extends boolean = false>(options: Options<
 
 export const overview = <ThrowOnError extends boolean = false>(options?: Options<OverviewData, ThrowOnError>): RequestResult<OverviewResponses, unknown, ThrowOnError> => (options?.client ?? client).get<OverviewResponses, unknown, ThrowOnError>({ url: '/stats/overview', ...options });
 
-export const list2 = <ThrowOnError extends boolean = false>(options?: Options<List2Data, ThrowOnError>): RequestResult<List2Responses, unknown, ThrowOnError> => (options?.client ?? client).get<List2Responses, unknown, ThrowOnError>({ url: '/online', ...options });
+export const list3 = <ThrowOnError extends boolean = false>(options?: Options<List3Data, ThrowOnError>): RequestResult<List3Responses, unknown, ThrowOnError> => (options?.client ?? client).get<List3Responses, unknown, ThrowOnError>({ url: '/online', ...options });
 
 export const server = <ThrowOnError extends boolean = false>(options?: Options<ServerData, ThrowOnError>): RequestResult<ServerResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ServerResponses, unknown, ThrowOnError>({ url: '/monitor/server', ...options });
 
@@ -340,20 +366,26 @@ export const byName = <ThrowOnError extends boolean = false>(options: Options<By
 
 export const tree1 = <ThrowOnError extends boolean = false>(options?: Options<Tree1Data, ThrowOnError>): RequestResult<Tree1Responses, unknown, ThrowOnError> => (options?.client ?? client).get<Tree1Responses, unknown, ThrowOnError>({ url: '/depts/tree', ...options });
 
+export const page6 = <ThrowOnError extends boolean = false>(options: Options<Page6Data, ThrowOnError>): RequestResult<Page6Responses, unknown, ThrowOnError> => (options.client ?? client).get<Page6Responses, unknown, ThrowOnError>({ url: '/database/records', ...options });
+
+export const export2 = <ThrowOnError extends boolean = false>(options: Options<Export2Data, ThrowOnError>): RequestResult<Export2Responses, unknown, ThrowOnError> => (options.client ?? client).get<Export2Responses, unknown, ThrowOnError>({ url: '/database/records/{id}/export', ...options });
+
 export const publicKey = <ThrowOnError extends boolean = false>(options?: Options<PublicKeyData, ThrowOnError>): RequestResult<PublicKeyResponses, unknown, ThrowOnError> => (options?.client ?? client).get<PublicKeyResponses, unknown, ThrowOnError>({ url: '/auth/public-key', ...options });
 
 export const me = <ThrowOnError extends boolean = false>(options?: Options<MeData, ThrowOnError>): RequestResult<MeResponses, unknown, ThrowOnError> => (options?.client ?? client).get<MeResponses, unknown, ThrowOnError>({ url: '/auth/me', ...options });
 
 export const captcha = <ThrowOnError extends boolean = false>(options?: Options<CaptchaData, ThrowOnError>): RequestResult<CaptchaResponses, unknown, ThrowOnError> => (options?.client ?? client).get<CaptchaResponses, unknown, ThrowOnError>({ url: '/auth/captcha', ...options });
 
-export const remove6 = <ThrowOnError extends boolean = false>(options: Options<Remove6Data, ThrowOnError>): RequestResult<Remove6Responses, unknown, ThrowOnError> => (options.client ?? client).delete<Remove6Responses, unknown, ThrowOnError>({ url: '/storage/files/{id}', ...options });
+export const remove7 = <ThrowOnError extends boolean = false>(options: Options<Remove7Data, ThrowOnError>): RequestResult<Remove7Responses, unknown, ThrowOnError> => (options.client ?? client).delete<Remove7Responses, unknown, ThrowOnError>({ url: '/storage/files/{id}', ...options });
 
 export const kick = <ThrowOnError extends boolean = false>(options: Options<KickData, ThrowOnError>): RequestResult<KickResponses, unknown, ThrowOnError> => (options.client ?? client).delete<KickResponses, unknown, ThrowOnError>({ url: '/online/{userId}', ...options });
 
-export const remove7 = <ThrowOnError extends boolean = false>(options: Options<Remove7Data, ThrowOnError>): RequestResult<Remove7Responses, unknown, ThrowOnError> => (options.client ?? client).delete<Remove7Responses, unknown, ThrowOnError>({ url: '/logs/operations/{id}', ...options });
+export const remove8 = <ThrowOnError extends boolean = false>(options: Options<Remove8Data, ThrowOnError>): RequestResult<Remove8Responses, unknown, ThrowOnError> => (options.client ?? client).delete<Remove8Responses, unknown, ThrowOnError>({ url: '/logs/operations/{id}', ...options });
 
 export const clear = <ThrowOnError extends boolean = false>(options?: Options<ClearData, ThrowOnError>): RequestResult<ClearResponses, unknown, ThrowOnError> => (options?.client ?? client).delete<ClearResponses, unknown, ThrowOnError>({ url: '/logs/operations/all', ...options });
 
-export const remove8 = <ThrowOnError extends boolean = false>(options: Options<Remove8Data, ThrowOnError>): RequestResult<Remove8Responses, unknown, ThrowOnError> => (options.client ?? client).delete<Remove8Responses, unknown, ThrowOnError>({ url: '/logs/exceptions/{id}', ...options });
+export const remove9 = <ThrowOnError extends boolean = false>(options: Options<Remove9Data, ThrowOnError>): RequestResult<Remove9Responses, unknown, ThrowOnError> => (options.client ?? client).delete<Remove9Responses, unknown, ThrowOnError>({ url: '/logs/exceptions/{id}', ...options });
 
 export const clear1 = <ThrowOnError extends boolean = false>(options?: Options<Clear1Data, ThrowOnError>): RequestResult<Clear1Responses, unknown, ThrowOnError> => (options?.client ?? client).delete<Clear1Responses, unknown, ThrowOnError>({ url: '/logs/exceptions/all', ...options });
+
+export const remove10 = <ThrowOnError extends boolean = false>(options: Options<Remove10Data, ThrowOnError>): RequestResult<Remove10Responses, unknown, ThrowOnError> => (options.client ?? client).delete<Remove10Responses, unknown, ThrowOnError>({ url: '/database/records/{id}', ...options });

@@ -32,6 +32,9 @@ public class StorageFile {
     /** 存储引擎：local 本地磁盘 / rustfs 对象存储 */
     private String engine;
 
+    /** 来源：空为页面上传 / backup 数据库备份（服务层内部打标，不暴露参数） */
+    private String source;
+
     /** 上传人用户名 */
     private String uploader;
 
