@@ -534,6 +534,7 @@ export default {
     size: 'Size',
     backupAt: 'Backup Time',
     filterFilename: 'File name search',
+    reset: 'Reset',
     export: 'Export',
     exportSuccess: 'Downloaded {name}',
     exportFailed: 'Export failed',

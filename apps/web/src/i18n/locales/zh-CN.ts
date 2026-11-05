@@ -530,6 +530,7 @@ export default {
     size: '大小',
     backupAt: '备份时间',
     filterFilename: '文件名模糊搜索',
+    reset: '重置',
     export: '导出',
     exportSuccess: '已下载 {name}',
     exportFailed: '导出失败',

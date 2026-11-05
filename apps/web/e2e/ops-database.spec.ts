@@ -170,3 +170,83 @@ test('备份触发：真实备份成功提示落册文件名、错误凭据页�
   await fileDialog.getByRole('button', { name: '确定' }).click()
   await expect(fileRow).toBeHidden()
 })
+
+test('备份记录链：备份出新行、文件名筛选命中与无命中、行级导出原名落地、删除后行消失', async ({
+  page,
+}) => {
+  await gotoWithSession(page, '/database')
+  const configTable = page.locator('[data-test="database-config-table"]')
+  await expect(
+    configTable.or(page.locator('[data-test="admin-table-empty"]')).first(),
+  ).toBeVisible()
+
+  // 造配置并触发一次真实备份（唯一记录行由此产生，库名前缀 + 时间戳文件名）
+  const dialog = page.locator('[data-test="database-config-dialog"]')
+  const remark = `e2e-db-rec-${Date.now()}`
+  await page.locator('[data-test="database-config-create"]').click()
+  await expect(dialog).toBeVisible()
+  await dialog.locator('[data-field="host"] input').fill('eladmin-plus-prod-mysql')
+  await dialog.locator('[data-field="port"] input').fill('3306')
+  await dialog.locator('[data-field="name"] input').fill('eladmin_plus')
+  await dialog.locator('[data-field="userName"] input').fill('root')
+  await dialog.locator('[data-field="password"] input').fill('root')
+  await dialog.locator('[data-field="remark"] input').fill(remark)
+  await dialog.getByRole('button', { name: '保存' }).click()
+  await expect(page.locator('.el-message').filter({ hasText: '保存成功' })).toBeVisible()
+  const configRow = configTable.locator('tbody tr').filter({ hasText: remark })
+  await expect(configRow).toBeVisible()
+
+  await configRow.locator('[data-test="database-config-backup"]').click()
+  const backupDialog = page.getByRole('dialog', { name: '备份确认' })
+  await expect(backupDialog).toBeVisible()
+  await backupDialog.getByRole('button', { name: '确定' }).click()
+  const successToast = page.locator('.el-message').filter({ hasText: '备份完成' })
+  await expect(successToast).toBeVisible({ timeout: 60_000 })
+  const toastText = (await successToast.first().textContent()) ?? ''
+  const fileName = toastText.replace(/^.*备份完成：/, '').trim()
+  expect(fileName).toMatch(/^eladmin_plus_\d{14}\.sql$/)
+
+  // 切备份记录区块：新行在册（文件名唯一定位）
+  await page.getByRole('tab', { name: '备份记录' }).click()
+  const recordTable = page.locator('[data-test="database-record-table"]')
+  await expect(
+    recordTable.or(page.locator('[data-test="admin-table-empty"]')).first(),
+  ).toBeVisible()
+  const recordRow = recordTable.locator('tbody tr').filter({ hasText: fileName })
+  await expect(recordRow).toBeVisible()
+
+  // 文件名模糊筛选：命中该行；无命中走空态占位
+  const nameFilter = page.locator('[data-test="database-record-filter"]')
+  await nameFilter.fill(fileName)
+  await nameFilter.press('Enter')
+  await expect(recordTable.locator('tbody tr').filter({ hasText: fileName })).toBeVisible()
+  await nameFilter.fill('e2e-no-such-backup')
+  await nameFilter.press('Enter')
+  await expect(page.locator('[data-test="admin-table-empty"]')).toBeVisible()
+
+  // 行级导出：blob 落盘原名 sql 文件
+  await nameFilter.fill(fileName)
+  await nameFilter.press('Enter')
+  await expect(recordRow).toBeVisible()
+  const downloadPromise = page.waitForEvent('download')
+  await recordRow.locator('[data-test="database-record-export"]').click()
+  const download = await downloadPromise
+  expect(download.suggestedFilename()).toBe(fileName)
+  await expect(page.locator('.el-message').filter({ hasText: '已下载' })).toBeVisible()
+
+  // 行级删除：确认后行消失（存储对象与记录行同删，后端语义）
+  await recordRow.locator('[data-test="database-record-delete"]').click()
+  const deleteDialog = page.getByRole('dialog', { name: '删除确认' })
+  await expect(deleteDialog).toBeVisible()
+  await deleteDialog.getByRole('button', { name: '确定' }).click()
+  await expect(page.locator('.el-message').filter({ hasText: '删除成功' })).toBeVisible()
+  await expect(recordRow).toBeHidden()
+
+  // 清理：连接配置行删除（自清，不留测试数据）
+  await page.getByRole('tab', { name: '连接配置' }).click()
+  await configRow.locator('[data-test="database-config-delete"]').click()
+  const confirmDialog = page.getByRole('dialog', { name: '删除确认' })
+  await expect(confirmDialog).toBeVisible()
+  await confirmDialog.getByRole('button', { name: '确定' }).click()
+  await expect(configRow).toBeHidden()
+})
