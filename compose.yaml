@@ -34,6 +34,23 @@ services:
       timeout: 3s
       retries: 20
 
+  rustfs:
+    image: rustfs/rustfs:latest
+    container_name: eladmin-plus-rustfs
+    environment:
+      RUSTFS_ACCESS_KEY: rustfsadmin
+      RUSTFS_SECRET_KEY: rustfsadmin
+    ports:
+      - '${RUSTFS_PORT:-9100}:9000'
+    volumes:
+      - rustfs_data:/data
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://127.0.0.1:9000/minio/health/live']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
 volumes:
   mysql_data:
   redis_data:
+  rustfs_data:
