@@ -5,14 +5,27 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
 
 import { buildI18n } from '@/i18n'
+import { useSessionStore } from '@/stores/session'
 import Account from '../index.vue'
 
-const { updateMutate, clearMutate, uploadMutate, blobUrl, confirmMock } = vi.hoisted(() => ({
+const {
+  updateMutate,
+  clearMutate,
+  uploadMutate,
+  changeMutate,
+  blobUrl,
+  confirmMock,
+  routerPush,
+  logoutBroadcast,
+} = vi.hoisted(() => ({
   updateMutate: vi.fn().mockResolvedValue(undefined),
   clearMutate: vi.fn().mockResolvedValue(undefined),
   uploadMutate: vi.fn().mockResolvedValue(9),
+  changeMutate: vi.fn().mockResolvedValue(undefined),
   blobUrl: vi.fn().mockResolvedValue('blob:mock-avatar'),
   confirmMock: vi.fn().mockResolvedValue(true),
+  routerPush: vi.fn().mockResolvedValue(undefined),
+  logoutBroadcast: vi.fn(),
 }))
 
 /** me 用户视图（各用例自行赋值；null 即未加载态） */
@@ -23,10 +36,23 @@ vi.mock('@/api/profile', () => ({
   useUpdateProfile: () => ({ mutateAsync: updateMutate }),
   useUploadAvatar: () => ({ mutateAsync: uploadMutate }),
   useClearAvatar: () => ({ mutateAsync: clearMutate }),
+  useChangePassword: () => ({ mutateAsync: changeMutate }),
 }))
 
 vi.mock('@/api/storage', () => ({
   storageFileBlobUrl: blobUrl,
+}))
+
+vi.mock('@/api/auth-sync', () => ({
+  broadcastLogout: logoutBroadcast,
+  broadcastRefreshed: vi.fn(),
+  onAuthBroadcast: vi.fn(() => () => {}),
+  withRefreshLock: vi.fn((fn: () => Promise<unknown>) => fn()),
+}))
+
+// 个人中心页对 vue-router 只消费 push（跳登录页）
+vi.mock('vue-router', () => ({
+  useRouter: () => ({ push: routerPush }),
 }))
 
 // vue-cropper 桩：暴露 getCropBlob（回一个 png blob），裁剪交互本体不在组件测试面
@@ -74,6 +100,13 @@ function renderPage() {
     global: { plugins: [pinia, buildI18n('zh-CN'), VueQueryPlugin] },
   })
   return pinia
+}
+
+/** 改密页签懒加载：点开第二个页签后三字段渲染 */
+async function openPasswordTab() {
+  await waitFor(() => expect(document.querySelectorAll('.el-tabs__item').length).toBe(2))
+  await fireEvent.click(document.querySelectorAll('.el-tabs__item')[1]!)
+  await waitFor(() => expect(byTest('account-password-old')).toBeTruthy())
 }
 
 describe('个人中心资料与头像 tab', () => {
@@ -207,5 +240,56 @@ describe('个人中心资料与头像 tab', () => {
     const uploaded = uploadMutate.mock.calls[0]?.[0] as File
     expect(uploaded.type).toBe('image/png')
     await waitFor(() => expect(document.body.textContent).toContain('头像已更新'))
+  })
+
+  it('改密页签：激活后三字段在册', async () => {
+    meUser = { id: 1, username: 'admin', nickName: '系统管理员' }
+    renderPage()
+    await openPasswordTab()
+    expect(byTest('account-password-new')).toBeTruthy()
+    expect(byTest('account-password-confirm')).toBeTruthy()
+    expect(byTest('account-password-save')).toBeTruthy()
+  })
+
+  it('改密成功：调端点后按登出语义清态跳登录', async () => {
+    meUser = { id: 1, username: 'admin', nickName: '系统管理员' }
+    const pinia = renderPage()
+    const session = useSessionStore(pinia)
+    session.save('token-in-memory')
+
+    await openPasswordTab()
+    await fireEvent.update(byTest('account-password-old'), 'old-123')
+    await fireEvent.update(byTest('account-password-new'), 'new-456')
+    await fireEvent.update(byTest('account-password-confirm'), 'new-456')
+    await fireEvent.click(byTest('account-password-save'))
+
+    await waitFor(() =>
+      expect(changeMutate).toHaveBeenCalledWith({ oldPassword: 'old-123', newPassword: 'new-456' }),
+    )
+    // 会话态与登录意图全清，广播其他 tab，跳登录页
+    await waitFor(() => expect(session.accessToken).toBeNull())
+    expect(localStorage.getItem('auth:logged-in')).toBeNull()
+    expect(logoutBroadcast).toHaveBeenCalled()
+    await waitFor(() => expect(routerPush).toHaveBeenCalledWith('/login'))
+  })
+
+  it('改密失败：旧密码错误页内展示且不清态', async () => {
+    changeMutate.mockRejectedValueOnce(new Error('旧密码不正确'))
+    meUser = { id: 1, username: 'admin', nickName: '系统管理员' }
+    const pinia = renderPage()
+    const session = useSessionStore(pinia)
+    session.save('token-in-memory')
+
+    await openPasswordTab()
+    await fireEvent.update(byTest('account-password-old'), 'wrong-old')
+    await fireEvent.update(byTest('account-password-new'), 'new-456')
+    await fireEvent.update(byTest('account-password-confirm'), 'new-456')
+    await fireEvent.click(byTest('account-password-save'))
+
+    await waitFor(() => expect(changeMutate).toHaveBeenCalledTimes(1))
+    await waitFor(() => expect(document.body.textContent).toContain('旧密码不正确'))
+    // 失败不清态不跳转
+    expect(session.accessToken).toBe('token-in-memory')
+    expect(routerPush).not.toHaveBeenCalled()
   })
 })

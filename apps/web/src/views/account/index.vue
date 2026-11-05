@@ -2,18 +2,24 @@
 import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
 import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 
 import AppIcon from '@/components/AppIcon.vue'
-import { useClearAvatar, useMe, useUpdateProfile } from '@/api/profile'
+import { useChangePassword, useClearAvatar, useMe, useUpdateProfile } from '@/api/profile'
+import { broadcastLogout } from '@/api/auth-sync'
 import { GENDER_OPTIONS } from '@/constants/gender'
 import { useAvatarUrl } from '@/composables/use-avatar-url'
+import { useMenusStore } from '@/stores/menus'
+import { useSessionStore } from '@/stores/session'
+import { useTagsViewStore } from '@/stores/tags-view'
 
 import AvatarCropper from './avatar-cropper.vue'
-import { buildAccountRules } from './rules'
+import { buildAccountRules, buildPasswordRules } from './rules'
 
 defineOptions({ name: 'Account' })
 
 const { t } = useI18n()
+const router = useRouter()
 
 const activeTab = ref('profile')
 
@@ -85,6 +91,40 @@ async function onSave() {
     ElMessage.error(error instanceof Error ? error.message : t('account.profileSaveFailed'))
   } finally {
     saving.value = false
+  }
+}
+
+/** —— 改密：成功即该用户全部会话失效（含当前），按登出语义清态跳登录 —— */
+
+const pwdFormRef = ref<FormInstance>()
+const pwdForm = reactive({ oldPassword: '', newPassword: '', confirmPassword: '' })
+
+const passwordRules = computed(() => buildPasswordRules(t, () => pwdForm.newPassword))
+
+const changePassword = useChangePassword()
+const changing = ref(false)
+
+async function onChangePassword() {
+  const valid = await pwdFormRef.value?.validate().catch(() => false)
+  if (!valid) {
+    return
+  }
+  changing.value = true
+  try {
+    await changePassword.mutateAsync({
+      oldPassword: pwdForm.oldPassword,
+      newPassword: pwdForm.newPassword,
+    })
+    // 后端已踢全部会话：本地全清并广播其他 tab，跳登录页（不再调登出端点，会话已无效）
+    useSessionStore().reset()
+    useMenusStore().reset()
+    useTagsViewStore().closeAll()
+    broadcastLogout()
+    await router.push('/login')
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : t('account.passwordChangeFailed'))
+  } finally {
+    changing.value = false
   }
 }
 </script>
@@ -170,7 +210,51 @@ async function onSave() {
         name="password"
         data-test="account-tab-password"
         lazy
-      />
+      >
+        <el-form
+          ref="pwdFormRef"
+          :model="pwdForm"
+          :rules="passwordRules"
+          label-width="96px"
+          class="password"
+          data-test="account-password-form"
+        >
+          <el-form-item :label="t('account.oldPassword')" prop="oldPassword">
+            <el-input
+              v-model="pwdForm.oldPassword"
+              type="password"
+              show-password
+              data-test="account-password-old"
+            />
+          </el-form-item>
+          <el-form-item :label="t('account.newPassword')" prop="newPassword">
+            <el-input
+              v-model="pwdForm.newPassword"
+              type="password"
+              show-password
+              data-test="account-password-new"
+            />
+          </el-form-item>
+          <el-form-item :label="t('account.confirmPassword')" prop="confirmPassword">
+            <el-input
+              v-model="pwdForm.confirmPassword"
+              type="password"
+              show-password
+              data-test="account-password-confirm"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-button
+              type="primary"
+              :loading="changing"
+              data-test="account-password-save"
+              @click="onChangePassword"
+            >
+              {{ t('account.passwordChange') }}
+            </el-button>
+          </el-form-item>
+        </el-form>
+      </el-tab-pane>
     </el-tabs>
     <avatar-cropper v-model="cropOpen" />
   </div>

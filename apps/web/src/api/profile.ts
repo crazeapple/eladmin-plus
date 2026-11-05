@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 
-import type { MeResponse, ProfileUpdateRequest } from './generated'
+import type { MeResponse, PasswordChangeRequest, ProfileUpdateRequest } from './generated'
 import { request } from './request'
 
-/** 个人中心契约薄封装：资料改、头像上传与清空（登录即可，仅操作会话用户自己） */
+/** 个人中心契约薄封装：资料改、头像上传与清空、改密（登录即可，仅操作会话用户自己） */
 
 const ME_KEY = ['auth', 'me'] as const
 
@@ -63,5 +63,16 @@ export function useClearAvatar() {
   return useMutation({
     mutationFn: () => request({ url: '/auth/me/avatar', method: 'DELETE' }),
     onSuccess: () => qc.invalidateQueries({ queryKey: [...ME_KEY] }),
+  })
+}
+
+/**
+ * 改密：成功即该用户全部会话失效（含当前，再访问 401）。前端按登出语义清态跳登录，
+ * 故此处不失效 me 缓存（随后的重取必 401），清态由调用方收口。
+ */
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: (payload: PasswordChangeRequest) =>
+      request({ url: '/auth/me/password', method: 'PUT', body: payload }),
   })
 }

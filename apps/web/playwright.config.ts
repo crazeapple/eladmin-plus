@@ -28,5 +28,12 @@ export default defineConfig({
       dependencies: ['setup'],
       use: { storageState: '.auth/state.json' },
     },
+    {
+      // 改密全链踢全部会话（含 storageState 的 refresh cookie）：殿后跑，不与其他组并行
+      name: 'account-password',
+      testMatch: /account-password\.spec\.ts$/,
+      dependencies: ['system'],
+      use: { storageState: '.auth/state.json' },
+    },
   ],
 })
