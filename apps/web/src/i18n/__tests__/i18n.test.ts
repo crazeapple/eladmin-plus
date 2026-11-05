@@ -114,8 +114,10 @@ describe('配置域词条收口', () => {
       ]) {
         expect(keys).toContain(route)
       }
-      // 已落页命名空间在册（storage 随存储页落位；email / aliPay 随页收口后补断言）
-      expect(keys.some((key) => key.startsWith('storage.'))).toBe(true)
+      // 已落页命名空间在册
+      for (const namespace of ['storage', 'email', 'aliPay']) {
+        expect(keys.some((key) => key.startsWith(`${namespace}.`))).toBe(true)
+      }
       // V10 四条按钮权限点文案（i18n_key 与种子一致）
       for (const key of [
         'perms.storageList',

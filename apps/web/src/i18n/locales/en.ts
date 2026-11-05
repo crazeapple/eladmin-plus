@@ -475,6 +475,25 @@ export default {
     exportSuccess: 'Exported {name}',
     exportFailed: 'Export failed',
   },
+  email: {
+    to: 'To',
+    subject: 'Subject',
+    content: 'Content',
+    contentPlaceholder: 'Write HTML source; the email is sent as HTML',
+    toRequired: 'Recipient is required',
+    send: 'Send',
+    sendSuccess: 'Email sent',
+    sendFailed: 'Send failed',
+  },
+  aliPay: {
+    title: 'Alipay Tools',
+    desc: 'Alipay is not integrated yet. The gateway interface and config slots are in place on the backend; this page opens up configuration and payment once integrated.',
+    pointGateway:
+      'Gateway: AlipayGateway is registered; the implementation lands with the integration proposal',
+    pointConfig:
+      'Config: AlipayProperties is registered; parameters are injected via configuration',
+    pointPage: 'This page is a status card only — no forms, no fake interactions',
+  },
   storage: {
     name: 'Original Name',
     size: 'Size',
@@ -490,6 +509,9 @@ export default {
     upload: 'Upload',
     uploadSuccess: 'Uploaded {name}',
     uploadFailed: 'Upload failed',
+    download: 'Download',
+    downloadSuccess: 'Downloaded {name}',
+    downloadFailed: 'Download failed',
     deleteTitle: 'Confirm Delete',
     removeOneConfirm: 'Delete "{name}"?',
     removeSuccess: 'Deleted',
