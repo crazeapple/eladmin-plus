@@ -56,4 +56,12 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    // 集成测试库独立于开发库（eladmin_plus）：迁移历史与本分支迁移集严格一致，
+    // 并行分支迁移互不干扰；库不存在时首跑自建（createDatabaseIfNotExist）
+    environment(
+        "DATASOURCE_URL",
+        System.getenv("DATASOURCE_URL")
+            ?: "jdbc:mysql://localhost:3307/eladmin_ops_it?useUnicode=true&characterEncoding=utf8"
+                + "&createDatabaseIfNotExist=true",
+    )
 }
