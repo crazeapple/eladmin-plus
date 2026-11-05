@@ -102,7 +102,7 @@ describe('配置域词条收口', () => {
     }
   })
 
-  it('工具域词条收口：目录与三页路由 key、四条权限点双包在册', () => {
+  it('工具域词条收口：目录与三页路由 key、三页命名空间、四条权限点双包在册', () => {
     for (const locale of ['zh-CN', 'en'] as const) {
       const keys = localeKeys(locale)
       // V10 种子路由 key：工具目录 + 三子菜单
@@ -114,6 +114,8 @@ describe('配置域词条收口', () => {
       ]) {
         expect(keys).toContain(route)
       }
+      // 已落页命名空间在册（storage 随存储页落位；email / aliPay 随页收口后补断言）
+      expect(keys.some((key) => key.startsWith('storage.'))).toBe(true)
       // V10 四条按钮权限点文案（i18n_key 与种子一致）
       for (const key of [
         'perms.storageList',
