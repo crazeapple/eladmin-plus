@@ -89,10 +89,46 @@ export type DeptSaveRequest = {
     enabled: number;
 };
 
+export type ProfileUpdateRequest = {
+    nickName?: string;
+    email?: string;
+    phone?: string;
+    gender?: number;
+};
+
+export type PasswordChangeRequest = {
+    oldPassword?: string;
+    newPassword?: string;
+};
+
 export type RLong = {
     code?: number;
     message?: string;
     data?: number;
+};
+
+export type EmailSendRequest = {
+    to?: string;
+    subject?: string;
+    content?: string;
+    html?: boolean;
+};
+
+export type RStorageFileView = {
+    code?: number;
+    message?: string;
+    data?: StorageFileView;
+};
+
+export type StorageFileView = {
+    id?: number;
+    name?: string;
+    ext?: string;
+    size?: number;
+    mime?: string;
+    engine?: string;
+    uploader?: string;
+    createdAt?: string;
 };
 
 export type RMapStringObject = {
@@ -214,6 +250,28 @@ export type TaskTargetView = {
     beanName?: string;
     methodName?: string;
     param?: string;
+};
+
+export type StorageFilePageQuery = {
+    page?: number;
+    size?: number;
+    name?: string;
+    uploader?: string;
+    startTime?: string;
+    endTime?: string;
+};
+
+export type PageResultStorageFileView = {
+    content?: Array<StorageFileView>;
+    total?: number;
+    page?: number;
+    size?: number;
+};
+
+export type RPageResultStorageFileView = {
+    code?: number;
+    message?: string;
+    data?: PageResultStorageFileView;
 };
 
 export type OverviewStats = {
@@ -866,6 +924,38 @@ export type Update6Responses = {
 
 export type Update6Response = Update6Responses[keyof Update6Responses];
 
+export type UpdateProfileData = {
+    body: ProfileUpdateRequest;
+    path?: never;
+    query?: never;
+    url: '/auth/me/profile';
+};
+
+export type UpdateProfileResponses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type UpdateProfileResponse = UpdateProfileResponses[keyof UpdateProfileResponses];
+
+export type ChangePasswordData = {
+    body: PasswordChangeRequest;
+    path?: never;
+    query?: never;
+    url: '/auth/me/password';
+};
+
+export type ChangePasswordResponses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type ChangePasswordResponse = ChangePasswordResponses[keyof ChangePasswordResponses];
+
 export type RemoveBatchData = {
     body: Array<number>;
     path?: never;
@@ -915,6 +1005,22 @@ export type CreateResponses = {
 };
 
 export type CreateResponse = CreateResponses[keyof CreateResponses];
+
+export type SendData = {
+    body: EmailSendRequest;
+    path?: never;
+    query?: never;
+    url: '/tools/email/send';
+};
+
+export type SendResponses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type SendResponse = SendResponses[keyof SendResponses];
 
 export type ListData = {
     body?: never;
@@ -1005,6 +1111,42 @@ export type ExecuteOnceResponse = ExecuteOnceResponses[keyof ExecuteOnceResponse
 export type Page1Data = {
     body?: never;
     path?: never;
+    query: {
+        query: StorageFilePageQuery;
+    };
+    url: '/storage/files';
+};
+
+export type Page1Responses = {
+    /**
+     * OK
+     */
+    200: RPageResultStorageFileView;
+};
+
+export type Page1Response = Page1Responses[keyof Page1Responses];
+
+export type UploadData = {
+    body?: {
+        file: Blob | File;
+    };
+    path?: never;
+    query?: never;
+    url: '/storage/files';
+};
+
+export type UploadResponses = {
+    /**
+     * OK
+     */
+    200: RStorageFileView;
+};
+
+export type UploadResponse = UploadResponses[keyof UploadResponses];
+
+export type Page2Data = {
+    body?: never;
+    path?: never;
     query?: {
         page?: number;
         size?: number;
@@ -1014,14 +1156,14 @@ export type Page1Data = {
     url: '/roles';
 };
 
-export type Page1Responses = {
+export type Page2Responses = {
     /**
      * OK
      */
     200: RPageResultRoleView;
 };
 
-export type Page1Response = Page1Responses[keyof Page1Responses];
+export type Page2Response = Page2Responses[keyof Page2Responses];
 
 export type Create2Data = {
     body: RoleSaveRequest;
@@ -1055,7 +1197,7 @@ export type Create3Responses = {
 
 export type Create3Response = Create3Responses[keyof Create3Responses];
 
-export type Page2Data = {
+export type Page3Data = {
     body?: never;
     path?: never;
     query?: {
@@ -1067,14 +1209,14 @@ export type Page2Data = {
     url: '/jobs';
 };
 
-export type Page2Responses = {
+export type Page3Responses = {
     /**
      * OK
      */
     200: RPageResultJobView;
 };
 
-export type Page2Response = Page2Responses[keyof Page2Responses];
+export type Page3Response = Page3Responses[keyof Page3Responses];
 
 export type Create4Data = {
     body: JobSaveRequest;
@@ -1195,6 +1337,40 @@ export type RefreshResponses = {
 
 export type RefreshResponse = RefreshResponses[keyof RefreshResponses];
 
+export type ClearAvatarData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/auth/me/avatar';
+};
+
+export type ClearAvatarResponses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type ClearAvatarResponse = ClearAvatarResponses[keyof ClearAvatarResponses];
+
+export type UploadAvatarData = {
+    body?: {
+        file: Blob | File;
+    };
+    path?: never;
+    query?: never;
+    url: '/auth/me/avatar';
+};
+
+export type UploadAvatarResponses = {
+    /**
+     * OK
+     */
+    200: RLong;
+};
+
+export type UploadAvatarResponse = UploadAvatarResponses[keyof UploadAvatarResponses];
+
 export type LogoutData = {
     body?: never;
     headers?: {
@@ -1283,6 +1459,24 @@ export type TargetsResponses = {
 
 export type TargetsResponse = TargetsResponses[keyof TargetsResponses];
 
+export type DownloadData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/storage/files/{id}/download';
+};
+
+export type DownloadResponses = {
+    /**
+     * OK
+     */
+    200: Blob | File;
+};
+
+export type DownloadResponse = DownloadResponses[keyof DownloadResponses];
+
 export type OverviewData = {
     body?: never;
     path?: never;
@@ -1363,7 +1557,7 @@ export type RemoveBatch1Responses = {
 
 export type RemoveBatch1Response = RemoveBatch1Responses[keyof RemoveBatch1Responses];
 
-export type Page3Data = {
+export type Page4Data = {
     body?: never;
     path?: never;
     query: {
@@ -1372,14 +1566,14 @@ export type Page3Data = {
     url: '/logs/operations';
 };
 
-export type Page3Responses = {
+export type Page4Responses = {
     /**
      * OK
      */
     200: RPageResultOperationLog;
 };
 
-export type Page3Response = Page3Responses[keyof Page3Responses];
+export type Page4Response = Page4Responses[keyof Page4Responses];
 
 export type ExportData = {
     body?: never;
@@ -1415,7 +1609,7 @@ export type RemoveBatch2Responses = {
 
 export type RemoveBatch2Response = RemoveBatch2Responses[keyof RemoveBatch2Responses];
 
-export type Page4Data = {
+export type Page5Data = {
     body?: never;
     path?: never;
     query: {
@@ -1424,14 +1618,14 @@ export type Page4Data = {
     url: '/logs/exceptions';
 };
 
-export type Page4Responses = {
+export type Page5Responses = {
     /**
      * OK
      */
     200: RPageResultExceptionLog;
 };
 
-export type Page4Response = Page4Responses[keyof Page4Responses];
+export type Page5Response = Page5Responses[keyof Page5Responses];
 
 export type Export1Data = {
     body?: never;
@@ -1533,6 +1727,24 @@ export type CaptchaResponses = {
 
 export type CaptchaResponse = CaptchaResponses[keyof CaptchaResponses];
 
+export type Remove6Data = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/storage/files/{id}';
+};
+
+export type Remove6Responses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type Remove6Response = Remove6Responses[keyof Remove6Responses];
+
 export type KickData = {
     body?: never;
     path: {
@@ -1551,7 +1763,7 @@ export type KickResponses = {
 
 export type KickResponse = KickResponses[keyof KickResponses];
 
-export type Remove6Data = {
+export type Remove7Data = {
     body?: never;
     path: {
         id: number;
@@ -1560,14 +1772,14 @@ export type Remove6Data = {
     url: '/logs/operations/{id}';
 };
 
-export type Remove6Responses = {
+export type Remove7Responses = {
     /**
      * OK
      */
     200: RVoid;
 };
 
-export type Remove6Response = Remove6Responses[keyof Remove6Responses];
+export type Remove7Response = Remove7Responses[keyof Remove7Responses];
 
 export type ClearData = {
     body?: never;
@@ -1585,7 +1797,7 @@ export type ClearResponses = {
 
 export type ClearResponse = ClearResponses[keyof ClearResponses];
 
-export type Remove7Data = {
+export type Remove8Data = {
     body?: never;
     path: {
         id: number;
@@ -1594,14 +1806,14 @@ export type Remove7Data = {
     url: '/logs/exceptions/{id}';
 };
 
-export type Remove7Responses = {
+export type Remove8Responses = {
     /**
      * OK
      */
     200: RVoid;
 };
 
-export type Remove7Response = Remove7Responses[keyof Remove7Responses];
+export type Remove8Response = Remove8Responses[keyof Remove8Responses];
 
 export type Clear1Data = {
     body?: never;
