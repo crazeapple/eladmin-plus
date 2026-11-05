@@ -7,12 +7,16 @@ import { ref } from 'vue'
 import { buildI18n } from '@/i18n'
 import StoragePage from '../index.vue'
 
-const { uploadMutate, removeMutate, confirmMock, pageQueryRef } = vi.hoisted(() => ({
-  uploadMutate: vi.fn().mockResolvedValue(undefined),
-  removeMutate: vi.fn().mockResolvedValue(undefined),
-  confirmMock: vi.fn().mockResolvedValue(true),
-  pageQueryRef: vi.fn(),
-}))
+const { uploadMutate, removeMutate, downloadFile, blobUrl, confirmMock, pageQueryRef } = vi.hoisted(
+  () => ({
+    uploadMutate: vi.fn().mockResolvedValue(undefined),
+    removeMutate: vi.fn().mockResolvedValue(undefined),
+    downloadFile: vi.fn().mockResolvedValue('报表.png'),
+    blobUrl: vi.fn().mockResolvedValue('blob:mock-thumb'),
+    confirmMock: vi.fn().mockResolvedValue(true),
+    pageQueryRef: vi.fn(),
+  }),
+)
 
 /** 列表数据源（各用例自行赋值） */
 let listData: {
@@ -27,6 +31,8 @@ vi.mock('@/api/storage', () => ({
   },
   useStorageUpload: () => ({ mutateAsync: uploadMutate }),
   useStorageRemove: () => ({ mutateAsync: removeMutate }),
+  downloadStorageFile: downloadFile,
+  storageFileBlobUrl: blobUrl,
 }))
 
 vi.mock('element-plus', async (importOriginal) => {
@@ -174,6 +180,68 @@ describe('存储管理页（列表、三维筛选、上传与删除）', () => {
     await waitFor(() => expect(confirmMock).toHaveBeenCalledTimes(2))
     await waitFor(() => expect(removeMutate).toHaveBeenCalledWith(1))
     await waitFor(() => expect(document.body.textContent).toContain('删除成功'))
+  })
+
+  it('图片行：缩略走 blob 对象 URL；非图片行不渲染缩略', async () => {
+    listData = {
+      content: [
+        {
+          id: 1,
+          name: '头像.png',
+          size: 449,
+          mime: 'image/png',
+          uploader: 'admin',
+          createdAt: '2026-11-05T09:30:00',
+        },
+        {
+          id: 2,
+          name: '报表.xlsx',
+          size: 1536,
+          mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          uploader: 'admin',
+          createdAt: '2026-11-05T09:31:00',
+        },
+      ],
+      total: 2,
+    }
+    await renderPage()
+    await waitFor(() => expect(blobUrl).toHaveBeenCalledWith(1))
+    await waitFor(() => {
+      // data-test 落 ElImage 根 div，src 在其内层 img 元素上
+      const thumbs = document.querySelectorAll('[data-test="storage-thumb"] img')
+      expect(thumbs.length).toBe(1)
+      expect(thumbs[0]?.getAttribute('src')).toBe('blob:mock-thumb')
+    })
+    expect(blobUrl).not.toHaveBeenCalledWith(2)
+  })
+
+  it('行下载：调下载封装并提示已落盘文件名；失败展示消息', async () => {
+    listData = {
+      content: [
+        {
+          id: 1,
+          name: '报表.xlsx',
+          size: 1536,
+          mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          uploader: 'admin',
+          createdAt: '2026-11-05T09:30:00',
+        },
+      ],
+      total: 1,
+    }
+    await renderPage()
+    await fireEvent.click(byTest('storage-download'))
+    await waitFor(() => expect(downloadFile).toHaveBeenCalledWith(1))
+    await waitFor(() => expect(document.body.textContent).toContain('已下载 报表.png'))
+
+    downloadFile.mockRejectedValueOnce(new Error('下载失败'))
+    await fireEvent.click(byTest('storage-download'))
+    await waitFor(() => {
+      const messages = Array.from(document.querySelectorAll('.el-message')).map(
+        (m) => m.textContent,
+      )
+      expect(messages.join()).toContain('下载失败')
+    })
   })
 
   it('hasAuth 藏显：无 storage:upload 无上传按钮、无 storage:del 无删除按钮', async () => {

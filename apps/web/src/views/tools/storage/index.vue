@@ -1,13 +1,19 @@
 <script setup lang="ts">
-import { ElButton, ElMessage, ElMessageBox, type UploadFile } from 'element-plus'
-import { computed, h, reactive, ref } from 'vue'
+import { ElButton, ElImage, ElMessage, ElMessageBox, type UploadFile } from 'element-plus'
+import { computed, h, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { DataTable } from '@eladmin-plus/admin-ui'
 import type { DataTableColumn } from '@eladmin-plus/admin-ui'
 
 import type { StorageFileView } from '@/api/generated'
-import { useStoragePage, useStorageRemove, useStorageUpload } from '@/api/storage'
+import {
+  downloadStorageFile,
+  storageFileBlobUrl,
+  useStoragePage,
+  useStorageRemove,
+  useStorageUpload,
+} from '@/api/storage'
 import type { StoragePageQuery } from '@/api/storage'
 import { useAuth } from '@/composables/use-auth'
 
@@ -127,42 +133,146 @@ function displayTime(value: string | undefined): string {
   return value?.replace('T', ' ') ?? ''
 }
 
-/** —— 列定义（下载与图片预览随后续任务落位） —— */
-
-const columns = computed<DataTableColumn<StorageFileView>[]>(() => [
-  { accessorKey: 'name', header: t('storage.name') },
-  {
-    accessorKey: 'size',
-    header: t('storage.size'),
-    cell: ({ row }) => h('span', formatSize(row.original.size)),
-  },
-  { accessorKey: 'uploader', header: t('storage.uploader') },
-  {
-    accessorKey: 'createdAt',
-    header: t('storage.createdAt'),
-    cell: ({ row }) => h('span', displayTime(row.original.createdAt)),
-  },
-  {
-    id: 'actions',
-    header: t('storage.actions'),
-    cell: ({ row }) =>
-      hasAuth('storage:del')
-        ? h(
-            ElButton,
-            {
-              link: true,
-              type: 'danger',
-              'data-test': 'storage-remove',
-              onClick: () => onRemove(row.original),
-            },
-            () => t('storage.delete'),
-          )
-        : null,
-  },
-])
+/** —— 列定义：图片行缩略 + 点开大图，行操作下载与删除 —— */
 
 const rows = computed(() => data.value?.content ?? [])
 const total = computed(() => data.value?.total ?? 0)
+
+/** 图片行判定：image MIME 走缩略展示（下载端点带鉴权头，blob 对象 URL 供给） */
+function isImage(row: StorageFileView): boolean {
+  return (row.mime ?? '').startsWith('image/')
+}
+
+/** 行缩略对象 URL：blob 到位即换新记录（列定义在 computed 内读它，重算驱动表格重渲染），行出回收、卸载全收 */
+const thumbUrls = ref<Record<number, string>>({})
+const fetching = new Set<number>()
+
+watch(
+  rows,
+  async (list) => {
+    const ids = new Set(list.map((row) => row.id ?? 0))
+    const kept: Record<number, string> = {}
+    for (const [idText, url] of Object.entries(thumbUrls.value)) {
+      const id = Number(idText)
+      if (ids.has(id)) {
+        kept[id] = url
+      } else {
+        URL.revokeObjectURL(url)
+      }
+    }
+    thumbUrls.value = kept
+    for (const row of list) {
+      const id = row.id ?? 0
+      if (!isImage(row) || thumbUrls.value[id] || fetching.has(id)) {
+        continue
+      }
+      fetching.add(id)
+      try {
+        const url = await storageFileBlobUrl(id)
+        thumbUrls.value = { ...thumbUrls.value, [id]: url }
+      } catch {
+        // 取图失败：缩略位回退原名文本，不阻塞列表
+      } finally {
+        fetching.delete(id)
+      }
+    }
+  },
+  { immediate: true },
+)
+
+onBeforeUnmount(() => {
+  for (const url of Object.values(thumbUrls.value)) {
+    URL.revokeObjectURL(url)
+  }
+  thumbUrls.value = {}
+})
+
+/** 行下载：原名落地（Content-Disposition 为准），提示已下载文件名 */
+const downloading = ref(false)
+
+async function onDownload(row: StorageFileView) {
+  if (downloading.value) {
+    return
+  }
+  downloading.value = true
+  try {
+    const filename = await downloadStorageFile(row.id ?? 0)
+    ElMessage.success(t('storage.downloadSuccess', { name: filename }))
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : t('storage.downloadFailed'))
+  } finally {
+    downloading.value = false
+  }
+}
+
+const columns = computed<DataTableColumn<StorageFileView>[]>(() => {
+  // 缩略地址记录在此读取：blob 到位即重算列定义，表格随之重渲染
+  const urls = thumbUrls.value
+  return [
+    {
+      accessorKey: 'name',
+      header: t('storage.name'),
+      cell: ({ row }) => {
+        const id = row.original.id ?? 0
+        const url = isImage(row.original) ? urls[id] : undefined
+        return h('span', { class: 'storage__name-cell' }, [
+          url
+            ? h(ElImage, {
+                src: url,
+                fit: 'cover',
+                class: 'storage__thumb',
+                'preview-teleported': true,
+                'preview-src-list': [url],
+                'hide-on-click-modal': true,
+                'data-test': 'storage-thumb',
+              })
+            : null,
+          h('span', row.original.name ?? ''),
+        ])
+      },
+    },
+    {
+      accessorKey: 'size',
+      header: t('storage.size'),
+      cell: ({ row }) => h('span', formatSize(row.original.size)),
+    },
+    { accessorKey: 'uploader', header: t('storage.uploader') },
+    {
+      accessorKey: 'createdAt',
+      header: t('storage.createdAt'),
+      cell: ({ row }) => h('span', displayTime(row.original.createdAt)),
+    },
+    {
+      id: 'actions',
+      header: t('storage.actions'),
+      cell: ({ row }) =>
+        h('span', { class: 'storage__row-actions' }, [
+          h(
+            ElButton,
+            {
+              link: true,
+              type: 'primary',
+              'data-test': 'storage-download',
+              onClick: () => onDownload(row.original),
+            },
+            () => t('storage.download'),
+          ),
+          hasAuth('storage:del')
+            ? h(
+                ElButton,
+                {
+                  link: true,
+                  type: 'danger',
+                  'data-test': 'storage-remove',
+                  onClick: () => onRemove(row.original),
+                },
+                () => t('storage.delete'),
+              )
+            : null,
+        ]),
+    },
+  ]
+})
 </script>
 
 <template>
@@ -244,5 +354,24 @@ const total = computed(() => data.value?.total ?? 0)
 
 .storage__upload {
   margin-left: auto;
+}
+
+.storage__name-cell {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.storage__thumb {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 4px;
+  cursor: zoom-in;
+}
+
+.storage__row-actions {
+  display: inline-flex;
+  gap: 4px;
 }
 </style>
