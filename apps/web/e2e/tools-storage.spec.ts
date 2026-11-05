@@ -11,11 +11,11 @@ import { gotoWithSession } from './helpers'
 
 const AVATAR_PNG = readFileSync(fileURLToPath(new URL('./fixtures/avatar.png', import.meta.url)))
 
-function localDate(offsetDays = 0): string {
+/** 库内时间为服务端 JVM 时区（UTC）落值：日期边界按 UTC 取，跨时区跑（如东八区零点后）不漂移 */
+function serverDate(): string {
   const now = new Date()
-  now.setDate(now.getDate() + offsetDays)
   const pad = (n: number) => String(n).padStart(2, '0')
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
+  return `${now.getUTCFullYear()}-${pad(now.getUTCMonth() + 1)}-${pad(now.getUTCDate())}`
 }
 
 test('存储页主链：上传、行渲染、三维筛选与删除确认', async ({ page }) => {
@@ -53,7 +53,7 @@ test('存储页主链：上传、行渲染、三维筛选与删除确认', async
   await expect(table.locator('tbody tr').filter({ hasText: uniqueName })).toBeVisible()
 
   // 时间范围：今天含该行（EP 日期范围编辑器不透传 data-test，按类定位）
-  const today = localDate()
+  const today = serverDate()
   const rangeInputs = page.locator('.storage__filter .el-range-editor input')
   await rangeInputs.first().fill(today)
   await rangeInputs.nth(1).fill(today)
