@@ -7,17 +7,21 @@ import { ref } from 'vue'
 import { buildI18n } from '@/i18n'
 import ConfigPanel from '../config-panel.vue'
 
-const { saveMutateAsync, removeMutateAsync, confirmMock, listData } = vi.hoisted(() => ({
-  saveMutateAsync: vi.fn().mockResolvedValue(undefined),
-  removeMutateAsync: vi.fn().mockResolvedValue(undefined),
-  confirmMock: vi.fn().mockResolvedValue(true),
-  listData: { value: [] as Array<Record<string, unknown>> },
-}))
+const { saveMutateAsync, removeMutateAsync, backupMutateAsync, confirmMock, listData } = vi.hoisted(
+  () => ({
+    saveMutateAsync: vi.fn().mockResolvedValue(undefined),
+    removeMutateAsync: vi.fn().mockResolvedValue(undefined),
+    backupMutateAsync: vi.fn().mockResolvedValue({ fileName: 'eladmin_plus_20261106000000.sql' }),
+    confirmMock: vi.fn().mockResolvedValue(true),
+    listData: { value: [] as Array<Record<string, unknown>> },
+  }),
+)
 
 vi.mock('@/api/database', () => ({
   useDatabaseConfigs: () => ({ data: ref(listData.value), isLoading: ref(false) }),
   useDatabaseConfigSave: () => ({ mutateAsync: saveMutateAsync }),
   useDatabaseConfigRemove: () => ({ mutateAsync: removeMutateAsync }),
+  useDatabaseBackup: () => ({ mutateAsync: backupMutateAsync }),
 }))
 
 vi.mock('element-plus', async (importOriginal) => {
@@ -201,6 +205,85 @@ describe('连接配置区块（列表、新增 / 编辑弹窗、删除确认）'
         (m) => m.textContent,
       )
       expect(messages.join()).toContain('库名已存在')
+    })
+  })
+
+  it('备份：确认后触发并提示落册文件名；请求期 loading 防重复提交', async () => {
+    listData.value = [
+      {
+        id: 7,
+        host: 'mysql-inner',
+        port: 3306,
+        name: 'eladmin_plus',
+        userName: 'root',
+        remark: '',
+        createdAt: '2026-11-05T09:30:00',
+      },
+    ]
+    await renderPanel()
+
+    // 手控 promise：挂起期断言 loading 防重，完成后断言成功提示
+    let resolveBackup!: (value: { fileName: string }) => void
+    backupMutateAsync.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveBackup = resolve
+        }),
+    )
+    const backupButton = byTest('database-config-backup')
+    await fireEvent.click(backupButton)
+    await waitFor(() => expect(confirmMock).toHaveBeenCalledTimes(1))
+    await waitFor(() => expect(backupMutateAsync).toHaveBeenCalledWith(7))
+    await waitFor(() => expect(backupButton.hasAttribute('disabled')).toBe(true))
+
+    // 挂起期再点不产生第二次请求
+    await fireEvent.click(backupButton)
+    expect(backupMutateAsync).toHaveBeenCalledTimes(1)
+
+    resolveBackup({ fileName: 'eladmin_plus_20261106000000.sql' })
+    await waitFor(() =>
+      expect(document.body.textContent).toContain('备份完成：eladmin_plus_20261106000000.sql'),
+    )
+    await waitFor(() => expect(backupButton.hasAttribute('disabled')).toBe(false))
+    // 成功链无页内错误提示
+    expect(document.querySelectorAll('[data-test="database-backup-error"]').length).toBe(0)
+  })
+
+  it('备份失败：后端原因文案页内提示（不整页报错），关闭即清', async () => {
+    listData.value = [
+      {
+        id: 8,
+        host: 'mysql-inner',
+        port: 3306,
+        name: 'eladmin_plus',
+        userName: 'root',
+        remark: '',
+        createdAt: '2026-11-05T09:30:00',
+      },
+    ]
+    await renderPanel()
+    backupMutateAsync.mockRejectedValueOnce(
+      new Error('备份执行失败：mysqldump 退出码 2（凭据拒绝）'),
+    )
+    await fireEvent.click(byTest('database-config-backup'))
+    await waitFor(() => expect(confirmMock).toHaveBeenCalledTimes(1))
+    await waitFor(() => {
+      const alert = document.querySelector('[data-test="database-backup-error"]')
+      expect(alert?.textContent ?? '').toContain('备份执行失败')
+      expect(alert?.textContent ?? '').toContain('mysqldump 退出码 2')
+    })
+    // 本用例内无新成功提示（前序用例的 toast 残留 body，不作全文本反证）
+    const successMessages = Array.from(document.querySelectorAll('.el-message')).filter((m) =>
+      m.textContent?.includes('备份完成'),
+    )
+    expect(successMessages.length).toBeLessThanOrEqual(1)
+
+    // 关闭提示即清
+    const alert = document.querySelector('[data-test="database-backup-error"]')
+    const closeButton = alert?.querySelector('.el-alert__close-btn') as HTMLElement
+    await fireEvent.click(closeButton)
+    await waitFor(() => {
+      expect(document.querySelectorAll('[data-test="database-backup-error"]').length).toBe(0)
     })
   })
 })

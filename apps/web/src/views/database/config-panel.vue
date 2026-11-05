@@ -8,7 +8,12 @@ import { AutoForm, DataTable } from '@eladmin-plus/admin-ui'
 import type { AutoFormField, AutoFormModel, DataTableColumn } from '@eladmin-plus/admin-ui'
 
 import type { DatabaseConfigView } from '@/api/generated'
-import { useDatabaseConfigRemove, useDatabaseConfigSave, useDatabaseConfigs } from '@/api/database'
+import {
+  useDatabaseBackup,
+  useDatabaseConfigRemove,
+  useDatabaseConfigSave,
+  useDatabaseConfigs,
+} from '@/api/database'
 import { useAuth } from '@/composables/use-auth'
 
 /** 连接配置区块：全量列表（密码列不展示）+ 新增 / 编辑弹窗 + 删除确认 */
@@ -123,6 +128,38 @@ function displayTime(value: string | undefined): string {
 
 const rows = computed(() => data.value ?? [])
 
+/** —— 备份触发：行操作确认后同步请求（mysqldump 真实执行数秒），loading 防重复提交 —— */
+
+const backup = useDatabaseBackup()
+const backingUpId = ref<number | null>(null)
+/** 备份失败页内提示（含后端原因文案），不整页报错；下一次动作即清 */
+const backupError = ref('')
+
+async function onBackup(row: DatabaseConfigView) {
+  if (backingUpId.value !== null) {
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+      t('database.backupConfirm', { name: row.name ?? '' }),
+      t('database.backupTitle'),
+      { type: 'info' },
+    )
+  } catch {
+    return
+  }
+  backupError.value = ''
+  backingUpId.value = row.id ?? 0
+  try {
+    const record = await backup.mutateAsync(row.id ?? 0)
+    ElMessage.success(t('database.backupSuccess', { name: record.fileName ?? '' }))
+  } catch (error) {
+    backupError.value = error instanceof Error ? error.message : t('database.backupFailed')
+  } finally {
+    backingUpId.value = null
+  }
+}
+
 const columns = computed<DataTableColumn<DatabaseConfigView>[]>(() => [
   { accessorKey: 'host', header: t('database.host') },
   { accessorKey: 'port', header: t('database.port') },
@@ -139,6 +176,19 @@ const columns = computed<DataTableColumn<DatabaseConfigView>[]>(() => [
     header: t('database.actions'),
     cell: ({ row }) =>
       h('span', { class: 'database-config__row-actions' }, [
+        hasAuth('database:backup')
+          ? h(
+              ElButton,
+              {
+                link: true,
+                type: 'success',
+                'data-test': 'database-config-backup',
+                loading: backingUpId.value === (row.original.id ?? 0),
+                onClick: () => onBackup(row.original),
+              },
+              () => t('database.backup'),
+            )
+          : null,
         hasAuth('database:edit')
           ? h(
               ElButton,
@@ -190,6 +240,18 @@ const columns = computed<DataTableColumn<DatabaseConfigView>[]>(() => [
       data-test="database-config-table"
     />
 
+    <!-- 备份失败页内提示：后端 5xx 原因文案权威，直显不整页报错 -->
+    <el-alert
+      v-if="backupError"
+      :title="backupError"
+      type="error"
+      show-icon
+      closable
+      class="database-config__backup-error"
+      data-test="database-backup-error"
+      @close="backupError = ''"
+    />
+
     <el-dialog
       v-model="dialogVisible"
       :title="editing ? t('database.edit') : t('database.create')"
@@ -210,6 +272,10 @@ const columns = computed<DataTableColumn<DatabaseConfigView>[]>(() => [
 </template>
 
 <style scoped lang="scss">
+.database-config__backup-error {
+  margin-top: 12px;
+}
+
 .database-config__toolbar {
   display: flex;
   justify-content: flex-end;
