@@ -52,6 +52,14 @@ public class GlobalExceptionHandler {
                 .body(R.error(HttpStatus.FORBIDDEN, resolve("error.auth.forbidden", locale)));
     }
 
+    /** 上传体积超限：servlet 容器解析层抛出，与存储服务层的权威判定同归 413 明确消息 */
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<R<Void>> handleMaxUploadSize(
+            org.springframework.web.multipart.MaxUploadSizeExceededException ex, Locale locale) {
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(R.error(HttpStatus.PAYLOAD_TOO_LARGE, resolve("error.storage.too-large", locale)));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<R<Void>> handleUnknown(Exception ex, Locale locale) {
         // 未知异常：堆栈进日志，响应只回通用消息，不泄内部细节；locale 与请求一致

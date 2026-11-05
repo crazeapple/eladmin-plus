@@ -20,6 +20,11 @@ spring:
     job-store-type: jdbc
     properties:
       org.quartz.jobStore.driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+  servlet:
+    multipart:
+      # 上传体积解析层兜底（权威判定在 storage.max-size，超限一律 413）
+      max-file-size: 50MB
+      max-request-size: 52MB
 
 server:
   port: 8080
@@ -44,6 +49,22 @@ auth:
     cookie-same-site: Lax
     # 生产 TLS 开启即开（Secure 标志环境变量可配）
     cookie-secure: false
+
+storage:
+  # 存储引擎：local 本地磁盘 / rustfs 对象存储（默认 rustfs，指向 compose 实例）；切换重启生效，不是回退。
+  # 环境变量覆盖（relaxed binding）：STORAGE_ENGINE / STORAGE_MAX_SIZE / STORAGE_LOCAL_BASE_PATH /
+  # STORAGE_RUSTFS_ENDPOINT / STORAGE_RUSTFS_BUCKET / STORAGE_RUSTFS_ACCESS_KEY / STORAGE_RUSTFS_SECRET_KEY
+  engine: rustfs
+  # 上传体积权威限制（超限 413）
+  max-size: 50MB
+  local:
+    base-path: ./data/storage
+  rustfs:
+    # 默认指向 compose 自起实例（just up）；已有外部 RustFS 实例以环境变量覆盖
+    endpoint: http://localhost:9100
+    bucket: eladmin-plus
+    access-key: rustfsadmin
+    secret-key: rustfsadmin
 
 management:
   endpoints:
