@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-/** 菜单种子（V4 身份域 + V6 配置域 + V8 监控域）：两目录、十一子菜单、34 条按钮权限点行，幂等在册。 */
+/** 菜单种子（V4 身份域 + V6 配置域 + V8 监控域 + V10 工具域）：三目录、十四子菜单、38 条按钮权限点行，幂等在册。 */
 @SpringBootTest
 class MenuSeedTest {
 
@@ -96,7 +96,40 @@ class MenuSeedTest {
     }
 
     @Test
-    void 三十四条按钮权限点行与后端权限标识一致() {
+    void 工具域目录与三子菜单在册且组件路径对齐前端视图() {
+        List<Menu> menus = menuMapper.selectList(null);
+        Menu directory = menus.stream()
+                .filter(menu -> "routes.tools".equals(menu.getI18nKey()))
+                .filter(menu -> menu.getType() == Menu.TYPE_DIRECTORY)
+                .findFirst().orElseThrow();
+        assertThat(directory.getIcon()).isEqualTo("svg:tools");
+        assertThat(directory.getSort()).isEqualTo(6);
+
+        // 三子菜单挂工具目录之下：组件路径对齐前端视图、icon 库值入库、sort 1~3
+        assertThat(menus)
+                .filteredOn(menu -> menu.getType() == Menu.TYPE_MENU
+                        && directory.getId().equals(menu.getParentId()))
+                .extracting(Menu::getComponentPathKey, Menu::getI18nKey,
+                        Menu::getIcon, Menu::getSort)
+                .containsExactlyInAnyOrder(
+                        tuple("tools/storage", "routes.toolsStorage", "svg:qiniu", 1),
+                        tuple("tools/email", "routes.toolsEmail", "svg:email", 2),
+                        tuple("tools/ali-pay", "routes.toolsAliPay", "svg:alipay", 3));
+    }
+
+    @Test
+    void 工具域四个按钮权限点挂对应页面菜单() {
+        List<Menu> menus = menuMapper.selectList(null);
+        assertThat(buttonPermissionsOf(menus, "tools/storage")).containsExactlyInAnyOrder(
+                "storage:list", "storage:upload", "storage:del");
+        assertThat(buttonPermissionsOf(menus, "tools/email")).containsExactlyInAnyOrder(
+                "email:send");
+        // 支付宝壳页零权限点（后端零实现，页面只呈现提示卡）
+        assertThat(buttonPermissionsOf(menus, "tools/ali-pay")).isEmpty();
+    }
+
+    @Test
+    void 三十八条按钮权限点行与后端权限标识一致() {
         List<Menu> buttons = menuMapper.selectList(
                 new LambdaQueryWrapper<Menu>().eq(Menu::getType, Menu.TYPE_BUTTON));
         assertThat(buttons).extracting(Menu::getPermission).containsExactlyInAnyOrder(
@@ -110,7 +143,9 @@ class MenuSeedTest {
                 "system:task:list", "system:task:add", "system:task:edit", "system:task:del",
                 "monitor:log:list", "monitor:log:del",
                 "monitor:online:list", "monitor:online:del",
-                "monitor:monitor:list");
+                "monitor:monitor:list",
+                "storage:list", "storage:upload", "storage:del",
+                "email:send");
         // 每条按钮挂对应页面菜单、授权树文案 key 在册
         assertThat(buttons).allSatisfy(button -> {
             assertThat(button.getParentId()).isNotNull();
@@ -157,8 +192,8 @@ class MenuSeedTest {
 
     @Test
     void 迁移幂等不产生重复行() {
-        // 全表行数精确：V2 三条页面 + 目录 2 + 子菜单 11 + 按钮 34 = 50
-        assertThat(menuMapper.selectCount(null)).isEqualTo(50);
+        // 全表行数精确：V2 三条页面 + 目录 3 + 子菜单 14 + 按钮 38 = 58
+        assertThat(menuMapper.selectCount(null)).isEqualTo(58);
         // 权限点标识唯一（NOT EXISTS 守卫语义）
         List<Menu> menus = menuMapper.selectList(null);
         long distinctPermissions = menus.stream()
@@ -166,7 +201,7 @@ class MenuSeedTest {
                 .filter(Objects::nonNull)
                 .distinct()
                 .count();
-        assertThat(distinctPermissions).isEqualTo(34);
+        assertThat(distinctPermissions).isEqualTo(38);
     }
 
     private List<String> buttonPermissionsOf(List<Menu> menus, String componentPathKey) {
