@@ -34,7 +34,7 @@ class StorageSchemaTest {
     @Test
     void 存储文件表与列在册() {
         assertThat(columns("storage_file"))
-                .contains("name", "storage_key", "ext", "size", "mime", "engine", "uploader", "created_at");
+                .contains("name", "storage_key", "ext", "size", "mime", "engine", "source", "uploader", "created_at");
     }
 
     @Test
