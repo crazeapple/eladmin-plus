@@ -32,6 +32,15 @@ services:
       DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD:-root}
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: '6379'
+      # 存储引擎与 RustFS 连接：缺省指向宿主发布的 RustFS 实例（本地冒烟即用；跨机部署以环境变量覆盖）
+      STORAGE_ENGINE: ${STORAGE_ENGINE:-rustfs}
+      STORAGE_RUSTFS_ENDPOINT: ${STORAGE_RUSTFS_ENDPOINT:-http://host.docker.internal:9100}
+      STORAGE_RUSTFS_BUCKET: ${STORAGE_RUSTFS_BUCKET:-eladmin-plus}
+      STORAGE_RUSTFS_ACCESS_KEY: ${STORAGE_RUSTFS_ACCESS_KEY:-rustfsadmin}
+      STORAGE_RUSTFS_SECRET_KEY: ${STORAGE_RUSTFS_SECRET_KEY:-rustfsadmin}
+    # Linux 宿主无内建 host.docker.internal 解析：host-gateway 兜底（Docker Desktop 原生支持）
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     depends_on:
       mysql:
         condition: service_healthy
