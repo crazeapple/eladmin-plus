@@ -29,9 +29,13 @@ class MeTest extends RefreshLogoutTest {
         JsonNode data = objectMapper
                 .readTree(result.getResponse().getContentAsString())
                 .get("data");
-        // 用户视图
+        // 用户视图（资料三字段为个人中心表单预填数据源；admin 种子无值，null 也在册）
         assertThat(data.get("user").get("username").asText()).isEqualTo("admin");
         assertThat(data.get("user").get("nickName").asText()).isEqualTo("系统管理员");
+        assertThat(data.get("user").has("avatarId")).isTrue();
+        assertThat(data.get("user").has("email")).isTrue();
+        assertThat(data.get("user").has("phone")).isTrue();
+        assertThat(data.get("user").has("gender")).isTrue();
         assertThat(data.get("user").has("password")).isFalse();
         // 角色码（ROLE_ROOT 内置位）
         assertThat(data.get("roles").toString()).contains("ROLE_ROOT");
