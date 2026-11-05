@@ -38,6 +38,8 @@ services:
       STORAGE_RUSTFS_BUCKET: ${STORAGE_RUSTFS_BUCKET:-eladmin-plus}
       STORAGE_RUSTFS_ACCESS_KEY: ${STORAGE_RUSTFS_ACCESS_KEY:-rustfsadmin}
       STORAGE_RUSTFS_SECRET_KEY: ${STORAGE_RUSTFS_SECRET_KEY:-rustfsadmin}
+      # 手动备份经容器执行（docker exec 调 mysqldump）：注入本栈 mysql 容器名（与 container_name 一致）
+      OPS_BACKUP_CONTAINER: ${OPS_BACKUP_CONTAINER:-eladmin-plus-prod-mysql}
     # Linux 宿主无内建 host.docker.internal 解析：host-gateway 兜底（Docker Desktop 原生支持）
     extra_hosts:
       - 'host.docker.internal:host-gateway'
