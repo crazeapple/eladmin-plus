@@ -20,11 +20,12 @@ export default defineConfig({
     },
     {
       name: 'anonymous',
-      testMatch: /(auth|public|login-page|login-slider)\.spec\.ts$/,
+      testMatch: /(auth|preferences-anonymous|public|login-page|login-slider)\.spec\.ts$/,
     },
     {
       name: 'system',
-      testMatch: /(smoke|system[^/]*|monitor[^/]*|tools[^/]*|ops[^/]*|account|ui[^/]*)\.spec\.ts$/,
+      testMatch:
+        /(smoke|preferences-sync|system[^/]*|monitor[^/]*|tools[^/]*|ops[^/]*|account|ui[^/]*)\.spec\.ts$/,
       dependencies: ['setup'],
       use: { storageState: '.auth/state.json' },
     },

@@ -92,3 +92,26 @@ export async function gotoWithSession(page: Page, path: string): Promise<void> {
   await page.goto(path)
   await page.waitForURL((url) => url.pathname === path)
 }
+
+/** 栈内 MySQL 容器名（deploy/compose.yaml 固定命名） */
+const MYSQL_CONTAINER = 'eladmin-plus-prod-mysql'
+
+/**
+ * 管理员账户偏好归零（preferences 置 NULL = 缺省）。
+ * 偏好同步用例的自净前提：不管此前运行留下什么账户态，用例起点恒为缺省。
+ */
+export function resetAdminPreferences(): void {
+  execFileSync(
+    'docker',
+    [
+      'exec',
+      MYSQL_CONTAINER,
+      'mysql',
+      '-uroot',
+      '-proot',
+      '-e',
+      "UPDATE eladmin_plus.`user` SET preferences = NULL WHERE username = 'admin'",
+    ],
+    { stdio: 'ignore' },
+  )
+}
