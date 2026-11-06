@@ -74,7 +74,7 @@ describe('Layout', () => {
     await renderLayout('/demo/cached')
     const breadcrumb = document.querySelector('.layout__breadcrumb') as HTMLElement
     expect(within(breadcrumb).getByText('首页')).toBeTruthy()
-    expect(within(breadcrumb).getByText('演示·缓存')).toBeTruthy()
+    expect(within(breadcrumb).getByText('缓存')).toBeTruthy()
   })
 
   it('全屏接线：点击触发 requestFullscreen', async () => {

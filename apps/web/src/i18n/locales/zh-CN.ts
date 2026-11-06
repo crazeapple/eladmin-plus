@@ -131,8 +131,9 @@ export default {
   },
   routes: {
     home: '首页',
-    demoCached: '演示·缓存',
-    demoNoCache: '演示·不缓存',
+    demo: '演示',
+    demoCached: '缓存',
+    demoNoCache: '不缓存',
     system: '系统管理',
     systemUsers: '用户管理',
     systemRoles: '角色管理',

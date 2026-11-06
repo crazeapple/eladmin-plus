@@ -152,6 +152,27 @@ describe('配置域词条收口', () => {
     }
   })
 
+  it('演示域词条收口：目录与两页路由 key 双包在册且子项去前缀', () => {
+    // 目录化后 routes.demo 目录在册，两子词条去「演示·」前缀（目录名承担归属）
+    for (const locale of ['zh-CN', 'en'] as const) {
+      const keys = localeKeys(locale)
+      for (const route of ['routes.demo', 'routes.demoCached', 'routes.demoNoCache']) {
+        expect(keys).toContain(route)
+      }
+    }
+    const i18n = buildI18n('zh-CN')
+    expect(i18n.global.t('routes.demo')).toBe('演示')
+    expect(i18n.global.t('routes.demoCached')).toBe('缓存')
+    expect(i18n.global.t('routes.demoNoCache')).toBe('不缓存')
+    // 页面内标题词条保持页面语境（不随目录化去前缀）
+    expect(i18n.global.t('demo.cachedTitle')).toBe('演示·缓存')
+    expect(i18n.global.t('demo.noCacheTitle')).toBe('演示·不缓存')
+    applyLocale(i18n.global, 'en')
+    expect(i18n.global.t('routes.demo')).toBe('Demo')
+    expect(i18n.global.t('routes.demoCached')).toBe('Cached')
+    expect(i18n.global.t('routes.demoNoCache')).toBe('Not cached')
+  })
+
   it('按钮权限点文案 43 条在册（与菜单种子权限点数一致）', () => {
     for (const locale of ['zh-CN', 'en'] as const) {
       const permKeys = localeKeys(locale).filter((key) => key.startsWith('perms.'))

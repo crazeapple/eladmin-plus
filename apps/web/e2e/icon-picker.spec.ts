@@ -37,7 +37,7 @@ test('选 EP 图标落库 ep: 值，菜单树与侧栏回显组件形态', async
   await expect(tree.getByText('定时任务', { exact: true })).toBeVisible()
   const timingNode = tree.locator('.el-tree-node__content', { hasText: '定时任务' }).first()
   await expect(timingNode.locator('.app-icon > svg')).toBeVisible()
-  const noCacheNode = tree.locator('.el-tree-node__content', { hasText: '演示·不缓存' }).first()
+  const noCacheNode = tree.locator('.el-tree-node__content', { hasText: '不缓存' }).first()
   await expect(noCacheNode.locator('.app-icon--ep .el-icon svg')).toBeVisible()
 
   // 字典管理编辑：svg tab 高亮当前值，切 EP tab 选 alarm-clock 落库 ep:alarm-clock（无 svg 同义项，缺省 svg 风格下保持 EP 形态）

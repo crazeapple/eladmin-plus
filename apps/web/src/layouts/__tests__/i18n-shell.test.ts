@@ -66,14 +66,14 @@ describe('壳层多语言', () => {
     // 渲染 App：语言绑定 watch（偏好 locale → i18n 实例）在 App 内接线
     render(App, { global: { plugins: [pinia, router, buildI18n('zh-CN'), VueQueryPlugin] } })
 
-    // 中文态：菜单、面包屑、页签各自容器内为中文
+    // 中文态：菜单、面包屑、页签各自容器内为中文（演示目录化后子项词条无「演示·」前缀）
     const menu = document.querySelector('.layout__menu') as HTMLElement
     const breadcrumb = document.querySelector('.layout__breadcrumb') as HTMLElement
     const tags = document.querySelector('[data-test="tags-view"]') as HTMLElement
-    expect(within(menu).getByText('演示·缓存')).toBeTruthy()
+    expect(within(menu).getByText('缓存')).toBeTruthy()
     expect(within(breadcrumb).getByText('首页')).toBeTruthy()
-    expect(within(breadcrumb).getByText('演示·缓存')).toBeTruthy()
-    expect(within(tags).getByText('演示·缓存')).toBeTruthy()
+    expect(within(breadcrumb).getByText('缓存')).toBeTruthy()
+    expect(within(tags).getByText('缓存')).toBeTruthy()
 
     // 切到英文：三处渲染即时换语言（无需刷新）
     const prefs = usePreferencesStore()
@@ -81,9 +81,9 @@ describe('壳层多语言', () => {
     await nextTick()
     await nextTick()
 
-    expect(within(menu).getByText('Demo · Cached')).toBeTruthy()
+    expect(within(menu).getByText('Cached')).toBeTruthy()
     expect(within(breadcrumb).getByText('Home')).toBeTruthy()
-    expect(within(tags).getByText('Demo · Cached')).toBeTruthy()
+    expect(within(tags).getByText('Cached')).toBeTruthy()
     expect(document.documentElement.getAttribute('lang')).toBe('en')
   })
 })

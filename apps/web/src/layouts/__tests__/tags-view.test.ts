@@ -49,25 +49,25 @@ describe('TagsView', () => {
   it('页签渲染：首页固定不可关闭，其他页签可关闭', async () => {
     await renderApp('/demo/cached')
     expect(tagByName('首页').querySelector('.el-tag__close')).toBeNull()
-    expect(tagByName('演示·缓存').querySelector('.el-tag__close')).not.toBeNull()
+    expect(tagByName('缓存').querySelector('.el-tag__close')).not.toBeNull()
   })
 
   it('右键菜单：关闭其他保留首页与目标，关闭全部仅剩首页', async () => {
     const router = await renderApp('/home')
     await router.push('/demo/cached')
     await router.push('/demo/no-cache')
-    expect(tagByName('演示·不缓存')).toBeTruthy()
+    expect(tagByName('不缓存')).toBeTruthy()
 
-    await fireEvent.contextMenu(tagByName('演示·缓存'))
+    await fireEvent.contextMenu(tagByName('缓存'))
     await fireEvent.click(menu().getByText('关闭其他'))
     await tick()
-    expect(tagsArea().queryByText('演示·不缓存')).toBeNull()
-    expect(tagsArea().getByText('演示·缓存')).toBeTruthy()
+    expect(tagsArea().queryByText('不缓存')).toBeNull()
+    expect(tagsArea().getByText('缓存')).toBeTruthy()
 
-    await fireEvent.contextMenu(tagByName('演示·缓存'))
+    await fireEvent.contextMenu(tagByName('缓存'))
     await fireEvent.click(menu().getByText('关闭全部'))
     await tick()
-    expect(tagsArea().queryByText('演示·缓存')).toBeNull()
+    expect(tagsArea().queryByText('缓存')).toBeNull()
     expect(tagsArea().getByText('首页')).toBeTruthy()
     expect(router.currentRoute.value.path).toBe('/home')
   })
@@ -75,12 +75,12 @@ describe('TagsView', () => {
   it('关闭当前：非首页可关，活跃被关跳最后存活页签', async () => {
     const router = await renderApp('/demo/cached')
     await router.push('/demo/no-cache')
-    expect(tagByName('演示·不缓存')).toBeTruthy()
+    expect(tagByName('不缓存')).toBeTruthy()
 
-    await fireEvent.contextMenu(tagByName('演示·不缓存'))
+    await fireEvent.contextMenu(tagByName('不缓存'))
     await fireEvent.click(menu().getByText('关闭当前'))
     await tick()
-    expect(tagsArea().queryByText('演示·不缓存')).toBeNull()
+    expect(tagsArea().queryByText('不缓存')).toBeNull()
     expect(router.currentRoute.value.path).toBe('/demo/cached')
   })
 

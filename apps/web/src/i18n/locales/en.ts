@@ -132,8 +132,9 @@ export default {
   },
   routes: {
     home: 'Home',
-    demoCached: 'Demo · Cached',
-    demoNoCache: 'Demo · Not cached',
+    demo: 'Demo',
+    demoCached: 'Cached',
+    demoNoCache: 'Not cached',
     system: 'System',
     systemUsers: 'Users',
     systemRoles: 'Roles',
