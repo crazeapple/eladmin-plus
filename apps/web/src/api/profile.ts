@@ -1,9 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 
-import type { MeResponse, PasswordChangeRequest, ProfileUpdateRequest, UserView } from './generated'
+import type {
+  MeResponse,
+  PasswordChangeRequest,
+  PreferencesUpdateRequest,
+  ProfileUpdateRequest,
+  UserView,
+} from './generated'
 import { request } from './request'
 
-/** 个人中心契约薄封装：资料改、头像上传与清空、改密（登录即可，仅操作会话用户自己） */
+/** 个人中心契约薄封装：资料改、头像上传与清空、改密、偏好写（登录即可，仅操作会话用户自己） */
 
 const ME_KEY = ['auth', 'me'] as const
 
@@ -66,4 +72,9 @@ export function useChangePassword() {
     mutationFn: (payload: PasswordChangeRequest) =>
       request({ url: '/auth/me/password', method: 'PUT', body: payload }),
   })
+}
+
+/** 偏好全量写：四项幂等覆盖（前端本地先行渲染，此为异步兜底真相源；偏好 store 消费） */
+export async function putPreferences(payload: PreferencesUpdateRequest): Promise<void> {
+  await request({ url: '/profile/preferences', method: 'PUT', body: payload })
 }

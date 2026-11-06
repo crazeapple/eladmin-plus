@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { request } from '@/api/request'
+import { usePreferencesStore } from '@/stores/preferences'
 
 /** 后端 /auth/me 下发的菜单树节点（与后端 MeController 形态对齐） */
 export interface MenuNode {
@@ -33,7 +34,7 @@ export const useMenusStore = defineStore('menus', () => {
   const roles = ref<string[]>([])
   const permissions = ref<string[]>([])
 
-  /** 拉取菜单树与用户视图；失败（含 401）返回 false 交守卫跳登录 */
+  /** 拉取菜单树与用户视图（随带账户偏好，到达即覆盖本地缓存）；失败（含 401）返回 false 交守卫跳登录 */
   async function load(): Promise<boolean> {
     try {
       const payload = await request<{
@@ -41,11 +42,13 @@ export const useMenusStore = defineStore('menus', () => {
         roles?: string[]
         permissions?: string[]
         menus?: MenuNode[]
+        preferences?: unknown
       }>({ url: '/auth/me' })
       user.value = payload.user ?? null
       roles.value = payload.roles ?? []
       permissions.value = payload.permissions ?? []
       menus.value = payload.menus ?? []
+      usePreferencesStore().applyAccountPreferences(payload.preferences)
       loaded.value = true
       return true
     } catch {

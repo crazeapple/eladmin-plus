@@ -2,7 +2,11 @@ import { useColorMode } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { type Ref, computed, watchEffect } from 'vue'
 
-import { usePreferencesStore, type ThemePreference } from '@/stores/preferences'
+import {
+  DEFAULT_PRIMARY_COLOR,
+  usePreferencesStore,
+  type ThemePreference,
+} from '@/stores/preferences'
 import { primaryVariants } from './colors'
 
 /** 三态偏好解析为明暗（auto 随系统）；系统信号由调用方传入，监听归各自持有 */
@@ -10,9 +14,18 @@ export function resolveDarkness(theme: ThemePreference, systemDark: boolean): bo
   return theme === 'auto' ? systemDark : theme === 'dark'
 }
 
-/** 把主色变体写到根元素行内样式（覆盖 EP 样式表变量） */
+/**
+ * 主色覆盖链接线（品牌缺省 → 用户自选）：缺省即品牌靛蓝——摘除行内接管回归样式层品牌 token；
+ * 非缺省才把变体写到根元素行内样式（覆盖 EP 样式表变量）。大小写不敏感比对同一色值。
+ */
 export function applyPrimaryColor(color: string, dark: boolean): void {
   const root = document.documentElement
+  if (color.toLowerCase() === DEFAULT_PRIMARY_COLOR.toLowerCase()) {
+    for (const name of Object.keys(primaryVariants(DEFAULT_PRIMARY_COLOR, dark))) {
+      root.style.removeProperty(name)
+    }
+    return
+  }
   for (const [name, value] of Object.entries(primaryVariants(color, dark))) {
     root.style.setProperty(name, value)
   }

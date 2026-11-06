@@ -124,4 +124,17 @@ describe('主色覆盖', () => {
     expect(style.getPropertyValue('--el-color-primary-light-3')).toBe('#58c3a8')
     expect(style.getPropertyValue('--el-color-primary-dark-2')).toBe('#0e8769')
   })
+
+  it('品牌缺省色摘除行内接管（回归样式层品牌 token），大小写不敏感', () => {
+    const style = document.documentElement.style
+    applyPrimaryColor('#11a983', false)
+    expect(style.getPropertyValue('--el-color-primary')).toBe('#11a983')
+
+    // 自选 → 缺省：行内变体摘除，主色交还品牌 token 映射
+    applyPrimaryColor('#5d87ff', false)
+    expect(style.getPropertyValue('--el-color-primary')).toBe('')
+    // 大写同值同语义
+    applyPrimaryColor('#5D87FF', false)
+    expect(style.getPropertyValue('--el-color-primary')).toBe('')
+  })
 })

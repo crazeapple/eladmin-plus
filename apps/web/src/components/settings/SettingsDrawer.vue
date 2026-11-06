@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { usePreferencesStore } from '@/stores/preferences'
+import {
+  usePreferencesStore,
+  type LocalePreference,
+  type ThemePreference,
+} from '@/stores/preferences'
 import { PRESET_COLORS } from '@/theme/colors'
 
 defineOptions({ name: 'SettingsDrawer' })
@@ -11,8 +14,8 @@ defineOptions({ name: 'SettingsDrawer' })
 const modelValue = defineModel<boolean>({ required: true })
 
 const { t } = useI18n()
+// 切换走 setPreference 动作：本地即时生效 + 登录态异步写后端（store 内收口回滚与提示）
 const prefs = usePreferencesStore()
-const { theme, primaryColor, locale } = storeToRefs(prefs)
 
 // 标签随语言即时重算
 const themeOptions = computed(() => [
@@ -29,6 +32,20 @@ const localeOptions = computed(() => [
 ])
 
 const presetColors = PRESET_COLORS
+
+/** 分段控件与取色器的受控形态：展示读偏好，改写交 store 动作 */
+const localeModel = computed({
+  get: () => prefs.locale,
+  set: (value: LocalePreference) => prefs.setPreference('locale', value),
+})
+const themeModel = computed({
+  get: () => prefs.theme,
+  set: (value: ThemePreference) => prefs.setPreference('theme', value),
+})
+const colorModel = computed({
+  get: () => prefs.primaryColor,
+  set: (value: string) => prefs.setPreference('primaryColor', value),
+})
 </script>
 
 <template>
@@ -42,7 +59,7 @@ const presetColors = PRESET_COLORS
     <div class="settings">
       <section class="settings__section">
         <h3>{{ t('settings.language') }}</h3>
-        <el-radio-group v-model="locale" class="settings__segment" data-test="settings-locale">
+        <el-radio-group v-model="localeModel" class="settings__segment" data-test="settings-locale">
           <el-radio-button
             v-for="option in localeOptions"
             :key="option.value"
@@ -54,7 +71,7 @@ const presetColors = PRESET_COLORS
       </section>
       <section class="settings__section">
         <h3>{{ t('settings.theme') }}</h3>
-        <el-radio-group v-model="theme" class="settings__segment" data-test="settings-theme">
+        <el-radio-group v-model="themeModel" class="settings__segment" data-test="settings-theme">
           <el-radio-button v-for="option in themeOptions" :key="option.value" :value="option.value">
             {{ option.label }}
           </el-radio-button>
@@ -68,12 +85,12 @@ const presetColors = PRESET_COLORS
             :key="color"
             type="button"
             class="settings__swatch"
-            :class="{ 'is-active': primaryColor.toLowerCase() === color }"
+            :class="{ 'is-active': colorModel.toLowerCase() === color }"
             :style="{ backgroundColor: color }"
             :aria-label="`primary color ${color}`"
-            @click="primaryColor = color"
+            @click="colorModel = color"
           />
-          <el-color-picker v-model="primaryColor" data-test="settings-color-picker" />
+          <el-color-picker v-model="colorModel" data-test="settings-color-picker" />
         </div>
       </section>
     </div>
