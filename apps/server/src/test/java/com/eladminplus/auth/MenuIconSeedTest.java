@@ -48,7 +48,7 @@ class MenuIconSeedTest {
     void 存量八菜单补值入库且语义择优落定() {
         List<Menu> menus = menuMapper.selectList(null);
         assertThat(iconOf(menus, "routes.home")).isEqualTo("svg:index");
-        assertThat(iconOf(menus, "routes.demoCached")).isEqualTo("svg:tab");
+        assertThat(iconOf(menus, "routes.demoCached")).isEqualTo("ep:box");
         assertThat(iconOf(menus, "routes.demoNoCache")).isEqualTo("ep:refresh-left");
         assertThat(iconOf(menus, "routes.system")).isEqualTo("svg:system");
         assertThat(iconOf(menus, "routes.systemUsers")).isEqualTo("svg:user");
