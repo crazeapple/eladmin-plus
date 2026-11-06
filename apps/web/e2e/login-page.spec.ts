@@ -1,52 +1,33 @@
 import { expect, test } from '@playwright/test'
 import { nextCaptchaChallenge } from './helpers'
 
-// 登录页左右分栏形态（匿名组）：宽屏两区对称等宽、右区图案底、表单卡层次，
-// 点登录后滑块区块内联在登录卡内与输入框对齐（弹层形态退役）；375 窄屏折叠单栏不破版。
+// 登录页整页背景图 + 单栏居中形态（匿名组）：粒子面料图铺满整页、品牌标识左上、
+// 标语与登录卡居中，滑块区块内联在登录卡内与输入框对齐；窄屏卡满幅不破版。
 
-test.describe('宽屏分栏', () => {
+test.describe('宽屏单栏居中', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 
-  test('1440 宽下品牌视觉区与表单卡并立', async ({ page }) => {
+  test('整页背景图在册，品牌标识在卡内顶部', async ({ page }) => {
     await page.goto('/login')
-    const brand = page.locator('[data-test="login-brand"]')
-    const card = page.locator('.login__card')
-    await expect(brand).toBeVisible()
-    await expect(card).toBeVisible()
-    const brandBox = await brand.boundingBox()
-    const cardBox = await card.boundingBox()
-    // 并立：品牌区整体在表单卡左侧
-    expect(brandBox!.x + brandBox!.width).toBeLessThanOrEqual(cardBox!.x)
-  })
-
-  test('品牌区与表单区各占约一半（48%~52%）', async ({ page }) => {
-    await page.goto('/login')
-    const brandBox = await page.locator('[data-test="login-brand"]').boundingBox()
-    const panelBox = await page.locator('.login__panel').boundingBox()
-    // 对称基数 50:50：两区宽度占比同落 48%~52% 区间
-    expect(brandBox!.width / 1440).toBeGreaterThanOrEqual(0.48)
-    expect(brandBox!.width / 1440).toBeLessThanOrEqual(0.52)
-    expect(panelBox!.width / 1440).toBeGreaterThanOrEqual(0.48)
-    expect(panelBox!.width / 1440).toBeLessThanOrEqual(0.52)
-  })
-
-  test('品牌区承载产品文案与渐变底', async ({ page }) => {
-    await page.goto('/login')
-    const brand = page.locator('[data-test="login-brand"]')
-    await expect(brand).toContainText('eladmin-plus')
-    // 渐变底在册：背景图（gradient）非 none
-    const backgroundImage = await brand.evaluate((el) => getComputedStyle(el).backgroundImage)
-    expect(backgroundImage).toContain('gradient')
-  })
-
-  test('右区几何图案底在册（程序化渐变平铺）', async ({ page }) => {
-    await page.goto('/login')
-    const backgroundImage = await page
-      .locator('.login__panel')
+    // 整页容器挂粒子面料背景图（cover 居中）
+    const pageBg = await page
+      .locator('.login')
       .evaluate((el) => getComputedStyle(el).backgroundImage)
-    // 点阵（radial）与网格（linear）双层平铺，非 none
-    expect(backgroundImage).toContain('radial-gradient')
-    expect(backgroundImage).toContain('linear-gradient')
+    expect(pageBg).toContain('login-fabric')
+    // 品牌标识在登录卡内（页面无独立品牌角标）
+    const mark = page.locator('.login__card [data-test="login-brand"]')
+    await expect(mark).toBeVisible()
+    await expect(mark).toContainText('eladmin-plus')
+    // 登录标题退役（与登录按钮文案重复）
+    await expect(page.locator('.login__title')).toHaveCount(0)
+  })
+
+  test('标语在册且登录卡整页居中（中心偏差 ≤60px）', async ({ page }) => {
+    await page.goto('/login')
+    await expect(page.locator('.login__slogan')).toContainText('开箱即用')
+    const cardBox = await page.locator('.login__card').boundingBox()
+    expect(Math.abs(cardBox!.x + cardBox!.width / 2 - 720)).toBeLessThanOrEqual(60)
+    expect(Math.abs(cardBox!.y + cardBox!.height / 2 - 450)).toBeLessThanOrEqual(90)
   })
 
   test('表单卡核心元素齐备（账号 / 密码 / 登录按钮）', async ({ page }) => {
@@ -79,12 +60,13 @@ test.describe('宽屏分栏', () => {
   })
 })
 
-test.describe('窄屏折叠', () => {
+test.describe('窄屏', () => {
   test.use({ viewport: { width: 375, height: 667 } })
 
-  test('375 宽折叠单栏且表单核心元素可见不破版', async ({ page }) => {
+  test('375 宽单栏卡满幅且表单核心元素可见不破版', async ({ page }) => {
     await page.goto('/login')
-    await expect(page.locator('[data-test="login-brand"]')).toBeHidden()
+    // 品牌标识仍在（左上角缩距形态）
+    await expect(page.locator('[data-test="login-brand"]')).toBeVisible()
     await expect(page.locator('[data-test="login-username"]')).toBeVisible()
     await expect(page.locator('[data-test="login-password"]')).toBeVisible()
     await expect(page.locator('[data-test="login-submit"]')).toBeVisible()

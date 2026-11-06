@@ -116,7 +116,7 @@ export default {
     iconSetEp: 'Element icons',
   },
   login: {
-    title: 'Sign in to eladmin-plus',
+    title: 'Sign in',
     slogan: 'An out-of-the-box admin foundation',
     sloganSub: 'IAM, scheduling, monitoring and ops — all in one place',
     username: 'Username',

@@ -82,26 +82,13 @@ async function submitWithCurrentKey(ticket: string, retried = false) {
 
 <template>
   <div class="login" data-test="login-page">
-    <!-- 品牌视觉区：渐变底 + 程序化几何装饰 + 产品文案（窄屏折叠隐藏） -->
-    <aside class="login__brand" data-test="login-brand">
-      <div class="login__brand-inner">
-        <div class="login__wordmark">eladmin-plus</div>
-        <h2 class="login__slogan">{{ t('login.slogan') }}</h2>
-        <p class="login__slogan-sub">{{ t('login.sloganSub') }}</p>
-      </div>
-      <div class="login__decor" aria-hidden="true">
-        <span class="login__decor-ring"></span>
-        <span class="login__decor-dot login__decor-dot--1"></span>
-        <span class="login__decor-dot login__decor-dot--2"></span>
-        <span class="login__decor-dot login__decor-dot--3"></span>
-        <span class="login__decor-square"></span>
-      </div>
-    </aside>
-
-    <!-- 表单卡 -->
-    <main class="login__panel">
+    <!-- 中央：标语 + 登录卡 -->
+    <main class="login__main">
+      <h2 class="login__slogan">{{ t('login.slogan') }}</h2>
+      <p class="login__slogan-sub">{{ t('login.sloganSub') }}</p>
       <el-card class="login__card">
-        <h1 class="login__title">{{ t('login.title') }}</h1>
+        <!-- 品牌标识：卡内顶部，颜色随文字主色亮暗自适应 -->
+        <div class="login__mark" data-test="login-brand">eladmin-plus</div>
         <el-input
           v-model="username"
           :placeholder="t('login.username')"
@@ -157,163 +144,55 @@ async function submitWithCurrentKey(ticket: string, retried = false) {
 .login {
   display: flex;
   min-height: 100vh;
-  background-color: var(--ea-page-bg, var(--el-bg-color-page, #f2f3f5));
+  /* 粒子面料背景图铺满整页：左右区全透明叠加，文字靠图面暗区与文字阴影保可读 */
+  background-image: url('../../assets/login-fabric.jpg');
+  background-size: cover;
+  background-position: center;
 }
 
-.login__brand {
-  position: relative;
-  display: flex;
-  /* 分栏对称基数 50:50：与表单区等宽，右区空旷感由背景图案填充而非占比压制 */
-  flex: 50;
-  align-items: center;
-  justify-content: center;
-  /* 品牌渐变底：靛蓝系对角渐变 */
-  background: var(--ea-gradient-brand, var(--el-color-primary));
-  overflow: hidden;
-}
-
-.login__brand-inner {
-  position: relative;
-  z-index: 1;
-  max-width: 420px;
-  padding: 48px;
-  color: #fff;
-}
-
-.login__wordmark {
-  margin-bottom: 32px;
-  font-size: 20px;
+.login__mark {
+  margin-bottom: 4px;
+  font-size: 18px;
   font-weight: 700;
   letter-spacing: 1px;
+  text-align: center;
+  color: var(--el-text-color-primary);
+}
+
+.login__main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 24px;
 }
 
 .login__slogan {
-  margin: 0 0 12px;
+  margin: 0;
   font-size: 30px;
   font-weight: 700;
   line-height: 1.35;
+  color: #fff;
+  text-align: center;
+  text-shadow: 0 2px 16px rgb(0 0 0 / 50%);
 }
 
 .login__slogan-sub {
-  margin: 0;
+  margin: -12px 0 0;
   font-size: 14px;
   line-height: 1.8;
   color: rgb(255 255 255 / 78%);
-}
-
-/* 几何装饰：程序化形状（圆环 / 圆点 / 圆角块），零图片资产 */
-.login__decor {
-  position: absolute;
-  inset: 0;
-
-  span {
-    position: absolute;
-    display: block;
-  }
-}
-
-.login__decor-ring {
-  top: 8%;
-  right: 12%;
-  width: 180px;
-  height: 180px;
-  border: 2px solid rgb(255 255 255 / 22%);
-  border-radius: 50%;
-}
-
-.login__decor-square {
-  bottom: 12%;
-  left: 10%;
-  width: 120px;
-  height: 120px;
-  background: rgb(255 255 255 / 10%);
-  border-radius: var(--ea-radius-lg, 12px);
-  transform: rotate(18deg);
-}
-
-.login__decor-dot {
-  border-radius: 50%;
-  background: rgb(255 255 255 / 28%);
-
-  &--1 {
-    top: 30%;
-    right: 28%;
-    width: 16px;
-    height: 16px;
-  }
-
-  &--2 {
-    bottom: 28%;
-    right: 14%;
-    width: 10px;
-    height: 10px;
-  }
-
-  &--3 {
-    top: 16%;
-    left: 14%;
-    width: 12px;
-    height: 12px;
-  }
-}
-
-.login__panel {
-  display: flex;
-  /* 分栏对称基数 50:50（与品牌区互为等宽） */
-  flex: 50;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  /* 右区极淡几何图案底：品牌主色点阵 + 细网格程序化平铺（透明度取 4%~7% 档，零图片资产） */
-  background-image:
-    radial-gradient(
-      circle,
-      color-mix(in srgb, var(--ea-primary, #5d87ff) 7%, transparent) 1.5px,
-      transparent 1.5px
-    ),
-    linear-gradient(
-      color-mix(in srgb, var(--ea-primary, #5d87ff) 4%, transparent) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--ea-primary, #5d87ff) 4%, transparent) 1px,
-      transparent 1px
-    );
-  background-size:
-    24px 24px,
-    24px 24px,
-    24px 24px;
-}
-
-/* 暗色底上图案略提亮仍守极淡档（4%~8% 上限档），色值随品牌主色 token 双态 */
-html.dark .login__panel {
-  background-image:
-    radial-gradient(
-      circle,
-      color-mix(in srgb, var(--ea-primary, #5d87ff) 8%, transparent) 1.5px,
-      transparent 1.5px
-    ),
-    linear-gradient(
-      color-mix(in srgb, var(--ea-primary, #5d87ff) 5%, transparent) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--ea-primary, #5d87ff) 5%, transparent) 1px,
-      transparent 1px
-    );
-  background-size:
-    24px 24px,
-    24px 24px,
-    24px 24px;
+  text-align: center;
+  text-shadow: 0 1px 10px rgb(0 0 0 / 45%);
 }
 
 .login__card {
   width: 400px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  /* 卡浮于装饰层之上 */
+  position: relative;
+  z-index: 1;
   /* 卡内边距随 EP 卡片 token 提到 28px（加宽加密改善空旷感） */
   --el-card-padding: 28px;
   /* 表单卡：品牌卡片底 + 圆角与重阴影层次（亮暗双态取 token 值） */
@@ -323,11 +202,12 @@ html.dark .login__panel {
   box-shadow: var(--ea-shadow-3, var(--el-box-shadow-light));
 }
 
-.login__title {
-  margin: 0;
-  font-size: 20px;
-  text-align: center;
-  color: var(--el-text-color-primary);
+/* 表单元素垂直间距落在 EP 卡片内容区（title/input/button 都在 body 层，
+   卡根设 flex gap 只会作用于唯一子元素、不生效） */
+.login__card :deep(.el-card__body) {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .login__submit {
@@ -375,19 +255,19 @@ html.dark .login__panel {
   transform: translateY(-6px);
 }
 
-/* 窄屏折叠单栏：品牌区让位，表单卡满幅 */
+/* 窄屏：品牌标识缩距，卡满幅 */
 @media (max-width: 768px) {
-  .login__brand {
-    display: none;
+  .login__mark {
+    padding: 20px 24px;
   }
 
-  .login__panel {
+  .login__main {
     padding: 16px;
   }
 
   .login__card {
     width: 100%;
-    max-width: 380px;
+    max-width: 400px;
   }
 }
 </style>

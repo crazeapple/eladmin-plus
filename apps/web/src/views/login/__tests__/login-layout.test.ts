@@ -55,16 +55,27 @@ function pxOf(value: string | undefined): number {
 }
 
 describe('登录页布局契约', () => {
-  it('分栏对称基数 50:50（品牌区与表单区互为等宽）', () => {
-    expect(rules.get('.login__brand')?.flex).toBe('50')
-    expect(rules.get('.login__panel')?.flex).toBe('50')
+  it('背景图铺满整页，品牌标识入卡、主区垂直水平居中', () => {
+    const page = rules.get('.login')
+    expect(page?.display).toBe('flex')
+    expect(page?.['background-image']).toContain('login-fabric')
+    expect(page?.['background-size']).toBe('cover')
+    const mark = rules.get('.login__mark')
+    expect(mark?.color).toContain('var(--el-text-color-primary)')
+    expect(mark?.['text-align']).toBe('center')
+    const main = rules.get('.login__main')
+    expect(main?.['align-items']).toBe('center')
+    expect(main?.['justify-content']).toBe('center')
   })
 
   it('表单卡宽 400px，卡内边距 28px，元素垂直间距 ≥18px', () => {
     const card = rules.get('.login__card')
     expect(card?.width).toBe('400px')
     expect(pxOf(card?.['--el-card-padding'])).toBeGreaterThanOrEqual(28)
-    expect(pxOf(card?.gap)).toBeGreaterThanOrEqual(18)
+    // 间距落在 EP 卡片内容区（body 层）——卡根设 gap 只作用于唯一子元素不生效
+    const bodyRule = rules.get('.login__card :deep(.el-card__body)')
+    expect(pxOf(bodyRule?.gap)).toBeGreaterThanOrEqual(18)
+    expect(bodyRule?.['flex-direction']).toBe('column')
   })
 
   it('表单卡层次 token 在册（卡片底 / 边框 / 圆角 / 重阴影）', () => {
@@ -75,29 +86,19 @@ describe('登录页布局契约', () => {
     expect(card?.['box-shadow']).toContain('var(--ea-shadow-3')
   })
 
-  it('右区几何图案底在册（品牌主色点阵 + 网格程序化平铺，透明度守 4%~8%）', () => {
-    const panelImage = rules.get('.login__panel')?.['background-image'] ?? ''
-    // 点阵（radial）与网格（linear）双层同在，色值走品牌主色 token
-    expect(panelImage).toContain('radial-gradient')
-    expect(panelImage).toContain('linear-gradient')
-    expect(panelImage).toContain('var(--ea-primary')
-    // 极淡档：声明里的透明度百分数全部落在 4%~8%
-    const alphas = [...panelImage.matchAll(/(\d+)%/g)].map((m) => Number(m[1]))
-    expect(alphas.length).toBeGreaterThan(0)
-    for (const alpha of alphas) {
-      expect(alpha).toBeGreaterThanOrEqual(4)
-      expect(alpha).toBeLessThanOrEqual(8)
-    }
-  })
-
-  it('图案底亮暗双态：暗色分支独立成规且提亮不越档', () => {
-    const darkImage = rules.get('html.dark .login__panel')?.['background-image'] ?? ''
-    expect(darkImage).toContain('radial-gradient')
-    // 暗色与亮色取不同透明度配比（双态值表不重合）
-    expect(darkImage).not.toBe(rules.get('.login__panel')?.['background-image'])
-    for (const alpha of [...darkImage.matchAll(/(\d+)%/g)].map((m) => Number(m[1]))) {
-      expect(alpha).toBeGreaterThanOrEqual(4)
-      expect(alpha).toBeLessThanOrEqual(8)
-    }
+  it('粒子背景图铺满整页，左右区全透明叠加', () => {
+    // 背景图在整页容器（cover 居中），左右区透明、文字靠图面暗区与文字阴影保可读
+    const page = rules.get('.login')
+    expect(page?.['background-image']).toContain('login-fabric')
+    expect(page?.['background-size']).toBe('cover')
+    expect(page?.['background-position']).toBe('center')
+    expect(rules.get('.login__brand')?.['background']).toBeUndefined()
+    expect(rules.get('.login__panel')?.['background-image']).toBeUndefined()
+    // 文字阴影在册（可读性增强且不遮背景图）
+    expect(rules.get('.login__slogan')?.['text-shadow']).toContain('rgb')
+    // 左区装饰退役（背景图即视觉主体）
+    expect(rules.get('.login__decor')).toBeUndefined()
+    // 卡浮于背景图之上
+    expect(rules.get('.login__card')?.['z-index']).toBe('1')
   })
 })
