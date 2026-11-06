@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import Home from '@/views/home/index.vue'
 import { buildI18n } from '@/i18n'
 import { chartPalette } from '@/components/charts/options'
-import { usePreferencesStore } from '@/stores/preferences'
+import { DEFAULT_PRIMARY_COLOR, usePreferencesStore } from '@/stores/preferences'
 import { lineDatasets } from '../demo-data'
 import { statsQueryState } from './stats-query-mock'
 
@@ -164,7 +164,8 @@ describe('主题与语言联动', () => {
 
     prefs.theme = 'dark'
     await nextTick()
-    const dark = chartPalette('#409eff', true)
+    // 期望值按当前缺省主色（品牌靛蓝）同公式重算，与组件消费侧同源
+    const dark = chartPalette(DEFAULT_PRIMARY_COLOR.toLowerCase(), true)
     expect(lastLineOption().color).toEqual([dark.dark2, dark.primary])
 
     prefs.theme = 'light'

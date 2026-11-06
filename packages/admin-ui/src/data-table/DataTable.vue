@@ -356,7 +356,9 @@ function cellSlotName(cell: Cell<typeof dataTableFeatures, TData, unknown>): str
   overflow: hidden;
   background: var(--el-bg-color);
   border: 1px solid var(--el-border-color-lighter);
-  border-radius: var(--el-border-radius-base);
+  /* 品牌 token 直引（带 fallback）：圆角档位与卡片阴影走设计基座 */
+  border-radius: var(--ea-radius-md, 8px);
+  box-shadow: var(--ea-shadow-1, 0 1px 2px rgb(15 23 42 / 6%));
 }
 
 .data-table__table {
@@ -440,7 +442,7 @@ function cellSlotName(cell: Cell<typeof dataTableFeatures, TData, unknown>): str
   width: 28px;
   height: 28px;
   border: 2px solid var(--el-color-primary-light-7);
-  border-top-color: var(--el-color-primary);
+  border-top-color: var(--ea-primary, var(--el-color-primary));
   border-radius: 50%;
   animation: data-table-spin 0.8s linear infinite;
 }

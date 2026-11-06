@@ -1,0 +1,93 @@
+// 品牌设计 token 值表（两层体系，亮暗双态）：
+//   品牌层 --ea-*：靛蓝主色（#5D87FF 基值）、圆角档位、阴影层级、渐变、卡片层次与布局语义
+//   覆盖层 --el-*：把品牌值映射到 Element Plus 变量，组件库换肤链路自动继承
+// 消费方一律以 var(--ea-*, <fallback>) 形态取值，token 未就绪时首帧无裸样式闪烁
+
+:root {
+  // —— 主色与派生（靛蓝基值） ——
+  --ea-primary: #5d87ff;
+  --ea-primary-strong: #4c6fef;
+  --ea-primary-soft: #eef2ff;
+
+  // —— 渐变 ——
+  --ea-gradient-primary: linear-gradient(135deg, #5d87ff 0%, #4c6fef 100%);
+  --ea-gradient-brand: linear-gradient(160deg, #4c6fef 0%, #5d87ff 45%, #9db6ff 100%);
+
+  // —— 圆角档位 ——
+  --ea-radius-sm: 6px;
+  --ea-radius-md: 8px;
+  --ea-radius-lg: 12px;
+
+  // —— 阴影层级（1 轻 / 2 中 / 3 重） ——
+  --ea-shadow-1: 0 1px 2px rgb(15 23 42 / 6%);
+  --ea-shadow-2: 0 4px 12px rgb(15 23 42 / 8%);
+  --ea-shadow-3: 0 12px 32px rgb(15 23 42 / 14%);
+
+  // —— 卡片层次与页面底 ——
+  --ea-card-bg: #ffffff;
+  --ea-card-border: #e4e7ed;
+  --ea-card-shadow: var(--ea-shadow-1);
+  --ea-page-bg: #f2f3f5;
+
+  // —— 布局语义 ——
+  --ea-layout-sidebar-width: 220px;
+  --ea-layout-sidebar-collapsed-width: 64px;
+  --ea-layout-header-height: 56px;
+  --ea-layout-content-padding: 16px;
+  --ea-sidebar-bg: #ffffff;
+  --ea-sidebar-border: #e4e7ed;
+  --ea-sidebar-text: #303133;
+  --ea-sidebar-active-bg: var(--ea-gradient-primary);
+  --ea-sidebar-active-text: #ffffff;
+  --ea-header-bg: #ffffff;
+  --ea-mask-bg: rgb(0 0 0 / 50%);
+
+  // —— 覆盖层：品牌值映射到 EP 变量（偏好主色以行内样式接管，此处为缺省映射） ——
+  --el-color-primary: var(--ea-primary);
+  --el-border-radius-base: var(--ea-radius-sm);
+  --el-border-radius-small: 4px;
+  --el-border-radius-round: var(--ea-radius-lg);
+  --el-box-shadow: var(--ea-shadow-2);
+  --el-box-shadow-light: var(--ea-shadow-2);
+  --el-box-shadow-dark: var(--ea-shadow-3);
+}
+
+html.dark {
+  // —— 主色与派生（暗色下淡底转半透明，基值不变） ——
+  --ea-primary: #5d87ff;
+  --ea-primary-strong: #4c6fef;
+  --ea-primary-soft: rgb(93 135 255 / 16%);
+
+  // —— 渐变（暗色降低明度对比） ——
+  --ea-gradient-primary: linear-gradient(135deg, #5d87ff 0%, #4c6fef 100%);
+  --ea-gradient-brand: linear-gradient(160deg, #2c3e75 0%, #3c55a8 45%, #5d87ff 100%);
+
+  // —— 圆角档位（形态语义与亮色一致） ——
+  --ea-radius-sm: 6px;
+  --ea-radius-md: 8px;
+  --ea-radius-lg: 12px;
+
+  // —— 阴影层级（暗色下加重保证层次可辨） ——
+  --ea-shadow-1: 0 1px 2px rgb(0 0 0 / 40%);
+  --ea-shadow-2: 0 4px 12px rgb(0 0 0 / 45%);
+  --ea-shadow-3: 0 12px 32px rgb(0 0 0 / 55%);
+
+  // —— 卡片层次与页面底（对齐 EP 暗色变量体系） ——
+  --ea-card-bg: #1d1e1f;
+  --ea-card-border: #414243;
+  --ea-card-shadow: var(--ea-shadow-2);
+  --ea-page-bg: #0a0a0a;
+
+  // —— 布局语义 ——
+  --ea-layout-sidebar-width: 220px;
+  --ea-layout-sidebar-collapsed-width: 64px;
+  --ea-layout-header-height: 56px;
+  --ea-layout-content-padding: 16px;
+  --ea-sidebar-bg: #141414;
+  --ea-sidebar-border: #414243;
+  --ea-sidebar-text: #cfd3dc;
+  --ea-sidebar-active-bg: var(--ea-gradient-primary);
+  --ea-sidebar-active-text: #ffffff;
+  --ea-header-bg: #141414;
+  --ea-mask-bg: rgb(0 0 0 / 65%);
+}

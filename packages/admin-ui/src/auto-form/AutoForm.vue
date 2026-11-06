@@ -261,7 +261,8 @@ async function onSubmit() {
   font-size: 13px;
   color: var(--el-color-danger);
   background: var(--el-color-danger-light-9);
-  border-radius: var(--el-border-radius-base);
+  /* 品牌 token 直引（带 fallback）：圆角档位走设计基座 */
+  border-radius: var(--ea-radius-sm, 6px);
 }
 
 .auto-form__actions {
@@ -274,6 +275,6 @@ async function onSubmit() {
   font-size: 13px;
   color: var(--el-text-color-secondary);
   border: 1px dashed var(--el-border-color);
-  border-radius: var(--el-border-radius-base);
+  border-radius: var(--ea-radius-sm, 6px);
 }
 </style>

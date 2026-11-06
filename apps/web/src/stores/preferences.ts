@@ -10,8 +10,8 @@ export interface Preferences {
   locale: LocalePreference
 }
 
-/** Element Plus 默认主色，偏好缺省与色板回退值 */
-export const DEFAULT_PRIMARY_COLOR = '#409EFF'
+/** 品牌靛蓝主色（与样式层 --ea-primary 同源），偏好缺省与色板回退值 */
+export const DEFAULT_PRIMARY_COLOR = '#5D87FF'
 
 const STORAGE_KEY = 'eladmin-plus:preferences'
 

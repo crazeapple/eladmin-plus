@@ -41,5 +41,13 @@ export function primaryVariants(color: string, dark: boolean): Record<string, st
   }
 }
 
-/** 预设色板：EP 默认主色打头，避开 success / warning / danger 语义色 */
-export const PRESET_COLORS = ['#409eff', '#11a983', '#13c2c2', '#6954dc', '#b37feb', '#f759ab']
+/** 预设色板：品牌靛蓝打头，EP 默认蓝殿后保底，避开 success / warning / danger 语义色 */
+export const PRESET_COLORS = [
+  '#5d87ff',
+  '#409eff',
+  '#11a983',
+  '#13c2c2',
+  '#6954dc',
+  '#b37feb',
+  '#f759ab',
+]
