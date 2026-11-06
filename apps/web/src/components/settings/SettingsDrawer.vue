@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 
 import {
   usePreferencesStore,
+  type IconSetPreference,
   type LocalePreference,
   type ThemePreference,
 } from '@/stores/preferences'
@@ -45,6 +46,10 @@ const themeModel = computed({
 const colorModel = computed({
   get: () => prefs.primaryColor,
   set: (value: string) => prefs.setPreference('primaryColor', value),
+})
+const iconSetModel = computed({
+  get: () => prefs.iconSet,
+  set: (value: IconSetPreference) => prefs.setPreference('iconSet', value),
 })
 </script>
 
@@ -92,6 +97,17 @@ const colorModel = computed({
           />
           <el-color-picker v-model="colorModel" data-test="settings-color-picker" />
         </div>
+      </section>
+      <section class="settings__section">
+        <h3>{{ t('settings.iconSet') }}</h3>
+        <el-radio-group
+          v-model="iconSetModel"
+          class="settings__segment"
+          data-test="settings-icon-set"
+        >
+          <el-radio-button value="svg">{{ t('settings.iconSetSvg') }}</el-radio-button>
+          <el-radio-button value="ep">{{ t('settings.iconSetEp') }}</el-radio-button>
+        </el-radio-group>
       </section>
     </div>
   </el-drawer>

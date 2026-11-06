@@ -5,45 +5,80 @@ import { computed } from 'vue'
 import AppIcon from '@/components/AppIcon.vue'
 import { hasAppIcon } from '@/components/app-icons'
 import { EP_ICONS, hasEpIcon } from '@/components/ep-icons'
+import { EP_TO_SVG, SVG_TO_EP } from '@/components/icon-synonyms'
+import { usePreferencesStore } from '@/stores/preferences'
 
 /** 菜单 icon 库值（svg:name / ep:name 双前缀形态） */
 const props = defineProps<{ value?: string | null }>()
+
+// 图标风格偏好（P-022 框架）：切换即经同义映射换边渲染，侧栏响应式重渲
+const prefs = usePreferencesStore()
 
 /**
  * 统一分派：`svg:` 走本地 svg 集（AppIcon 同款形态）、`ep:` 走 EP 具名清单动态组件
  * （el-icon 包裹）；无前缀裸名（历史脏数据防御）与缺失值不渲染；
  * 前缀在册但名未知的渲染缺省占位，不崩。
+ * 风格开关（iconSet）叠加同义映射换边：目标名不在册保持原库形态，不强行错换。
  */
-const svgName = computed<string | null>(() => {
+const resolved = computed<{ kind: 'svg' | 'ep'; name: string } | 'missing' | null>(() => {
   const value = props.value ?? ''
-  if (!value.startsWith('svg:')) {
-    return null
+  if (value.startsWith('svg:')) {
+    const name = value.slice('svg:'.length)
+    if (!name) {
+      return null
+    }
+    if (!hasAppIcon(name)) {
+      return 'missing'
+    }
+    if (prefs.iconSet === 'ep') {
+      const mapped = SVG_TO_EP[name]
+      if (mapped && hasEpIcon(mapped)) {
+        return { kind: 'ep', name: mapped }
+      }
+    }
+    return { kind: 'svg', name }
   }
-  const name = value.slice('svg:'.length)
-  return name && hasAppIcon(name) ? name : null
+  if (value.startsWith('ep:')) {
+    const name = value.slice('ep:'.length)
+    if (!name) {
+      return null
+    }
+    if (!hasEpIcon(name)) {
+      return 'missing'
+    }
+    if (prefs.iconSet === 'svg') {
+      const mapped = EP_TO_SVG[name]
+      if (mapped && hasAppIcon(mapped)) {
+        return { kind: 'svg', name: mapped }
+      }
+    }
+    return { kind: 'ep', name }
+  }
+  return null
 })
 
-const epName = computed<string | null>(() => {
-  const value = props.value ?? ''
-  if (!value.startsWith('ep:')) {
-    return null
-  }
-  const name = value.slice('ep:'.length)
-  return name && hasEpIcon(name) ? name : null
+const svgRender = computed<string | null>(() => {
+  const resolvedValue = resolved.value
+  return resolvedValue && resolvedValue !== 'missing' && resolvedValue.kind === 'svg'
+    ? resolvedValue.name
+    : null
+})
+
+const epRender = computed<string | null>(() => {
+  const resolvedValue = resolved.value
+  return resolvedValue && resolvedValue !== 'missing' && resolvedValue.kind === 'ep'
+    ? resolvedValue.name
+    : null
 })
 
 // 缺省占位只限双前缀值（在册但名未知）；裸名与缺失值静默不渲染
-const missing = computed(() => {
-  const value = props.value ?? ''
-  const prefixed = value.startsWith('svg:') || value.startsWith('ep:')
-  return prefixed && !svgName.value && !epName.value
-})
+const missing = computed(() => resolved.value === 'missing')
 </script>
 
 <template>
-  <app-icon v-if="svgName" :name="svgName" />
-  <span v-else-if="epName" class="app-icon app-icon--ep" aria-hidden="true">
-    <el-icon><component :is="EP_ICONS[epName]" /></el-icon>
+  <app-icon v-if="svgRender" :name="svgRender" />
+  <span v-else-if="epRender" class="app-icon app-icon--ep" aria-hidden="true">
+    <el-icon><component :is="EP_ICONS[epRender]" /></el-icon>
   </span>
   <!-- 缺省占位与 AppIcon missing 同形：库值在册但名未知的防御形态 -->
   <span v-else-if="missing" class="app-icon app-icon--missing" aria-hidden="true">?</span>

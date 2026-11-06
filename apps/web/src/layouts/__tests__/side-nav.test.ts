@@ -143,7 +143,7 @@ function iconMenuTree(): MenuNode[] {
     page(3, 'routes.systemTasks', 'system/tasks', 'star'),
     page(4, 'routes.systemDepts', 'system/depts', 'svg:no-such-icon'),
     page(5, 'routes.systemMenus', 'system/menus', null),
-    page(6, 'routes.systemDicts', 'system/dicts', 'ep:setting'),
+    page(6, 'routes.systemDicts', 'system/dicts', 'ep:refresh-left'),
   ]
 }
 
@@ -159,7 +159,7 @@ describe('侧栏图标库值优先', () => {
     expect(itemHasSvg('用户管理')).toBe(true)
   })
 
-  it('ep: 前缀在册名经分派组件渲染 el-icon 组件形态', async () => {
+  it('ep: 前缀在册名经分派组件渲染 el-icon 组件形态（refresh-left 无 svg 同义项保持 EP）', async () => {
     await renderApp('/', iconMenuTree())
     await waitFor(() => expect(screen.getByText('字典管理')).toBeTruthy())
     const item = screen.getByText('字典管理').closest('li') as HTMLElement

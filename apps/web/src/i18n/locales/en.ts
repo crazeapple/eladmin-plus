@@ -111,6 +111,9 @@ export default {
     primaryColor: 'Primary color',
     language: 'Language',
     localeSystem: 'System',
+    iconSet: 'Icon style',
+    iconSetSvg: 'SVG icons',
+    iconSetEp: 'Element icons',
   },
   login: {
     title: 'Sign in to eladmin-plus',

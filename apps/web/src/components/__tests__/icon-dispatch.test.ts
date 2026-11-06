@@ -1,7 +1,14 @@
 import { cleanup, render } from '@testing-library/vue'
-import { afterEach, describe, expect, it } from 'vitest'
+import { createPinia, setActivePinia } from 'pinia'
+import { nextTick } from 'vue'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import MenuIcon from '../MenuIcon.vue'
+import { usePreferencesStore } from '@/stores/preferences'
+
+beforeEach(() => {
+  setActivePinia(createPinia())
+})
 
 afterEach(cleanup)
 
@@ -43,7 +50,8 @@ describe('MenuIcon 前缀分派', () => {
     const svg = renderIcon('svg:settings')
     expect(svg.container.querySelector('.app-icon')?.className).not.toContain('app-icon--ep')
     svg.unmount()
-    const ep = renderIcon('ep:setting')
+    // refresh-left 无 svg 同义项，svg 风格缺省下保持 EP 形态
+    const ep = renderIcon('ep:refresh-left')
     expect(ep.container.querySelector('.app-icon')?.className).toContain('app-icon--ep')
   })
 
@@ -70,5 +78,50 @@ describe('MenuIcon 前缀分派', () => {
     empty.unmount()
     const none = renderIcon(null)
     expect(none.container.querySelector('.app-icon')).toBeNull()
+  })
+})
+
+describe('MenuIcon 风格开关换算（iconSet 偏好 + 同义映射）', () => {
+  it('EP 风格下 svg 值经映射换 el-icon 形态，映射缺失保持 svg 形态', () => {
+    const prefs = usePreferencesStore()
+    prefs.iconSet = 'ep'
+    const { container, unmount } = renderIcon('svg:index')
+    // index → home-filled 在册：换 EP 形态
+    expect(container.querySelector('.app-icon--ep .el-icon svg')).toBeTruthy()
+    unmount()
+    // alipay 不在映射表：保持原库 svg 形态
+    const unmapped = renderIcon('svg:alipay')
+    expect(unmapped.container.querySelector('.app-icon > svg')).toBeTruthy()
+    expect(unmapped.container.querySelector('.el-icon')).toBeNull()
+    unmount()
+    // ep 值不受 EP 风格影响
+    const ep = renderIcon('ep:refresh-left')
+    expect(ep.container.querySelector('.app-icon--ep .el-icon svg')).toBeTruthy()
+    unmount()
+  })
+
+  it('svg 风格下 ep 值经反向映射换 svg 形态，映射缺失保持 EP 形态', () => {
+    const prefs = usePreferencesStore()
+    prefs.iconSet = 'svg'
+    const { container, unmount } = renderIcon('ep:user-filled')
+    // user-filled → peoples 在册：换 svg 形态
+    expect(container.querySelector('.app-icon > svg')).toBeTruthy()
+    expect(container.querySelector('.el-icon')).toBeNull()
+    unmount()
+    // refresh-left 无 svg 同义项：保持 EP 形态
+    const unmapped = renderIcon('ep:refresh-left')
+    expect(unmapped.container.querySelector('.app-icon--ep .el-icon svg')).toBeTruthy()
+    unmount()
+  })
+
+  it('切换偏好即时翻转渲染形态（响应式重渲）', async () => {
+    const prefs = usePreferencesStore()
+    const { container } = renderIcon('svg:system')
+    // 缺省 svg 风格：本地 svg 形态
+    expect(container.querySelector('.app-icon > svg')).toBeTruthy()
+    prefs.iconSet = 'ep'
+    await nextTick()
+    // system → setting 在册：翻转为 EP 形态
+    expect(container.querySelector('.app-icon--ep .el-icon svg')).toBeTruthy()
   })
 })

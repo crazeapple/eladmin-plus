@@ -40,11 +40,11 @@ test('选 EP 图标落库 ep: 值，菜单树与侧栏回显组件形态', async
   const noCacheNode = tree.locator('.el-tree-node__content', { hasText: '演示·不缓存' }).first()
   await expect(noCacheNode.locator('.app-icon--ep .el-icon svg')).toBeVisible()
 
-  // 字典管理编辑：svg tab 高亮当前值，切 EP tab 选 timer 落库 ep:timer
+  // 字典管理编辑：svg tab 高亮当前值，切 EP tab 选 alarm-clock 落库 ep:alarm-clock（无 svg 同义项，缺省 svg 风格下保持 EP 形态）
   const dialog = await openEdit(page, '字典管理')
   await expect(dialog.locator('[data-test="menus-icon-input"]')).toHaveValue('svg:dictionary')
-  await pickEpIcon(page, 'timer')
-  await expect(dialog.locator('[data-test="menus-icon-input"]')).toHaveValue('ep:timer')
+  await pickEpIcon(page, 'alarm-clock')
+  await expect(dialog.locator('[data-test="menus-icon-input"]')).toHaveValue('ep:alarm-clock')
   await dialog.getByRole('button', { name: '保存' }).click()
   await expect(dialog).toBeHidden()
 
@@ -67,7 +67,9 @@ test('选 EP 图标落库 ep: 值，菜单树与侧栏回显组件形态', async
 
   // 还原原库值（svg:dictionary）：ep 值打开落 EP tab，切回 svg tab 按名过滤选格
   const restoreDialog = await openEdit(page, '字典管理')
-  await expect(restoreDialog.locator('[data-test="menus-icon-input"]')).toHaveValue('ep:timer')
+  await expect(restoreDialog.locator('[data-test="menus-icon-input"]')).toHaveValue(
+    'ep:alarm-clock',
+  )
   await restoreDialog.locator('[data-test="menus-icon-pick"]').click()
   const picker = page.locator('[data-test="menus-icon-dialog"]')
   await expect(picker).toBeVisible()
