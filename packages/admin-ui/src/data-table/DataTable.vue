@@ -236,7 +236,27 @@ function cellSlotName(cell: Cell<typeof dataTableFeatures, TData, unknown>): str
       <div v-if="loading" class="data-table__loading" data-test="admin-table-loading">
         <span class="data-table__spinner" aria-hidden="true"></span>
       </div>
-      <table v-if="!isMobile" class="data-table__table">
+      <!-- 移动端卡片形态：页面提供 card-row 插槽时走卡片，内容语义由插槽自带 -->
+      <div
+        v-if="isMobile && slots['card-row']"
+        class="data-table__cards"
+        data-test="admin-table-cards"
+      >
+        <div v-if="isEmpty" class="data-table__empty" data-test="admin-table-empty">
+          <ElEmpty :image-size="60" :description="resolvedTexts.empty" />
+        </div>
+        <div
+          v-for="row in table.getRowModel().rows"
+          v-else
+          :key="row.id"
+          class="data-table__card"
+          data-test="admin-table-card"
+        >
+          <slot name="card-row" :row="row.original" />
+        </div>
+      </div>
+      <!-- 移动端无 card-row 插槽时回退表格横向滚动：操作可达不破版 -->
+      <table v-else class="data-table__table">
         <thead>
           <tr v-for="group in table.getHeaderGroups()" :key="group.id">
             <th v-for="header in group.headers" :key="header.id" :aria-sort="ariaSort(header)">
@@ -290,22 +310,6 @@ function cellSlotName(cell: Cell<typeof dataTableFeatures, TData, unknown>): str
           </tr>
         </tbody>
       </table>
-
-      <!-- 移动端卡片形态：内容由页面经 card-row 插槽提供，选择/操作列语义由插槽自带 -->
-      <div v-else class="data-table__cards" data-test="admin-table-cards">
-        <div v-if="isEmpty" class="data-table__empty" data-test="admin-table-empty">
-          <ElEmpty :image-size="60" :description="resolvedTexts.empty" />
-        </div>
-        <div
-          v-for="row in table.getRowModel().rows"
-          v-else
-          :key="row.id"
-          class="data-table__card"
-          data-test="admin-table-card"
-        >
-          <slot name="card-row" :row="row.original" />
-        </div>
-      </div>
     </div>
 
     <div v-if="totalRows > 0" class="data-table__pagination" data-test="admin-table-pagination">
@@ -353,7 +357,8 @@ function cellSlotName(cell: Cell<typeof dataTableFeatures, TData, unknown>): str
 
 .data-table__frame {
   position: relative;
-  overflow: hidden;
+  /* 窄屏列多时表格横向滚动（页面不横向溢出），桌面无溢出不受影响 */
+  overflow-x: auto;
   background: var(--el-bg-color);
   border: 1px solid var(--el-border-color-lighter);
   /* 品牌 token 直引（带 fallback）：圆角档位与卡片阴影走设计基座 */

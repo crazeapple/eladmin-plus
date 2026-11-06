@@ -621,6 +621,17 @@ const total = computed(() => data.value?.total ?? 0)
     flex: 1;
     min-width: 0;
   }
+
+  // 窄屏纵排：部门树置顶收窄，列表满幅（L2 不破版）
+  @media (max-width: 768px) {
+    flex-direction: column;
+
+    .users__aside {
+      width: 100%;
+      max-height: 200px;
+      overflow: auto;
+    }
+  }
 }
 
 .users__filter {

@@ -18,3 +18,10 @@ body {
   color: var(--el-text-color-primary, #303133);
   font-size: var(--el-font-size-base, 14px);
 }
+
+// 窄屏对话框封顶：表单类弹窗宽度不超视口（移动端 L2 不破版）
+@media (max-width: 768px) {
+  .el-dialog {
+    max-width: calc(100vw - 24px);
+  }
+}

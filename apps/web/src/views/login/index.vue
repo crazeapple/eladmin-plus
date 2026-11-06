@@ -262,7 +262,8 @@ async function submitWithCurrentKey(ticket: string, retried = false) {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  /* 表单卡：品牌圆角与重阴影层次 */
+  /* 表单卡：品牌卡片底 + 圆角与重阴影层次（亮暗双态取 token 值） */
+  background-color: var(--ea-card-bg, #fff);
   border: 1px solid var(--ea-card-border, var(--el-border-color-lighter, #e4e7ed));
   border-radius: var(--ea-radius-lg, 12px);
   box-shadow: var(--ea-shadow-3, var(--el-box-shadow-light));
