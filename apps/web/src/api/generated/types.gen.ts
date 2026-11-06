@@ -46,6 +46,13 @@ export type RoleSaveRequest = {
     enabled?: number;
 };
 
+export type PreferencesUpdateRequest = {
+    theme?: string;
+    primaryColor?: string;
+    locale?: string;
+    iconSet?: string;
+};
+
 export type MenuSaveRequest = {
     id?: number;
     parentId?: number;
@@ -623,12 +630,20 @@ export type MeResponse = {
     roles?: Array<string>;
     permissions?: Array<string>;
     menus?: Array<MenuNode>;
+    preferences?: UserPreferences;
 };
 
 export type RMeResponse = {
     code?: number;
     message?: string;
     data?: MeResponse;
+};
+
+export type UserPreferences = {
+    theme?: string;
+    primaryColor?: string;
+    locale?: string;
+    iconSet?: string;
 };
 
 export type BlockPuzzle = {
@@ -806,6 +821,22 @@ export type SaveRoleMenusResponses = {
 };
 
 export type SaveRoleMenusResponse = SaveRoleMenusResponses[keyof SaveRoleMenusResponses];
+
+export type UpdatePreferencesData = {
+    body: PreferencesUpdateRequest;
+    path?: never;
+    query?: never;
+    url: '/profile/preferences';
+};
+
+export type UpdatePreferencesResponses = {
+    /**
+     * OK
+     */
+    200: RVoid;
+};
+
+export type UpdatePreferencesResponse = UpdatePreferencesResponses[keyof UpdatePreferencesResponses];
 
 export type Remove2Data = {
     body?: never;

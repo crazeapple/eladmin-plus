@@ -44,6 +44,13 @@ export const zRoleSaveRequest = z.object({
     enabled: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional()
 });
 
+export const zPreferencesUpdateRequest = z.object({
+    theme: z.string().optional(),
+    primaryColor: z.string().optional(),
+    locale: z.string().optional(),
+    iconSet: z.string().optional()
+});
+
 export const zMenuSaveRequest = z.object({
     id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
     parentId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
@@ -612,11 +619,19 @@ export const zRDatabaseConfigView = z.object({
     data: zDatabaseConfigView.optional()
 });
 
+export const zUserPreferences = z.object({
+    theme: z.string().optional(),
+    primaryColor: z.string().optional(),
+    locale: z.string().optional(),
+    iconSet: z.string().optional()
+});
+
 export const zMeResponse = z.object({
     user: zUserView.optional(),
     roles: z.array(z.string()).optional(),
     permissions: z.array(z.string()).optional(),
-    menus: z.array(zMenuNode).optional()
+    menus: z.array(zMenuNode).optional(),
+    preferences: zUserPreferences.optional()
 });
 
 export const zRMeResponse = z.object({
@@ -727,6 +742,13 @@ export const zSaveRoleMenusPath = z.object({
  * OK
  */
 export const zSaveRoleMenusResponse = zRVoid;
+
+export const zUpdatePreferencesBody = zPreferencesUpdateRequest;
+
+/**
+ * OK
+ */
+export const zUpdatePreferencesResponse = zRVoid;
 
 export const zRemove2Path = z.object({
     id: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
