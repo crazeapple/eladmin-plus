@@ -157,6 +157,8 @@ async function submitWithCurrentKey(ticket: string, retried = false) {
 .login__brand {
   position: relative;
   display: flex;
+  /* 分栏对称基数 50:50：与表单区等宽，右区空旷感由背景图案填充而非占比压制 */
+  flex: 50;
   align-items: center;
   justify-content: center;
   /* 品牌渐变底：靛蓝系对角渐变 */
@@ -251,17 +253,63 @@ async function submitWithCurrentKey(ticket: string, retried = false) {
 
 .login__panel {
   display: flex;
-  flex: 1;
+  /* 分栏对称基数 50:50（与品牌区互为等宽） */
+  flex: 50;
   align-items: center;
   justify-content: center;
   padding: 24px;
+  /* 右区极淡几何图案底：品牌主色点阵 + 细网格程序化平铺（透明度取 4%~7% 档，零图片资产） */
+  background-image:
+    radial-gradient(
+      circle,
+      color-mix(in srgb, var(--ea-primary, #5d87ff) 7%, transparent) 1.5px,
+      transparent 1.5px
+    ),
+    linear-gradient(
+      color-mix(in srgb, var(--ea-primary, #5d87ff) 4%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--ea-primary, #5d87ff) 4%, transparent) 1px,
+      transparent 1px
+    );
+  background-size:
+    24px 24px,
+    24px 24px,
+    24px 24px;
+}
+
+/* 暗色底上图案略提亮仍守极淡档（4%~8% 上限档），色值随品牌主色 token 双态 */
+html.dark .login__panel {
+  background-image:
+    radial-gradient(
+      circle,
+      color-mix(in srgb, var(--ea-primary, #5d87ff) 8%, transparent) 1.5px,
+      transparent 1.5px
+    ),
+    linear-gradient(
+      color-mix(in srgb, var(--ea-primary, #5d87ff) 5%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--ea-primary, #5d87ff) 5%, transparent) 1px,
+      transparent 1px
+    );
+  background-size:
+    24px 24px,
+    24px 24px,
+    24px 24px;
 }
 
 .login__card {
-  width: 380px;
+  width: 400px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 20px;
+  /* 卡内边距随 EP 卡片 token 提到 28px（加宽加密改善空旷感） */
+  --el-card-padding: 28px;
   /* 表单卡：品牌卡片底 + 圆角与重阴影层次（亮暗双态取 token 值） */
   background-color: var(--ea-card-bg, #fff);
   border: 1px solid var(--ea-card-border, var(--el-border-color-lighter, #e4e7ed));
@@ -270,7 +318,7 @@ async function submitWithCurrentKey(ticket: string, retried = false) {
 }
 
 .login__title {
-  margin: 0 0 8px;
+  margin: 0;
   font-size: 20px;
   text-align: center;
   color: var(--el-text-color-primary);
