@@ -29,6 +29,8 @@ const slideX = ref(0)
 const dragging = ref(false)
 const failed = ref(false)
 const verifiedDone = ref(false)
+// 拼块渲染宽占画布百分比：出图档位可变，按拼块 PNG 实际像素宽回填（缺省取 44/310 基线）
+const pieceWidthPercent = ref((44 / 310) * 100)
 let failTimer: ReturnType<typeof setTimeout> | null = null
 
 onUnmounted(() => {
@@ -38,6 +40,14 @@ onUnmounted(() => {
 const percent = computed(() => `${(slideX.value / trackWidth) * 100}%`)
 // 拼块纵向按画布比例定位：显示高度随容器宽缩放，原图像素直用会在窄容器垂直错位
 const topPercent = computed(() => (jigsawY.value / imageHeight.value) * 100)
+
+/** 拼块图加载完成：以 PNG 原生宽度换算渲染宽占比，档位变化时与缺口对齐 */
+function onPieceLoad(event: Event) {
+  const img = event.target as HTMLImageElement
+  if (img.naturalWidth > 0 && imageWidth.value > 0) {
+    pieceWidthPercent.value = (img.naturalWidth / imageWidth.value) * 100
+  }
+}
 
 async function loadPuzzle() {
   const puzzle = await fetchCaptcha()
@@ -95,8 +105,9 @@ async function onUp() {
         v-if="jigsaw"
         class="slider-captcha__jigsaw"
         :src="jigsaw"
-        :style="{ top: `${topPercent}%`, left: percent }"
+        :style="{ top: `${topPercent}%`, left: percent, width: `${pieceWidthPercent}%` }"
         alt=""
+        @load="onPieceLoad"
       />
     </div>
     <div
@@ -133,6 +144,7 @@ async function onUp() {
 
 .slider-captcha__jigsaw {
   position: absolute;
+  /* 渲染宽随出图档位以行内样式回填（PNG 原生宽 / 画布宽），此处仅兜底 */
   width: 14.2%;
 }
 
