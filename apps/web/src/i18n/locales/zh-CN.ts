@@ -108,6 +108,8 @@ export default {
   },
   login: {
     title: 'eladmin-plus 登录',
+    slogan: '开箱即用的后台管理基座',
+    sloganSub: '权限 · 调度 · 监控 · 运维部署，一站齐备',
     username: '账号',
     password: '密码',
     slideHint: '按住滑块拖动到最右侧完成验证',

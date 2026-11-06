@@ -109,6 +109,8 @@ export default {
   },
   login: {
     title: 'Sign in to eladmin-plus',
+    slogan: 'An out-of-the-box admin foundation',
+    sloganSub: 'IAM, scheduling, monitoring and ops — all in one place',
     username: 'Username',
     password: 'Password',
     slideHint: 'Hold and drag the slider to complete verification',

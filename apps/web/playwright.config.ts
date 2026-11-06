@@ -20,7 +20,7 @@ export default defineConfig({
     },
     {
       name: 'anonymous',
-      testMatch: /(auth|public)\.spec\.ts$/,
+      testMatch: /(auth|public|login-page|login-slider)\.spec\.ts$/,
     },
     {
       name: 'system',

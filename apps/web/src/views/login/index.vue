@@ -10,6 +10,7 @@ import SliderCaptcha from '@/components/captcha/SliderCaptcha.vue'
 
 /**
  * 登录页（布局壳之外，偏好主题与语言天然生效）：
+ * 左侧品牌视觉区（渐变底 + 几何装饰 + 产品文案），右侧表单卡，窄屏折叠单栏；
  * 公钥页面加载时取 → 滑块通过 → 密码 RSA 加密提交 → 会话入内存 → 跳 redirect；
  * 公钥过期（后端 400 分语义）自动重取公钥重试一次；redirect 只认站内路径。
  */
@@ -80,56 +81,180 @@ async function submitWithCurrentKey(retried = false) {
 
 <template>
   <div class="login" data-test="login-page">
-    <el-card class="login__card">
-      <h1 class="login__title">{{ t('login.title') }}</h1>
-      <el-input
-        v-model="username"
-        :placeholder="t('login.username')"
-        data-test="login-username"
-        autocomplete="username"
-      />
-      <el-input
-        v-model="password"
-        type="password"
-        :placeholder="t('login.password')"
-        data-test="login-password"
-        autocomplete="current-password"
-        show-password
-      />
-      <SliderCaptcha
-        v-if="username && password"
-        :hint="t('login.slideHint')"
-        :fail-text="t('login.slideFail')"
-        @verified="onVerified"
-      />
-      <el-button
-        v-if="ticket"
-        type="primary"
-        class="login__submit"
-        :loading="submitting"
-        data-test="login-submit"
-        @click="onSubmit"
-      >
-        {{ t('login.submit') }}
-      </el-button>
-    </el-card>
+    <!-- 品牌视觉区：渐变底 + 程序化几何装饰 + 产品文案（窄屏折叠隐藏） -->
+    <aside class="login__brand" data-test="login-brand">
+      <div class="login__brand-inner">
+        <div class="login__wordmark">eladmin-plus</div>
+        <h2 class="login__slogan">{{ t('login.slogan') }}</h2>
+        <p class="login__slogan-sub">{{ t('login.sloganSub') }}</p>
+      </div>
+      <div class="login__decor" aria-hidden="true">
+        <span class="login__decor-ring"></span>
+        <span class="login__decor-dot login__decor-dot--1"></span>
+        <span class="login__decor-dot login__decor-dot--2"></span>
+        <span class="login__decor-dot login__decor-dot--3"></span>
+        <span class="login__decor-square"></span>
+      </div>
+    </aside>
+
+    <!-- 表单卡 -->
+    <main class="login__panel">
+      <el-card class="login__card">
+        <h1 class="login__title">{{ t('login.title') }}</h1>
+        <el-input
+          v-model="username"
+          :placeholder="t('login.username')"
+          data-test="login-username"
+          autocomplete="username"
+        />
+        <el-input
+          v-model="password"
+          type="password"
+          :placeholder="t('login.password')"
+          data-test="login-password"
+          autocomplete="current-password"
+          show-password
+        />
+        <SliderCaptcha
+          v-if="username && password"
+          :hint="t('login.slideHint')"
+          :fail-text="t('login.slideFail')"
+          @verified="onVerified"
+        />
+        <el-button
+          v-if="ticket"
+          type="primary"
+          class="login__submit"
+          :loading="submitting"
+          data-test="login-submit"
+          @click="onSubmit"
+        >
+          {{ t('login.submit') }}
+        </el-button>
+      </el-card>
+    </main>
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .login {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--ea-page-bg, var(--el-bg-color-page, #f2f3f5));
+}
+
+.login__brand {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  background: var(--el-bg-color-page);
+  /* 品牌渐变底：靛蓝系对角渐变 */
+  background: var(--ea-gradient-brand, var(--el-color-primary));
+  overflow: hidden;
+}
+
+.login__brand-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 420px;
+  padding: 48px;
+  color: #fff;
+}
+
+.login__wordmark {
+  margin-bottom: 32px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.login__slogan {
+  margin: 0 0 12px;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.login__slogan-sub {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.8;
+  color: rgb(255 255 255 / 78%);
+}
+
+/* 几何装饰：程序化形状（圆环 / 圆点 / 圆角块），零图片资产 */
+.login__decor {
+  position: absolute;
+  inset: 0;
+
+  span {
+    position: absolute;
+    display: block;
+  }
+}
+
+.login__decor-ring {
+  top: 8%;
+  right: 12%;
+  width: 180px;
+  height: 180px;
+  border: 2px solid rgb(255 255 255 / 22%);
+  border-radius: 50%;
+}
+
+.login__decor-square {
+  bottom: 12%;
+  left: 10%;
+  width: 120px;
+  height: 120px;
+  background: rgb(255 255 255 / 10%);
+  border-radius: var(--ea-radius-lg, 12px);
+  transform: rotate(18deg);
+}
+
+.login__decor-dot {
+  border-radius: 50%;
+  background: rgb(255 255 255 / 28%);
+
+  &--1 {
+    top: 30%;
+    right: 28%;
+    width: 16px;
+    height: 16px;
+  }
+
+  &--2 {
+    bottom: 28%;
+    right: 14%;
+    width: 10px;
+    height: 10px;
+  }
+
+  &--3 {
+    top: 16%;
+    left: 14%;
+    width: 12px;
+    height: 12px;
+  }
+}
+
+.login__panel {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
 }
 
 .login__card {
-  width: 360px;
+  width: 380px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  /* 表单卡：品牌圆角与重阴影层次 */
+  border: 1px solid var(--ea-card-border, var(--el-border-color-lighter, #e4e7ed));
+  border-radius: var(--ea-radius-lg, 12px);
+  box-shadow: var(--ea-shadow-3, var(--el-box-shadow-light));
 }
 
 .login__title {
@@ -141,5 +266,21 @@ async function submitWithCurrentKey(retried = false) {
 
 .login__submit {
   width: 100%;
+}
+
+/* 窄屏折叠单栏：品牌区让位，表单卡满幅 */
+@media (max-width: 768px) {
+  .login__brand {
+    display: none;
+  }
+
+  .login__panel {
+    padding: 16px;
+  }
+
+  .login__card {
+    width: 100%;
+    max-width: 380px;
+  }
 }
 </style>
