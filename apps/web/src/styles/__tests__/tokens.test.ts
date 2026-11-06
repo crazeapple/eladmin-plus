@@ -83,8 +83,9 @@ describe('品牌 token 值表', () => {
 })
 
 describe('EP 覆盖层映射', () => {
-  it('EP 主色缺省映射到品牌主色变量', () => {
+  it('EP 主色缺省映射到品牌主色变量（暗色分支重申，防 html.dark 特异度打回默认蓝）', () => {
     expect(light['--el-color-primary']).toBe('var(--ea-primary)')
+    expect(dark['--el-color-primary']).toBe('var(--ea-primary)')
   })
 
   it('EP 圆角与阴影映射到品牌档位', () => {

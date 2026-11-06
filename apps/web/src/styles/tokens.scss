@@ -98,4 +98,9 @@ html.dark {
   --ea-sidebar-active-text: #ffffff;
   --ea-header-bg: #141414;
   --ea-mask-bg: rgb(0 0 0 / 65%);
+
+  // —— 覆盖层补映射 ——
+  // html.dark 特异度高于 :root，EP 暗色变量集会把主色打回组件库默认蓝，品牌映射须在暗色分支重申
+  // （偏好主色为缺省时靠此映射生效；非缺省仍由偏好行内样式接管，主色覆盖链不变）
+  --el-color-primary: var(--ea-primary);
 }
