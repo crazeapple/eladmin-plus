@@ -68,32 +68,17 @@ async function onUserCommand(command: string | number | object) {
 }
 
 /**
- * 菜单 icon 静态映射：i18n key → 前端图标名，库值缺失时的兜底通路
- * （存量菜单无 icon 值照常渲染；库值优先，映射退位兜底）。
- */
-const ICON_BY_I18N_KEY: Record<string, string> = {
-  'routes.home': 'index',
-  'routes.demoCached': 'tab',
-  'routes.demoNoCache': 'edit',
-  'routes.system': 'system',
-  'routes.systemUsers': 'user',
-  'routes.systemRoles': 'role',
-  'routes.systemDepts': 'dept',
-  'routes.systemJobs': 'people',
-}
-
-/**
- * 侧栏图标解析（库值优先）：icon 值 `svg:name` 且名在册 → 图标资产名；
- * 无前缀或未知名 → i18n key 静态映射兜底；两处皆无 → undefined 不渲染。
+ * 侧栏图标解析：icon 库值 `svg:name` 且名在册 → 图标资产名；
+ * 其余形态（ep: 前缀、无前缀裸名、未知名、缺失）→ undefined 不渲染。
+ * V14 迁移已补齐全部目录与页面菜单库值，静态映射兜底随之退役——侧栏解析纯库值。
  */
 function navIcon(menu: MenuNode): string | undefined {
-  const byKey = () => ICON_BY_I18N_KEY[menu.i18nKey ?? '']
   const value = menu.icon ?? ''
-  if (value.startsWith('svg:')) {
-    const name = value.slice('svg:'.length)
-    return name && hasAppIcon(name) ? name : byKey()
+  if (!value.startsWith('svg:')) {
+    return undefined
   }
-  return byKey()
+  const name = value.slice('svg:'.length)
+  return name && hasAppIcon(name) ? name : undefined
 }
 
 /** 侧栏节点：目录（type=0）带子级，页面（type=1）可点；按钮（type=2）不进侧栏 */

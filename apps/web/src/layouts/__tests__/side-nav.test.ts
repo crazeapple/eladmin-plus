@@ -158,21 +158,19 @@ describe('侧栏图标库值优先', () => {
     expect(itemHasSvg('用户管理')).toBe(true)
   })
 
-  it('无前缀值与未知名回退 i18n key 静态映射', async () => {
+  it('无前缀值与 svg: 未知名不渲染图标（静态映射兜底已随 V14 补值退役）', async () => {
     await renderApp('/', iconMenuTree())
     await waitFor(() => expect(screen.getByText('角色管理')).toBeTruthy())
-    // 无前缀值 star 不被采用，按 key 落映射 user 图标
-    expect(itemHasSvg('角色管理')).toBe(true)
-    // svg: 未知名回退映射 dept 图标
-    expect(itemHasSvg('部门管理')).toBe(true)
+    // 无前缀裸名值无解析通路 → 不渲染
+    expect(itemHasSvg('角色管理')).toBe(false)
+    // svg: 未知名不在资产册 → 不渲染
+    expect(itemHasSvg('部门管理')).toBe(false)
   })
 
-  it('两处皆无不渲染图标', async () => {
+  it('icon 值缺失不渲染图标', async () => {
     await renderApp('/', iconMenuTree())
     await waitFor(() => expect(screen.getByText('定时任务')).toBeTruthy())
-    // 无前缀未知名且 key 不在映射 → 不渲染
-    expect(itemHasSvg('定时任务')).toBe(false)
-    // icon 值残缺形态（null）且 key 不在映射 → 不渲染
+    // 无 icon 值 → 不渲染
     expect(itemHasSvg('菜单管理')).toBe(false)
   })
 })
