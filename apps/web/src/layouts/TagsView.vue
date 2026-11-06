@@ -113,15 +113,17 @@ onBeforeUnmount(() => document.removeEventListener('click', closeMenu))
 .tags-view {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 12px;
-  background-color: var(--el-bg-color, #fff);
-  border-bottom: 1px solid var(--el-border-color-light, #e4e7ed);
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: var(--ea-header-bg, #fff);
+  border-bottom: 1px solid var(--ea-sidebar-border, #e4e7ed);
 }
 
 .tags-view__tag {
   cursor: pointer;
   user-select: none;
+  /* 页签圆角片形态：圆角走品牌档位 */
+  border-radius: var(--ea-radius-sm, 6px);
 }
 
 .tags-view__menu {
@@ -133,8 +135,8 @@ onBeforeUnmount(() => document.removeEventListener('click', closeMenu))
   list-style: none;
   background-color: var(--el-bg-color-overlay, #fff);
   border: 1px solid var(--el-border-color-light, #e4e7ed);
-  border-radius: 4px;
-  box-shadow: var(--el-box-shadow-light, 0 0 12px rgb(0 0 0 / 12%));
+  border-radius: var(--ea-radius-md, 8px);
+  box-shadow: var(--ea-shadow-2, var(--el-box-shadow-light, 0 0 12px rgb(0 0 0 / 12%)));
 
   li {
     padding: 6px 16px;

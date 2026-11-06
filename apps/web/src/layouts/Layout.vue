@@ -318,16 +318,20 @@ function onMenuSelect() {
 .layout__aside {
   display: flex;
   flex-direction: column;
-  width: 210px;
+  width: var(--ea-layout-sidebar-width, 220px);
   transition:
     width 0.2s,
     transform 0.2s;
-  background-color: var(--el-bg-color, #fff);
-  border-right: 1px solid var(--el-border-color-light, #e4e7ed);
+  background-color: var(--ea-sidebar-bg, #fff);
+  border-right: 1px solid var(--ea-sidebar-border, #e4e7ed);
   overflow-x: hidden;
 
   &.is-collapsed {
-    width: 64px;
+    width: var(--ea-layout-sidebar-collapsed-width, 64px);
+
+    .layout__menu.el-menu--collapse {
+      width: auto;
+    }
   }
 
   &.is-mobile {
@@ -348,26 +352,49 @@ function onMenuSelect() {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background-color: rgb(0 0 0 / 50%);
+  background-color: var(--ea-mask-bg, rgb(0 0 0 / 50%));
 }
 
 .layout__logo {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 48px;
+  height: var(--ea-layout-header-height, 56px);
   font-weight: 700;
   font-size: 16px;
-  color: var(--el-text-color-primary, #303133);
+  letter-spacing: 0.5px;
   white-space: nowrap;
+  /* 品牌渐变文字：logo 走主色渐变裁切 */
+  background: var(--ea-gradient-primary, var(--el-color-primary));
+  background-clip: text;
+  color: transparent;
 }
 
 .layout__menu {
   flex: 1;
+  padding: 8px;
   border-right: none;
+  /* 侧栏菜单配色走品牌 token：选中项为圆角主色色块 */
+  --el-menu-bg-color: transparent;
+  --el-menu-text-color: var(--ea-sidebar-text, var(--el-text-color-primary));
+  --el-menu-hover-bg-color: var(--ea-primary-soft, #eef2ff);
 
   .app-icon {
     margin-right: 8px;
+  }
+
+  .el-menu-item,
+  .el-sub-menu__title {
+    height: 42px;
+    line-height: 42px;
+    margin-bottom: 2px;
+    border-radius: var(--ea-radius-md, 8px);
+  }
+
+  .el-menu-item.is-active {
+    background: var(--ea-sidebar-active-bg, var(--el-color-primary));
+    --el-menu-active-color: var(--ea-sidebar-active-text, #fff);
+    color: var(--ea-sidebar-active-text, #fff);
   }
 }
 
@@ -379,9 +406,10 @@ function onMenuSelect() {
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 48px;
-  background-color: var(--el-bg-color, #fff);
-  border-bottom: 1px solid var(--el-border-color-light, #e4e7ed);
+  height: var(--ea-layout-header-height, 56px);
+  padding: 0 16px;
+  background-color: var(--ea-header-bg, #fff);
+  border-bottom: 1px solid var(--ea-sidebar-border, #e4e7ed);
 }
 
 .layout__trigger {
@@ -396,7 +424,7 @@ function onMenuSelect() {
   cursor: pointer;
   background: none;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--ea-radius-sm, 6px);
   transition:
     color 0.2s,
     background-color 0.2s;
@@ -435,7 +463,8 @@ function onMenuSelect() {
 }
 
 .layout__main {
-  background-color: var(--el-bg-color-page, #f2f3f5);
+  padding: var(--ea-layout-content-padding, 16px);
+  background-color: var(--ea-page-bg, var(--el-bg-color-page, #f2f3f5));
 }
 
 .layout__footer {
@@ -445,5 +474,7 @@ function onMenuSelect() {
   height: 36px;
   font-size: 12px;
   color: var(--el-text-color-secondary, #909399);
+  background-color: var(--ea-header-bg, #fff);
+  border-top: 1px solid var(--ea-sidebar-border, #e4e7ed);
 }
 </style>
