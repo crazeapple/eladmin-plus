@@ -7,6 +7,9 @@ export default defineConfig({
   testDir: 'e2e',
   // 冒烟是发布门禁：重试会掩盖问题，一次都不重试
   retries: 0,
+  // 单 worker 串行：偏好后端化后账户偏好成为跨 context 共享态（me 随登录带出），
+  // 并行 worker 的中途切语言 / 切主题会经后端串场到同时段其他用例；admin 数据面同理
+  workers: 1,
   reporter: 'list',
   use: {
     baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:80',

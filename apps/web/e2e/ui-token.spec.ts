@@ -1,12 +1,27 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 
 import { gotoWithSession } from './helpers'
 
 // 设计 token 基座核验（system 组）：亮色下主色 = 品牌靛蓝基值（--el-color-primary 映射生效），
 // 圆角与阴影品牌 token（--ea-*）在册可解析；admin-ui 组件样式对品牌 token 的引用由包内组件测试断言。
 
+/** 归位亮色基准（auto 随系统，测试机 colorScheme=light）：账户态为共享面，先自净再断言；已在 auto 则免写 */
+async function pinLightBasis(page: Page): Promise<void> {
+  await page.locator('[data-test="settings-trigger"]').click()
+  const autoOption = page.locator('[data-test="settings-theme"] .el-radio-button').nth(2)
+  if (!(await autoOption.locator('input[type=radio]').isChecked())) {
+    const putPromise = page.waitForResponse(
+      (res) => res.url().includes('/profile/preferences') && res.request().method() === 'PUT',
+    )
+    await autoOption.click()
+    await putPromise
+  }
+  await page.locator('.el-drawer__close-btn').click()
+}
+
 test('亮色下主色映射与品牌 token 在册可解析', async ({ page }) => {
   await gotoWithSession(page, '/home')
+  await pinLightBasis(page)
 
   // 主色：偏好缺省品牌靛蓝经行内样式写入 --el-color-primary（EP 换肤链路入口）
   const primary = await page.evaluate(() =>
