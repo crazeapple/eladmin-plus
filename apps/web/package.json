@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@eladmin-plus/admin-ui": "workspace:*",
+    "@element-plus/icons-vue": "2.3.2",
     "@tanstack/vue-query": "^5.105.0",
     "@vueuse/core": "^15.0.0",
     "echarts": "^6.1.0",

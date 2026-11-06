@@ -193,6 +193,9 @@ importers:
       '@eladmin-plus/admin-ui':
         specifier: workspace:*
         version: link:../../packages/admin-ui
+      '@element-plus/icons-vue':
+        specifier: 2.3.2
+        version: 2.3.2(vue@3.5.44(typescript@5.9.3))
       '@tanstack/vue-query':
         specifier: ^5.105.0
         version: 5.105.0(vue@3.5.44(typescript@5.9.3))
