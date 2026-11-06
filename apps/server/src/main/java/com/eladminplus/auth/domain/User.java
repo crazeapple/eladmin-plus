@@ -31,6 +31,9 @@ public class User {
     /** 头像文件 id（storage_file），空即无头像 */
     private Long avatar;
 
+    /** 用户级偏好 JSON 文本（theme / primaryColor / locale / iconSet），NULL 即缺省 */
+    private String preferences;
+
     /** 状态：1 启用 0 停用 */
     private Integer enabled;
 
