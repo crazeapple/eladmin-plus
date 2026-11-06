@@ -59,15 +59,15 @@ export async function solveSlider(page: Page, challenge: CaptchaChallenge): Prom
   await page.mouse.up()
 }
 
-/** 完整登录：填表（密码触发滑块出题）→ 按答案拖动 → 提交；返回是否进入了系统（密码错返回 false） */
+/** 完整登录：填表（不触发验证码）→ 点「登录」弹层出题 → 按答案拖动（过验即登录）；返回是否进入了系统（密码错返回 false） */
 export async function loginAs(page: Page, username: string, password: string): Promise<boolean> {
   await page.goto('/login')
-  const challengePromise = nextCaptchaChallenge(page)
   await page.locator('[data-test="login-username"]').fill(username)
   await page.locator('[data-test="login-password"]').fill(password)
+  const challengePromise = nextCaptchaChallenge(page)
+  await page.locator('[data-test="login-submit"]').click()
   const challenge = await challengePromise
   await solveSlider(page, challenge)
-  await page.locator('[data-test="login-submit"]').click()
   try {
     await page.waitForURL((url) => !url.pathname.startsWith('/login'), { timeout: 8000 })
     return true
@@ -76,7 +76,7 @@ export async function loginAs(page: Page, username: string, password: string): P
   }
 }
 
-/** 管理员完整登录：填表（密码触发滑块出题）→ 按答案拖动 → 提交 → 等进系统 */
+/** 管理员完整登录：填表 → 点「登录」弹层出题 → 按答案拖动过验即登录 → 等进系统 */
 export async function loginAsAdmin(page: Page): Promise<void> {
   const succeeded = await loginAs(page, 'admin', '123456')
   if (!succeeded) {

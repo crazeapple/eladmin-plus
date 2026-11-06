@@ -4,7 +4,7 @@ import { checkCaptcha, fetchCaptcha } from '@/api/auth'
 
 /**
  * 滑块验证码：拉题渲染双图，拖动拼块对齐缺口，松手校验；
- * 通过向父组件发 ticket（一次性），失败自动换题重来。
+ * 通过向父组件发 ticket（一次性），失败自动换题重来，出图失败提示可重试。
  */
 const emit = defineEmits<{
   verified: [ticket: string]
@@ -15,6 +15,8 @@ defineProps<{
   hint: string
   /** 校验失败提示（i18n 注入，组件只展示不持语言包） */
   failText: string
+  /** 出图失败的重试文案（i18n 注入，可缺省回退 failText） */
+  retryText?: string
 }>()
 
 const back = ref('')
@@ -29,8 +31,9 @@ const slideX = ref(0)
 const dragging = ref(false)
 const failed = ref(false)
 const verifiedDone = ref(false)
+const loadFailed = ref(false)
 // 拼块渲染宽占画布百分比：出图档位可变，按拼块 PNG 实际像素宽回填（缺省取 44/310 基线）
-const pieceWidthPercent = ref((44 / 310) * 100)
+const pieceWidthPercent = ref((sliderSize / 310) * 100)
 let failTimer: ReturnType<typeof setTimeout> | null = null
 
 onUnmounted(() => {
@@ -50,15 +53,22 @@ function onPieceLoad(event: Event) {
 }
 
 async function loadPuzzle() {
-  const puzzle = await fetchCaptcha()
-  back.value = puzzle.back
-  jigsaw.value = puzzle.jigsaw
-  jigsawY.value = puzzle.jigsawY
-  imageWidth.value = puzzle.imageWidth
-  imageHeight.value = puzzle.imageHeight
-  token.value = puzzle.token
-  slideX.value = 0
+  loadFailed.value = false
+  try {
+    const puzzle = await fetchCaptcha()
+    back.value = puzzle.back
+    jigsaw.value = puzzle.jigsaw
+    jigsawY.value = puzzle.jigsawY
+    imageWidth.value = puzzle.imageWidth
+    imageHeight.value = puzzle.imageHeight
+    token.value = puzzle.token
+    slideX.value = 0
+  } catch {
+    // 出图失败：弹层内错误提示，用户重试或关层后再点登录重新触发
+    loadFailed.value = true
+  }
 }
+
 void loadPuzzle()
 
 function onDown(event: PointerEvent) {
@@ -99,32 +109,48 @@ async function onUp() {
 
 <template>
   <div class="slider-captcha" data-test="slider-captcha">
-    <div class="slider-captcha__puzzle">
-      <img v-if="back" class="slider-captcha__back" :src="back" alt="" />
-      <img
-        v-if="jigsaw"
-        class="slider-captcha__jigsaw"
-        :src="jigsaw"
-        :style="{ top: `${topPercent}%`, left: percent, width: `${pieceWidthPercent}%` }"
-        alt=""
-        @load="onPieceLoad"
-      />
+    <div v-if="loadFailed" class="slider-captcha__error" data-test="slider-load-error">
+      <span>{{ retryText || failText }}</span>
+      <button
+        type="button"
+        class="slider-captcha__retry"
+        data-test="slider-retry"
+        @click="loadPuzzle"
+      >
+        {{ retryText || failText }}
+      </button>
     </div>
-    <div
-      class="slider-captcha__track"
-      data-test="slider-track"
-      @pointerdown="onDown"
-      @pointermove="onMove"
-      @pointerup="onUp"
-    >
+    <template v-else>
+      <div class="slider-captcha__puzzle">
+        <img v-if="back" class="slider-captcha__back" :src="back" alt="" />
+        <img
+          v-if="jigsaw"
+          class="slider-captcha__jigsaw"
+          :src="jigsaw"
+          :style="{ top: `${topPercent}%`, left: percent, width: `${pieceWidthPercent}%` }"
+          alt=""
+          @load="onPieceLoad"
+        />
+        <div v-if="!back" class="slider-captcha__loading">···</div>
+      </div>
       <div
-        class="slider-captcha__slider"
-        data-test="slider-handle"
-        :class="{ 'slider-captcha__slider--done': verifiedDone }"
-        :style="{ left: percent, width: `${sliderSize}px` }"
-      ></div>
-      <span v-if="!verifiedDone" class="slider-captcha__hint">{{ hint }}</span>
-    </div>
+        class="slider-captcha__track"
+        data-test="slider-track"
+        @pointerdown="onDown"
+        @pointermove="onMove"
+        @pointerup="onUp"
+      >
+        <div
+          class="slider-captcha__slider"
+          data-test="slider-handle"
+          :class="{ 'slider-captcha__slider--done': verifiedDone }"
+          :style="{ left: percent, width: `${sliderSize}px` }"
+        >
+          »
+        </div>
+        <span v-if="!verifiedDone" class="slider-captcha__hint">{{ hint }}</span>
+      </div>
+    </template>
     <div v-if="failed" class="slider-captcha__fail" data-test="slider-fail">{{ failText }}</div>
   </div>
 </template>
@@ -134,7 +160,9 @@ async function onUp() {
   position: relative;
   width: 100%;
   overflow: hidden;
-  border-radius: 4px;
+  background: var(--el-fill-color-lighter, #fafafa);
+  border: 1px solid var(--ea-card-border, var(--el-border-color-lighter, #e4e7ed));
+  border-radius: var(--ea-radius-md, 8px);
 }
 
 .slider-captcha__back {
@@ -148,15 +176,26 @@ async function onUp() {
   width: 14.2%;
 }
 
+.slider-captcha__loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  letter-spacing: 4px;
+  color: var(--el-text-color-secondary, #909399);
+  background: var(--el-fill-color-lighter, #fafafa);
+}
+
 .slider-captcha__track {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 36px;
-  margin-top: 8px;
-  background: var(--el-fill-color-light);
-  border-radius: 4px;
+  height: 40px;
+  margin-top: 10px;
+  background: var(--el-fill-color, #f0f2f5);
+  border-radius: var(--ea-radius-md, 8px);
   cursor: pointer;
   user-select: none;
   /* 触屏拖动不打断（禁掉手势滚动） */
@@ -165,24 +204,53 @@ async function onUp() {
 
 .slider-captcha__slider {
   position: absolute;
+  top: 0;
   left: 0;
-  height: 36px;
-  background: var(--el-color-primary);
-  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  color: #fff;
+  font-size: 16px;
+  background: var(--ea-gradient-primary, var(--el-color-primary));
+  border-radius: var(--ea-radius-md, 8px);
+  box-shadow: var(--ea-shadow-1, 0 1px 2px rgb(15 23 42 / 6%));
 }
 
 .slider-captcha__slider--done {
-  background: var(--el-color-success);
+  background: var(--el-color-success, #67c23a);
 }
 
 .slider-captcha__hint {
   font-size: 12px;
-  color: var(--el-text-color-secondary);
+  color: var(--el-text-color-secondary, #909399);
 }
 
 .slider-captcha__fail {
-  margin-top: 4px;
+  margin-top: 6px;
   font-size: 12px;
-  color: var(--el-color-danger);
+  color: var(--el-color-danger, #f56c6c);
+}
+
+.slider-captcha__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  font-size: 13px;
+  color: var(--el-text-color-secondary, #909399);
+  border: 1px dashed var(--el-border-color, #dcdfe6);
+  border-radius: var(--ea-radius-md, 8px);
+}
+
+.slider-captcha__retry {
+  padding: 4px 16px;
+  font-size: 13px;
+  color: var(--ea-primary, var(--el-color-primary, #409eff));
+  cursor: pointer;
+  background: none;
+  border: 1px solid var(--ea-primary, var(--el-color-primary, #409eff));
+  border-radius: var(--ea-radius-sm, 6px);
 }
 </style>

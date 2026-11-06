@@ -115,6 +115,8 @@ export default {
     password: 'Password',
     slideHint: 'Hold and drag the slider to complete verification',
     slideFail: 'Verification failed, please try again',
+    captchaTitle: 'Security check',
+    captchaRetry: 'Failed to load, click to retry',
     submit: 'Sign in',
     success: 'Signed in',
     failed: 'Sign-in failed, please try again later',

@@ -38,7 +38,7 @@ vi.mock('@/api/auth', () => ({
 vi.mock('@/components/captcha/SliderCaptcha.vue', () => ({
   default: {
     name: 'SliderCaptcha',
-    props: ['hint', 'failText'],
+    props: ['hint', 'failText', 'retryText'],
     emits: ['verified'],
     template: `<div data-test="slider-stub"><button data-test="slider-verify" @click="$emit('verified', 'ticket-1')">v</button></div>`,
   },
@@ -60,13 +60,22 @@ function elInput(id: string): HTMLInputElement {
   return byTest(id) as HTMLInputElement
 }
 
-/** 填表 + 滑块通过 + 出登录按钮 */
-async function fillAndVerify() {
+/**
+ * 填表 + 点「登录」弹滑块层（不点过验）：填表不出滑块，提交时才弹层。
+ * 过验动作单独走 verifySlider——过验即登录，会真实提交（须先备好协议桩）。
+ */
+async function fillAndOpenSlider() {
   await fireEvent.input(elInput('login-username'), { target: { value: 'admin' } })
   await fireEvent.input(elInput('login-password'), { target: { value: '123456' } })
-  await waitFor(() => expect(byTest('slider-verify')).toBeTruthy())
+  // 填表阶段不触发滑块
+  expect(queryTest('slider-stub')).toBeNull()
+  await fireEvent.click(byTest('login-submit'))
+  await waitFor(() => expect(byTest('slider-stub')).toBeTruthy())
+}
+
+/** 滑块过验：过验即登录（不再有二次提交点击） */
+async function verifySlider() {
   await fireEvent.click(byTest('slider-verify'))
-  await waitFor(() => expect(byTest('login-submit')).toBeTruthy())
 }
 
 async function submit() {
@@ -121,28 +130,20 @@ afterEach(() => {
 })
 
 describe('登录页', () => {
-  it('页面渲染在壳外且账号密码滑块齐备', async () => {
-    mocks.fetchCaptcha.mockResolvedValue({
-      token: 't',
-      back: 'b',
-      jigsaw: 'j',
-      jigsawY: 3,
-      imageWidth: 310,
-      imageHeight: 155,
-    })
+  it('页面渲染在壳外且账号密码登录按钮齐备，填表不出滑块', async () => {
     const pinia = createPinia()
     setActivePinia(pinia)
     await mountLogin(makeRouter(), pinia)
 
     expect(byTest('login-username')).toBeTruthy()
     expect(byTest('login-password')).toBeTruthy()
-    // 填表后滑块出现；布局壳不在此页（壳外断言）
-    await fillAndVerify()
-    await waitFor(() => expect(byTest('slider-stub')).toBeTruthy())
+    expect(byTest('login-submit')).toBeTruthy()
+    // 填表不弹滑块，点登录才弹层（此处不点过验，避免触发真实提交链）
+    await fillAndOpenSlider()
     expect(document.querySelector('.layout')).toBeNull()
   })
 
-  it('全链成功：RSA 密文可被对应私钥解开、token 入内存、跳站内目标', async () => {
+  it('全链成功：过验即登录，RSA 密文可被对应私钥解开、token 入内存、跳站内目标', async () => {
     const pair = await generateKeyPair()
     mocks.fetchPublicKey.mockResolvedValue({ keyId: pair.keyId, publicKey: pair.publicKey })
     mocks.login.mockResolvedValue({ accessToken: 'access-token-1', expiresIn: 7200 })
@@ -159,9 +160,10 @@ describe('登录页', () => {
     setActivePinia(pinia)
     const router = makeRouter()
     await mountLogin(router, pinia)
-    await fillAndVerify()
-    await submit()
+    await fillAndOpenSlider()
+    await verifySlider()
 
+    // 过验即登录：不再点提交
     await waitFor(() => expect(mocks.login).toHaveBeenCalledTimes(1))
     const payload = mocks.login.mock.calls[0]![0] as Record<string, string>
     expect(payload.username).toBe('admin')
@@ -197,8 +199,8 @@ describe('登录页', () => {
 
     render(Login, { global: { plugins: [buildI18n('zh-CN'), pinia, router] } })
     await waitFor(() => expect(byTest('login-page')).toBeTruthy())
-    await fillAndVerify()
-    await submit()
+    await fillAndOpenSlider()
+    await verifySlider()
 
     await waitFor(() => expect(router.currentRoute.value.path).toBe('/home'))
   })
@@ -224,15 +226,15 @@ describe('登录页', () => {
     const pinia = createPinia()
     setActivePinia(pinia)
     await mountLogin(makeRouter(), pinia)
-    await fillAndVerify()
-    await submit()
+    await fillAndOpenSlider()
+    await verifySlider()
 
     await waitFor(() => expect(mocks.login).toHaveBeenCalledTimes(2))
     expect(mocks.fetchPublicKey).toHaveBeenCalledTimes(2)
     await waitFor(() => expect(useSessionStore().accessToken).toBe('access-token-2'))
   })
 
-  it('登录失败不重试且回初始态（账号密码清空、滑块隐藏）', async () => {
+  it('登录失败回表单态保留输入，可再点登录重新过滑块', async () => {
     const pair = await generateKeyPair()
     mocks.fetchPublicKey.mockResolvedValue({ keyId: pair.keyId, publicKey: pair.publicKey })
     mocks.login.mockRejectedValue(new Error('账号或密码错误'))
@@ -248,16 +250,28 @@ describe('登录页', () => {
     const pinia = createPinia()
     setActivePinia(pinia)
     await mountLogin(makeRouter(), pinia)
-    await fillAndVerify()
-    await submit()
+    await fillAndOpenSlider()
+    await verifySlider()
 
     await waitFor(() => expect(mocks.login).toHaveBeenCalledTimes(1))
     expect(mocks.fetchPublicKey).toHaveBeenCalledTimes(1)
     await waitFor(() => expect(useSessionStore().accessToken).toBeNull())
-    // 失败回初始态：账号密码清空（滑块随非空条件卸载）、票据清（按钮收起），重填后才重新出题
-    await waitFor(() => expect(elInput('login-username').value).toBe(''))
-    expect(elInput('login-password').value).toBe('')
-    await waitFor(() => expect(queryTest('slider-stub')).toBeNull())
-    expect(queryTest('login-submit')).toBeNull()
+    // 失败回表单态：输入保留（票据一次性，重试需重新过滑块；弹层卸载随 EP 过渡时序，单测不锚定）
+    expect(elInput('login-username').value).toBe('admin')
+    expect(elInput('login-password').value).toBe('123456')
+    // 再点登录可重新弹滑块出题（重开即重挂载出新题）
+    await submit()
+    await waitFor(() => expect(byTest('slider-stub')).toBeTruthy())
+  })
+
+  it('表单不全点登录不开滑块层', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    await mountLogin(makeRouter(), pinia)
+
+    // 只填账号不填密码：点登录不开层
+    await fireEvent.input(elInput('login-username'), { target: { value: 'admin' } })
+    await submit()
+    expect(queryTest('slider-stub')).toBeNull()
   })
 })

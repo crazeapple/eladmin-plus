@@ -11,7 +11,8 @@ import SliderCaptcha from '@/components/captcha/SliderCaptcha.vue'
 /**
  * 登录页（布局壳之外，偏好主题与语言天然生效）：
  * 左侧品牌视觉区（渐变底 + 几何装饰 + 产品文案），右侧表单卡，窄屏折叠单栏；
- * 公钥页面加载时取 → 滑块通过 → 密码 RSA 加密提交 → 会话入内存 → 跳 redirect；
+ * 公钥页面加载时取；填表不触发验证码，点「登录」弹滑块层，过验即登录；
+ * 密码 RSA 加密提交 → 会话入内存 → 跳 redirect；
  * 公钥过期（后端 400 分语义）自动重取公钥重试一次；redirect 只认站内路径。
  */
 const { t } = useI18n()
@@ -21,11 +22,24 @@ const session = useSessionStore()
 
 const username = ref('')
 const password = ref('')
-const ticket = ref<string | null>(null)
 const submitting = ref(false)
+const captchaOpen = ref(false)
 
+/** 点「登录」弹滑块层：表单不全时不开层（校验消息由浏览器表单语义承担，不强弹提示） */
+function onSubmit() {
+  if (!username.value || !password.value || submitting.value) return
+  captchaOpen.value = true
+}
+
+/** 过验即登录：持一次性票据直接提交，无需二次操作；未过验关层则回表单态（旧题随 TTL 过期） */
 async function onVerified(value: string) {
-  ticket.value = value
+  captchaOpen.value = false
+  submitting.value = true
+  try {
+    await submitWithCurrentKey(value)
+  } finally {
+    submitting.value = false
+  }
 }
 
 /** redirect 站内校验：仅接受以 / 开头且非 // 的路径（防开放重定向） */
@@ -37,17 +51,7 @@ function safeRedirect(): string {
   return '/home'
 }
 
-async function onSubmit() {
-  if (!ticket.value) return
-  submitting.value = true
-  try {
-    await submitWithCurrentKey()
-  } finally {
-    submitting.value = false
-  }
-}
-
-async function submitWithCurrentKey(retried = false) {
+async function submitWithCurrentKey(ticket: string, retried = false) {
   const { keyId, publicKey } = await fetchPublicKey()
   try {
     const cipher = await encryptPassword(publicKey, password.value)
@@ -55,7 +59,7 @@ async function submitWithCurrentKey(retried = false) {
       username: username.value,
       password: cipher,
       keyId,
-      ticket: ticket.value!,
+      ticket,
     })
     session.save(result.accessToken)
     ElMessage.success(t('login.success'))
@@ -68,13 +72,10 @@ async function submitWithCurrentKey(retried = false) {
       !retried &&
       expiredMarkers.some((marker) => message.toLowerCase().includes(marker.toLowerCase()))
     ) {
-      return submitWithCurrentKey(true)
+      return submitWithCurrentKey(ticket, true)
     }
     ElMessage.error(message || t('login.failed'))
-    // 登录失败回初始态：账号密码清空（滑块随非空条件隐藏），重新填写后重新出题重滑（票据一次性）
-    username.value = ''
-    password.value = ''
-    ticket.value = null
+    // 票据一次性：失败后保留表单，重试需重新过滑块（点「登录」重开弹层出新题）
   }
 }
 </script>
@@ -115,14 +116,7 @@ async function submitWithCurrentKey(retried = false) {
           autocomplete="current-password"
           show-password
         />
-        <SliderCaptcha
-          v-if="username && password"
-          :hint="t('login.slideHint')"
-          :fail-text="t('login.slideFail')"
-          @verified="onVerified"
-        />
         <el-button
-          v-if="ticket"
           type="primary"
           class="login__submit"
           :loading="submitting"
@@ -133,6 +127,23 @@ async function submitWithCurrentKey(retried = false) {
         </el-button>
       </el-card>
     </main>
+
+    <!-- 滑块验证弹层：过验即登录；关层重开随组件重挂载重新出题 -->
+    <el-dialog
+      v-model="captchaOpen"
+      :title="t('login.captchaTitle')"
+      width="360px"
+      align-center
+      destroy-on-close
+      data-test="login-captcha-dialog"
+    >
+      <SliderCaptcha
+        :hint="t('login.slideHint')"
+        :fail-text="t('login.slideFail')"
+        :retry-text="t('login.captchaRetry')"
+        @verified="onVerified"
+      />
+    </el-dialog>
   </div>
 </template>
 

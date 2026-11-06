@@ -25,6 +25,13 @@ test.describe('宽屏分栏', () => {
     const backgroundImage = await brand.evaluate((el) => getComputedStyle(el).backgroundImage)
     expect(backgroundImage).toContain('gradient')
   })
+
+  test('表单卡核心元素齐备（账号 / 密码 / 登录按钮）', async ({ page }) => {
+    await page.goto('/login')
+    await expect(page.locator('[data-test="login-username"]')).toBeVisible()
+    await expect(page.locator('[data-test="login-password"]')).toBeVisible()
+    await expect(page.locator('[data-test="login-submit"]')).toBeVisible()
+  })
 })
 
 test.describe('窄屏折叠', () => {
@@ -35,6 +42,7 @@ test.describe('窄屏折叠', () => {
     await expect(page.locator('[data-test="login-brand"]')).toBeHidden()
     await expect(page.locator('[data-test="login-username"]')).toBeVisible()
     await expect(page.locator('[data-test="login-password"]')).toBeVisible()
+    await expect(page.locator('[data-test="login-submit"]')).toBeVisible()
     // 不破版：视口内无横向滚动溢出
     const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth)
     expect(scrollWidth).toBeLessThanOrEqual(375)
