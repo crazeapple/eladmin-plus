@@ -368,7 +368,8 @@ function cellSlotName(cell: Cell<typeof dataTableFeatures, TData, unknown>): str
 
 .data-table__table th,
 .data-table__table td {
-  padding: 10px 12px;
+  /* 行密度走品牌 token（带 fallback）：全站列表行高一致 */
+  padding: var(--ea-table-cell-padding-y, 10px) var(--ea-table-cell-padding-x, 12px);
   text-align: left;
 }
 

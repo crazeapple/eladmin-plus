@@ -4,6 +4,11 @@ export default {
     notFoundDesc: '页面不存在或已被移动。',
     backHome: '回首页',
     retry: '重试',
+    columnSettings: '列设置',
+    refresh: '刷新',
+    empty: '暂无数据',
+    selectAll: '全选',
+    selectRow: '选择此行',
   },
   home: {
     statsError: '统计数据加载失败，请重试。',

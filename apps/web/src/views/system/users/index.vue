@@ -19,6 +19,8 @@ import {
 } from '@/api/users'
 import { GENDER_LABEL_KEYS, GENDER_OPTIONS } from '@/constants/gender'
 import { useAuth } from '@/composables/use-auth'
+import { useTableTexts } from '@/composables/use-table-texts'
+import { formatDateTime } from '@/utils/datetime'
 import { useMenusStore } from '@/stores/menus'
 import { buildUserRules, type FormMode } from './rules'
 
@@ -27,6 +29,7 @@ defineOptions({ name: 'SystemUsers' })
 const { t } = useI18n()
 const { hasAuth } = useAuth()
 const menusStore = useMenusStore()
+const tableTexts = useTableTexts()
 
 /** 查询与筛选：筛选经「查询」应用并重置 page 0；部门树点选即时过滤 */
 const page = ref(0)
@@ -358,7 +361,11 @@ const columns = computed<DataTableColumn<UserView>[]>(() => [
             onChange: () => onToggle(row.original),
           }),
   },
-  { accessorKey: 'createdAt', header: t('users.createdAt') },
+  {
+    accessorKey: 'createdAt',
+    header: t('users.createdAt'),
+    cell: ({ row }) => h('span', formatDateTime(row.original.createdAt)),
+  },
   {
     id: 'actions',
     header: t('users.actions'),
@@ -496,6 +503,7 @@ const total = computed(() => data.value?.total ?? 0)
         :page-size="pageSize"
         :total="total"
         row-key="id"
+        :texts="tableTexts"
         data-test="users-table"
         @page-change="
           ({ page: p, pageSize: s }) => {

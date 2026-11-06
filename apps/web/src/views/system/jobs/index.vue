@@ -2,6 +2,7 @@
 import { ElButton, ElMessage, ElMessageBox, ElTag } from 'element-plus'
 import { h, computed, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useTableTexts } from '@/composables/use-table-texts'
 import { z } from 'zod'
 
 import { AutoForm, DataTable } from '@eladmin-plus/admin-ui'
@@ -15,6 +16,7 @@ import type { JobView, PageResultJobView } from '@/api/generated'
 defineOptions({ name: 'SystemJobs' })
 
 const { t } = useI18n()
+const tableTexts = useTableTexts()
 const { hasAuth } = useAuth()
 
 /** 查询与筛选：筛选变化经「查询」应用并重置 page 0 */
@@ -229,6 +231,7 @@ const total = computed(() => data.value?.total ?? 0)
     </div>
 
     <DataTable
+      :texts="tableTexts"
       :columns="columns"
       :data="rows"
       :loading="isLoading"

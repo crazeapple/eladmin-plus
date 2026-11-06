@@ -2,6 +2,8 @@
 import { ElButton, ElMessage, ElMessageBox } from 'element-plus'
 import { computed, h, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useTableTexts } from '@/composables/use-table-texts'
+import { formatDateTime } from '@/utils/datetime'
 import { z } from 'zod'
 
 import { AutoForm, DataTable } from '@eladmin-plus/admin-ui'
@@ -20,6 +22,7 @@ import { useAuth } from '@/composables/use-auth'
 defineOptions({ name: 'DatabaseConfigPanel' })
 
 const { t } = useI18n()
+const tableTexts = useTableTexts()
 const { hasAuth } = useAuth()
 
 const { data, isLoading } = useDatabaseConfigs()
@@ -121,11 +124,6 @@ async function onRemove(row: DatabaseConfigView) {
   }
 }
 
-/** 展示用时间：ISO 的 T 换空格（仅显示层） */
-function displayTime(value: string | undefined): string {
-  return value?.replace('T', ' ') ?? ''
-}
-
 const rows = computed(() => data.value ?? [])
 
 /** —— 备份触发：行操作确认后同步请求（mysqldump 真实执行数秒），loading 防重复提交 —— */
@@ -169,7 +167,7 @@ const columns = computed<DataTableColumn<DatabaseConfigView>[]>(() => [
   {
     accessorKey: 'createdAt',
     header: t('database.createdAt'),
-    cell: ({ row }) => h('span', displayTime(row.original.createdAt)),
+    cell: ({ row }) => h('span', formatDateTime(row.original.createdAt)),
   },
   {
     id: 'actions',
@@ -233,6 +231,7 @@ const columns = computed<DataTableColumn<DatabaseConfigView>[]>(() => [
     </div>
 
     <DataTable
+      :texts="tableTexts"
       :columns="columns"
       :data="rows"
       :loading="isLoading"

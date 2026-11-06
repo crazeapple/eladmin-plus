@@ -34,6 +34,10 @@
   --ea-layout-sidebar-collapsed-width: 64px;
   --ea-layout-header-height: 56px;
   --ea-layout-content-padding: 16px;
+  // 列表密度与筛选区排布：行内边距与筛选控件间距全站统一
+  --ea-table-cell-padding-y: 10px;
+  --ea-table-cell-padding-x: 12px;
+  --ea-filter-gap: 12px;
   --ea-sidebar-bg: #ffffff;
   --ea-sidebar-border: #e4e7ed;
   --ea-sidebar-text: #303133;
@@ -83,6 +87,10 @@ html.dark {
   --ea-layout-sidebar-collapsed-width: 64px;
   --ea-layout-header-height: 56px;
   --ea-layout-content-padding: 16px;
+  // 列表密度与筛选区排布：行内边距与筛选控件间距全站统一
+  --ea-table-cell-padding-y: 10px;
+  --ea-table-cell-padding-x: 12px;
+  --ea-filter-gap: 12px;
   --ea-sidebar-bg: #141414;
   --ea-sidebar-border: #414243;
   --ea-sidebar-text: #cfd3dc;

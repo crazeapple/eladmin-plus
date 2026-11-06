@@ -2,6 +2,7 @@
 import { ElButton, ElDialog, ElInput, ElInputNumber, ElMessage, ElMessageBox } from 'element-plus'
 import { computed, h, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useTableTexts } from '@/composables/use-table-texts'
 
 import {
   useDictDetailRemove,
@@ -22,6 +23,7 @@ import { buildLabelJson, parseLabelJson } from './label-json'
 defineOptions({ name: 'SystemDicts' })
 
 const { t, locale } = useI18n()
+const tableTexts = useTableTexts()
 const { hasAuth } = useAuth()
 
 const { data: dicts, isLoading } = useDictList()
@@ -288,7 +290,13 @@ function openDetails(row: Dict) {
       </el-button>
     </div>
 
-    <DataTable :columns="columns" :data="rows" :loading="isLoading" data-test="dicts-table" />
+    <DataTable
+      :texts="tableTexts"
+      :columns="columns"
+      :data="rows"
+      :loading="isLoading"
+      data-test="dicts-table"
+    />
 
     <el-dialog
       v-model="dialogVisible"
@@ -335,6 +343,7 @@ function openDetails(row: Dict) {
         </el-button>
       </div>
       <DataTable
+        :texts="tableTexts"
         :columns="detailColumns"
         :data="detailRows"
         :loading="detailsLoading"

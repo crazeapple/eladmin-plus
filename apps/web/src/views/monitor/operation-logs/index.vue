@@ -2,6 +2,8 @@
 import { ElButton, ElMessage, ElMessageBox } from 'element-plus'
 import { computed, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useTableTexts } from '@/composables/use-table-texts'
+import { formatDateTime } from '@/utils/datetime'
 
 import { DataTable } from '@eladmin-plus/admin-ui'
 import type { DataTableColumn } from '@eladmin-plus/admin-ui'
@@ -20,6 +22,7 @@ import { useAuth } from '@/composables/use-auth'
 defineOptions({ name: 'MonitorOperationLogs' })
 
 const { t } = useI18n()
+const tableTexts = useTableTexts()
 const { hasAuth } = useAuth()
 
 /** 四维筛选：文本框 blur / 回车即应用（筛选变更即重查并重置分页），日期选毕即应用 */
@@ -88,11 +91,6 @@ const detail = ref<OperationLog | null>(null)
 function openDetail(row: OperationLog) {
   detail.value = row
   detailVisible.value = true
-}
-
-/** 展示用时间：ISO 的 T 换空格（仅显示层，筛选仍用原值） */
-function displayTime(value: string | undefined): string {
-  return value?.replace('T', ' ') ?? ''
 }
 
 /** —— 删除 / 批删 / 清空（一律二次确认，取消不调接口） —— */
@@ -201,7 +199,7 @@ const columns = computed<DataTableColumn<OperationLog>[]>(() => [
   {
     accessorKey: 'createdAt',
     header: t('operationLogs.createdAt'),
-    cell: ({ row }) => h('span', displayTime(row.original.createdAt)),
+    cell: ({ row }) => h('span', formatDateTime(row.original.createdAt)),
   },
   {
     id: 'actions',
@@ -310,6 +308,7 @@ const total = computed(() => data.value?.total ?? 0)
     </div>
 
     <DataTable
+      :texts="tableTexts"
       :columns="columns"
       :data="rows"
       :loading="isLoading"
@@ -356,7 +355,7 @@ const total = computed(() => data.value?.total ?? 0)
           </div>
           <div class="op-logs__detail-row">
             <span class="op-logs__detail-label">{{ t('operationLogs.createdAt') }}</span>
-            <span data-test="op-logs-detail-created">{{ displayTime(detail.createdAt) }}</span>
+            <span data-test="op-logs-detail-created">{{ formatDateTime(detail.createdAt) }}</span>
           </div>
           <div class="op-logs__detail-row">
             <span class="op-logs__detail-label">{{ t('operationLogs.requestParam') }}</span>

@@ -16,6 +16,14 @@ test('用户页主链：联动、复杂表单、启停与藏显、重置与删�
   await expect(rowOf('admin').locator('[data-test="users-enabled"]')).toHaveCount(0)
   await expect(rowOf('admin').locator('[data-test="users-remove"]')).toHaveCount(0)
 
+  // 时间列本地化格式：yyyy-MM-dd HH:mm:ss（不含 ISO 的 T 分隔符）
+  const timeCell = table
+    .locator('tbody td')
+    .filter({ hasText: /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/ })
+    .first()
+  await expect(timeCell).toBeVisible()
+  expect(await timeCell.textContent()).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)
+
   // 复杂表单：全字段新增（唯一用户名），对话框提交后列表出现
   await page.locator('[data-test="users-create"]').click()
   const dialog = page.locator('[data-test="users-dialog"]')

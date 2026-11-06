@@ -4,6 +4,11 @@ export default {
     notFoundDesc: 'Page not found or has been moved.',
     backHome: 'Back to home',
     retry: 'Retry',
+    columnSettings: 'Columns',
+    refresh: 'Refresh',
+    empty: 'No data',
+    selectAll: 'Select all',
+    selectRow: 'Select this row',
   },
   home: {
     statsError: 'Failed to load statistics. Retry.',

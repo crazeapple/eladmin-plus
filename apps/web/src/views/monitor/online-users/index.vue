@@ -2,6 +2,8 @@
 import { ElButton, ElMessage, ElMessageBox, ElTooltip } from 'element-plus'
 import { computed, h } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useTableTexts } from '@/composables/use-table-texts'
+import { formatDateTime } from '@/utils/datetime'
 
 import { DataTable } from '@eladmin-plus/admin-ui'
 import type { DataTableColumn } from '@eladmin-plus/admin-ui'
@@ -15,6 +17,7 @@ import { parseUa } from '@/utils/ua'
 defineOptions({ name: 'MonitorOnlineUsers' })
 
 const { t } = useI18n()
+const tableTexts = useTableTexts()
 const { hasAuth } = useAuth()
 const menusStore = useMenusStore()
 
@@ -24,11 +27,6 @@ const kick = useOnlineKick()
 
 /** 当前登录用户 id：强退目标是自己时确认文案明示将登出当前会话 */
 const currentUserId = computed(() => menusStore.user?.id ?? null)
-
-/** 展示用时间：ISO 的 T 换空格（仅显示层） */
-function displayTime(value: string | undefined): string {
-  return value?.replace('T', ' ') ?? ''
-}
 
 /** UA 列：原文截断展示，tooltip 全文 */
 function uaCell(raw: string | undefined) {
@@ -66,7 +64,7 @@ const columns = computed<DataTableColumn<OnlineUserView>[]>(() => [
   {
     accessorKey: 'loginAt',
     header: t('onlineUsers.loginAt'),
-    cell: ({ row }) => h('span', displayTime(row.original.loginAt)),
+    cell: ({ row }) => h('span', formatDateTime(row.original.loginAt)),
   },
   {
     accessorKey: 'browser',
@@ -121,6 +119,7 @@ const rows = computed(() => data.value ?? [])
     </div>
 
     <DataTable
+      :texts="tableTexts"
       :columns="columns"
       :data="rows"
       :loading="isLoading"

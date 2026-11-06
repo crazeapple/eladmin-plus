@@ -2,6 +2,8 @@
 import { ElButton, ElMessage, ElMessageBox } from 'element-plus'
 import { computed, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useTableTexts } from '@/composables/use-table-texts'
+import { formatDateTime } from '@/utils/datetime'
 
 import { DataTable } from '@eladmin-plus/admin-ui'
 import type { DataTableColumn } from '@eladmin-plus/admin-ui'
@@ -15,6 +17,7 @@ import { useAuth } from '@/composables/use-auth'
 defineOptions({ name: 'DatabaseRecordPanel' })
 
 const { t } = useI18n()
+const tableTexts = useTableTexts()
 const { hasAuth } = useAuth()
 
 const page = ref(0)
@@ -96,11 +99,6 @@ function formatSize(bytes: number | undefined): string {
   return `${(mb / 1024).toFixed(2)} GB`
 }
 
-/** 展示用时间：ISO 的 T 换空格（仅显示层） */
-function displayTime(value: string | undefined): string {
-  return value?.replace('T', ' ') ?? ''
-}
-
 const rows = computed(() => data.value?.content ?? [])
 const total = computed(() => data.value?.total ?? 0)
 
@@ -115,7 +113,7 @@ const columns = computed<DataTableColumn<BackupRecordView>[]>(() => [
   {
     accessorKey: 'createdAt',
     header: t('database.backupAt'),
-    cell: ({ row }) => h('span', displayTime(row.original.createdAt)),
+    cell: ({ row }) => h('span', formatDateTime(row.original.createdAt)),
   },
   {
     id: 'actions',
@@ -169,6 +167,7 @@ const columns = computed<DataTableColumn<BackupRecordView>[]>(() => [
     </div>
 
     <DataTable
+      :texts="tableTexts"
       :columns="columns"
       :data="rows"
       :loading="isLoading"

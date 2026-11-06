@@ -2,6 +2,8 @@
 import { ElButton, ElMessage, ElMessageBox } from 'element-plus'
 import { computed, h, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useTableTexts } from '@/composables/use-table-texts'
+import { formatDateTime } from '@/utils/datetime'
 
 import { DataTable } from '@eladmin-plus/admin-ui'
 import type { DataTableColumn } from '@eladmin-plus/admin-ui'
@@ -20,6 +22,7 @@ import { useAuth } from '@/composables/use-auth'
 defineOptions({ name: 'MonitorExceptionLogs' })
 
 const { t } = useI18n()
+const tableTexts = useTableTexts()
 const { hasAuth } = useAuth()
 
 /** 筛选：操作人 / IP 精确、异常消息模糊、创建时间闭区间；变更即重查并重置分页 */
@@ -74,11 +77,6 @@ function onReset() {
   applied.startTime = undefined
   applied.endTime = undefined
   page.value = 0
-}
-
-/** 展示用时间：ISO 的 T 换空格（仅显示层，筛选仍用原值） */
-function displayTime(value: string | undefined): string {
-  return value?.replace('T', ' ') ?? ''
 }
 
 /** —— 堆栈抽屉：全文滚动展示 + 复制按钮 —— */
@@ -215,7 +213,7 @@ const columns = computed<DataTableColumn<ExceptionLog>[]>(() => [
   {
     accessorKey: 'createdAt',
     header: t('exceptionLogs.createdAt'),
-    cell: ({ row }) => h('span', displayTime(row.original.createdAt)),
+    cell: ({ row }) => h('span', formatDateTime(row.original.createdAt)),
   },
   {
     id: 'actions',
@@ -324,6 +322,7 @@ const total = computed(() => data.value?.total ?? 0)
     </div>
 
     <DataTable
+      :texts="tableTexts"
       :columns="columns"
       :data="rows"
       :loading="isLoading"

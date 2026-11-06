@@ -3,6 +3,7 @@ import { ElButton, ElMessage, ElMessageBox, ElTag, ElTree, ElTreeSelect } from '
 import type { TreeInstance } from 'element-plus'
 import { computed, h, nextTick, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useTableTexts } from '@/composables/use-table-texts'
 import { z } from 'zod'
 
 import { AutoForm, DataTable } from '@eladmin-plus/admin-ui'
@@ -17,6 +18,7 @@ import type { MenuNode, RoleView } from '@/api/generated'
 defineOptions({ name: 'SystemRoles' })
 
 const { t } = useI18n()
+const tableTexts = useTableTexts()
 const { hasAuth } = useAuth()
 
 const page = ref(0)
@@ -353,6 +355,7 @@ const total = computed(() => data.value?.total ?? 0)
     </div>
 
     <DataTable
+      :texts="tableTexts"
       :columns="columns"
       :data="rows"
       :loading="isLoading"

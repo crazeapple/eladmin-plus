@@ -2,6 +2,8 @@
 import { ElButton, ElImage, ElMessage, ElMessageBox, type UploadFile } from 'element-plus'
 import { computed, h, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useTableTexts } from '@/composables/use-table-texts'
+import { formatDateTime } from '@/utils/datetime'
 
 import { DataTable } from '@eladmin-plus/admin-ui'
 import type { DataTableColumn } from '@eladmin-plus/admin-ui'
@@ -20,6 +22,7 @@ import { useAuth } from '@/composables/use-auth'
 defineOptions({ name: 'ToolsStorage' })
 
 const { t } = useI18n()
+const tableTexts = useTableTexts()
 const { hasAuth } = useAuth()
 
 /** 三维筛选：原名模糊、上传人精确、时间范围；文本回车即应用，日期选毕即应用 */
@@ -126,11 +129,6 @@ function formatSize(bytes: number | undefined): string {
     return `${mb.toFixed(1)} MB`
   }
   return `${(mb / 1024).toFixed(2)} GB`
-}
-
-/** 展示用时间：ISO 的 T 换空格（仅显示层，筛选仍用原值） */
-function displayTime(value: string | undefined): string {
-  return value?.replace('T', ' ') ?? ''
 }
 
 /** —— 列定义：图片行缩略 + 点开大图，行操作下载与删除 —— */
@@ -240,7 +238,7 @@ const columns = computed<DataTableColumn<StorageFileView>[]>(() => {
     {
       accessorKey: 'createdAt',
       header: t('storage.createdAt'),
-      cell: ({ row }) => h('span', displayTime(row.original.createdAt)),
+      cell: ({ row }) => h('span', formatDateTime(row.original.createdAt)),
     },
     {
       id: 'actions',
@@ -321,6 +319,7 @@ const columns = computed<DataTableColumn<StorageFileView>[]>(() => {
     </div>
 
     <DataTable
+      :texts="tableTexts"
       :columns="columns"
       :data="rows"
       :loading="isLoading"

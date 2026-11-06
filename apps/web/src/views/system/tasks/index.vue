@@ -15,6 +15,8 @@ import {
 } from 'element-plus'
 import { computed, h, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useTableTexts } from '@/composables/use-table-texts'
+import { formatDateTime } from '@/utils/datetime'
 
 import {
   useTaskExec,
@@ -35,6 +37,7 @@ import { cronHint, CRON_PRESETS } from './cron'
 defineOptions({ name: 'SystemTasks' })
 
 const { t } = useI18n()
+const tableTexts = useTableTexts()
 const { hasAuth } = useAuth()
 
 const { data: tasks, isLoading } = useTaskList()
@@ -334,7 +337,11 @@ const logRows = computed(() => logs.value?.content ?? [])
 const logTotal = computed(() => logs.value?.total ?? 0)
 
 const logColumns = computed<DataTableColumn<TaskLog>[]>(() => [
-  { accessorKey: 'executeTime', header: t('tasks.logTime') },
+  {
+    accessorKey: 'executeTime',
+    header: t('tasks.logTime'),
+    cell: ({ row }) => h('span', formatDateTime(row.original.executeTime)),
+  },
   {
     accessorKey: 'success',
     header: t('tasks.logResult'),
@@ -380,6 +387,7 @@ function refreshLogs() {
     </div>
 
     <DataTable
+      :texts="tableTexts"
       :columns="columns"
       :data="rows"
       :loading="isLoading"
@@ -482,6 +490,7 @@ function refreshLogs() {
         </el-button>
       </div>
       <DataTable
+        :texts="tableTexts"
         :columns="logColumns"
         :data="logRows"
         :loading="logsLoading"
