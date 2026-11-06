@@ -192,6 +192,27 @@ describe('菜单管理页', () => {
     expect(iconInput?.value).toBe('svg:dictionary')
   })
 
+  it('图标选择器：EP tab 选图回填 ep: 前缀值', async () => {
+    await renderPage()
+    await fireEvent.click(byTest('menus-create')[0]!)
+    const dialog = document.querySelector('[data-test="menus-dialog"]') as HTMLElement
+    await fireEvent.click(dialog.querySelector('[data-test="menus-icon-pick"]')!)
+    const pickerDialog = document.querySelector('[data-test="menus-icon-dialog"]') as HTMLElement
+    await waitFor(() => expect(pickerDialog).toBeTruthy())
+    // 切 EP tab：格走 EP 具名清单命名空间
+    const epTab = pickerDialog.querySelector('#tab-ep') as HTMLElement
+    await fireEvent.click(epTab)
+    await waitFor(() => {
+      expect(
+        pickerDialog.querySelectorAll('[data-test^="icon-option-ep-"]').length,
+      ).toBeGreaterThan(0)
+    })
+    expect(pickerDialog.querySelector('[data-test="icon-option-ep-timer"]')).toBeTruthy()
+    await fireEvent.click(pickerDialog.querySelector('[data-test="icon-option-ep-timer"]')!)
+    const iconInput = dialog.querySelector('[data-test="menus-icon-input"]') as HTMLInputElement
+    expect(iconInput?.value).toBe('ep:timer')
+  })
+
   it('删除确认：确认后调删除接口，错误消息直显', async () => {
     await renderPage()
     await fireEvent.click(byTest('menus-delete')[0]!)

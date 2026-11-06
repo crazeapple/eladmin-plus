@@ -221,6 +221,8 @@ export default {
     iconTitle: 'Pick an Icon',
     iconFilter: 'Type to filter',
     iconEmpty: 'No matching icons',
+    iconTabSvg: 'SVG icons',
+    iconTabEp: 'Element icons',
     hidden: 'Hide in Sidebar',
     noCache: 'Keep Alive',
     sort: 'Sort',

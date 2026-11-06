@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import AppIcon from '@/components/AppIcon.vue'
-import { hasAppIcon } from '@/components/app-icons'
+import MenuIcon from '@/components/MenuIcon.vue'
 import SettingsDrawer from '@/components/settings/SettingsDrawer.vue'
 import { logout } from '@/api/auth'
 import { broadcastLogout } from '@/api/auth-sync'
@@ -67,20 +67,6 @@ async function onUserCommand(command: string | number | object) {
   await router.push('/login')
 }
 
-/**
- * 侧栏图标解析：icon 库值 `svg:name` 且名在册 → 图标资产名；
- * 其余形态（ep: 前缀、无前缀裸名、未知名、缺失）→ undefined 不渲染。
- * V14 迁移已补齐全部目录与页面菜单库值，静态映射兜底随之退役——侧栏解析纯库值。
- */
-function navIcon(menu: MenuNode): string | undefined {
-  const value = menu.icon ?? ''
-  if (!value.startsWith('svg:')) {
-    return undefined
-  }
-  const name = value.slice('svg:'.length)
-  return name && hasAppIcon(name) ? name : undefined
-}
-
 /** 侧栏节点：目录（type=0）带子级，页面（type=1）可点；按钮（type=2）不进侧栏 */
 interface NavNode {
   key: string
@@ -98,7 +84,8 @@ const navNodes = computed<NavNode[]>(() => {
     const node: NavNode = {
       key: `${menu.type}:${menu.i18nKey ?? menu.id}`,
       title: menu.i18nKey ?? '',
-      icon: navIcon(menu),
+      // 图标透传原始库值，前缀分派与占位语义集中在 MenuIcon（V14 补值后侧栏解析纯库值）
+      icon: menu.icon ?? undefined,
     }
     if (menu.type === 1) {
       if (!menu.componentPathKey) {
@@ -194,16 +181,16 @@ function onMenuSelect() {
         <template v-for="item in navNodes" :key="item.key">
           <el-sub-menu v-if="item.children" :index="item.key">
             <template #title>
-              <app-icon v-if="item.icon" :name="item.icon" />
+              <menu-icon :value="item.icon" />
               <span>{{ t(item.title) }}</span>
             </template>
             <el-menu-item v-for="child in item.children" :key="child.key" :index="child.path!">
-              <app-icon v-if="child.icon" :name="child.icon" />
+              <menu-icon :value="child.icon" />
               <template #title>{{ t(child.title) }}</template>
             </el-menu-item>
           </el-sub-menu>
           <el-menu-item v-else :index="item.path!">
-            <app-icon v-if="item.icon" :name="item.icon" />
+            <menu-icon :value="item.icon" />
             <template #title>{{ t(item.title) }}</template>
           </el-menu-item>
         </template>

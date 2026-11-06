@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import { ElButton, ElDialog, ElInput } from 'element-plus'
+import { ElButton, ElDialog, ElInput, ElIcon, ElTabPane, ElTabs } from 'element-plus'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import AppIcon from '@/components/AppIcon.vue'
+import { EP_ICONS } from '@/components/ep-icons'
 
 defineOptions({ name: 'MenusIconPicker' })
 
 const { t } = useI18n()
 
 /**
- * 收录白名单：81 个 svg 资产中挑适配后台菜单的子集，
+ * svg tab 收录白名单：81 个 svg 资产中挑适配后台菜单的子集，
  * 人像（user / people 等）与社交、消费类（wechat / alipay / shopping 等）明显不适配，不进选择器。
  * 选择器可见集与资产全集解耦：剔除不改资产，增补只动这份常量。
  */
@@ -83,27 +84,49 @@ const PICKER_ICONS = [
   'zujian',
 ]
 
+/** EP tab 收录即 EP 具名清单（挑适配后台菜单的子集在册），与分派渲染同一事实源 */
+const EP_PICKER_ICONS = Object.keys(EP_ICONS)
+
 const props = defineProps<{ modelValue: string }>()
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
 const visible = ref(false)
 const keyword = ref('')
 
-const filtered = computed(() => {
+/** 双 tab：svg 本地集 / EP 集；落库值形态分别为 svg:name / ep:name */
+const activeTab = ref<'svg' | 'ep'>('svg')
+
+// 打开时按当前值形态落 tab：svg: 高亮 svg tab，ep: 高亮 EP tab，其余落 svg
+function open() {
+  activeTab.value = props.modelValue.startsWith('ep:') ? 'ep' : 'svg'
+  visible.value = true
+}
+
+/** 两 tab 各自过滤：pane 同时在册渲染（隐藏 pane 不卸载），清单不能共用 */
+function filterBy(names: string[]): string[] {
   const query = keyword.value.trim().toLowerCase()
   if (!query) {
-    return PICKER_ICONS
+    return names
   }
-  return PICKER_ICONS.filter((name) => name.toLowerCase().includes(query))
+  return names.filter((name) => name.toLowerCase().includes(query))
+}
+
+const filteredSvg = computed(() => filterBy(PICKER_ICONS))
+const filteredEp = computed(() => filterBy(EP_PICKER_ICONS))
+
+/** 当前选中格：icon 值带前缀时按形态取名段高亮（无前缀视为未选） */
+const selected = computed(() => {
+  if (props.modelValue.startsWith('svg:')) {
+    return { tab: 'svg', name: props.modelValue.slice('svg:'.length) }
+  }
+  if (props.modelValue.startsWith('ep:')) {
+    return { tab: 'ep', name: props.modelValue.slice('ep:'.length) }
+  }
+  return null
 })
 
-/** 当前选中名：icon 值统一 svg:name 形态，取 name 段高亮（无前缀视为未选） */
-const selected = computed(() =>
-  props.modelValue.startsWith('svg:') ? props.modelValue.slice('svg:'.length) : '',
-)
-
 function pick(name: string) {
-  emit('update:modelValue', `svg:${name}`)
+  emit('update:modelValue', `${activeTab.value}:${name}`)
   visible.value = false
 }
 </script>
@@ -116,7 +139,7 @@ function pick(name: string) {
       :placeholder="t('menus.iconEmpty')"
       data-test="menus-icon-input"
     />
-    <el-button type="primary" plain data-test="menus-icon-pick" @click="visible = true">
+    <el-button type="primary" plain data-test="menus-icon-pick" @click="open">
       {{ t('menus.iconPick') }}
     </el-button>
     <el-button
@@ -142,22 +165,48 @@ function pick(name: string) {
         :placeholder="t('menus.iconFilter')"
         data-test="menus-icon-filter"
       />
-      <div class="icon-picker__grid" data-test="menus-icon-grid">
-        <button
-          v-for="name in filtered"
-          :key="name"
-          type="button"
-          class="icon-picker__cell"
-          :class="{ 'is-active': name === selected }"
-          :title="name"
-          :data-test="`icon-option-${name}`"
-          @click="pick(name)"
-        >
-          <app-icon :name="name" />
-          <span class="icon-picker__name">{{ name }}</span>
-        </button>
-      </div>
-      <p v-if="!filtered.length" class="icon-picker__empty">{{ t('menus.iconEmpty') }}</p>
+      <el-tabs v-model="activeTab" class="icon-picker__tabs">
+        <el-tab-pane :label="t('menus.iconTabSvg')" name="svg">
+          <div class="icon-picker__grid" data-test="menus-icon-grid-svg">
+            <button
+              v-for="name in filteredSvg"
+              :key="name"
+              type="button"
+              class="icon-picker__cell"
+              :class="{ 'is-active': selected?.tab === 'svg' && name === selected.name }"
+              :title="name"
+              :data-test="`icon-option-${name}`"
+              @click="pick(name)"
+            >
+              <app-icon :name="name" />
+              <span class="icon-picker__name">{{ name }}</span>
+            </button>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane :label="t('menus.iconTabEp')" name="ep">
+          <div class="icon-picker__grid" data-test="menus-icon-grid-ep">
+            <button
+              v-for="name in filteredEp"
+              :key="name"
+              type="button"
+              class="icon-picker__cell"
+              :class="{ 'is-active': selected?.tab === 'ep' && name === selected.name }"
+              :title="name"
+              :data-test="`icon-option-ep-${name}`"
+              @click="pick(name)"
+            >
+              <el-icon class="icon-picker__ep"><component :is="EP_ICONS[name]" /></el-icon>
+              <span class="icon-picker__name">{{ name }}</span>
+            </button>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
+      <p
+        v-if="activeTab === 'svg' ? !filteredSvg.length : !filteredEp.length"
+        class="icon-picker__empty"
+      >
+        {{ t('menus.iconEmpty') }}
+      </p>
     </el-dialog>
   </span>
 </template>
@@ -175,12 +224,15 @@ function pick(name: string) {
   }
 }
 
+.icon-picker__tabs {
+  margin-top: 4px;
+}
+
 .icon-picker__grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 8px;
   max-height: 320px;
-  margin-top: 12px;
   overflow-y: auto;
 }
 
@@ -205,6 +257,10 @@ function pick(name: string) {
     color: var(--el-color-primary, #409eff);
     border-color: var(--el-color-primary, #409eff);
   }
+}
+
+.icon-picker__ep {
+  font-size: 18px;
 }
 
 .icon-picker__name {

@@ -23,7 +23,7 @@ import { useI18n } from 'vue-i18n'
 
 import { useMenuRemove, useMenuSave, useMenuTree } from '@/api/menus'
 import type { MenuNode, MenuSaveRequest } from '@/api/generated'
-import AppIcon from '@/components/AppIcon.vue'
+import MenuIcon from '@/components/MenuIcon.vue'
 import { useAuth } from '@/composables/use-auth'
 import { loadView } from '@/router/views'
 import { componentPathSelectOptions, i18nKeySelectOptions } from './form-options'
@@ -233,7 +233,7 @@ async function onRemove(row: MenuNode) {
     >
       <template #default="{ data }">
         <div class="menus__node">
-          <app-icon v-if="data.icon?.startsWith('svg:')" :name="data.icon.slice('svg:'.length)" />
+          <menu-icon :value="data.icon" />
           <el-tag v-if="data.type === 0" size="small" type="info">{{
             t('menus.typeDirectory')
           }}</el-tag>

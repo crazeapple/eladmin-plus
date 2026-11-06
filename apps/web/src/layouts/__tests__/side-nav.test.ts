@@ -143,6 +143,7 @@ function iconMenuTree(): MenuNode[] {
     page(3, 'routes.systemTasks', 'system/tasks', 'star'),
     page(4, 'routes.systemDepts', 'system/depts', 'svg:no-such-icon'),
     page(5, 'routes.systemMenus', 'system/menus', null),
+    page(6, 'routes.systemDicts', 'system/dicts', 'ep:setting'),
   ]
 }
 
@@ -156,6 +157,13 @@ describe('侧栏图标库值优先', () => {
     await renderApp('/', iconMenuTree())
     await waitFor(() => expect(screen.getByText('用户管理')).toBeTruthy())
     expect(itemHasSvg('用户管理')).toBe(true)
+  })
+
+  it('ep: 前缀在册名经分派组件渲染 el-icon 组件形态', async () => {
+    await renderApp('/', iconMenuTree())
+    await waitFor(() => expect(screen.getByText('字典管理')).toBeTruthy())
+    const item = screen.getByText('字典管理').closest('li') as HTMLElement
+    expect(item.querySelector('.app-icon--ep .el-icon svg')).toBeTruthy()
   })
 
   it('无前缀值与 svg: 未知名不渲染图标（静态映射兜底已随 V14 补值退役）', async () => {
