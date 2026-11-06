@@ -11,7 +11,7 @@ import SliderCaptcha from '@/components/captcha/SliderCaptcha.vue'
 /**
  * 登录页（布局壳之外，偏好主题与语言天然生效）：
  * 左侧品牌视觉区（渐变底 + 几何装饰 + 产品文案），右侧表单卡，窄屏折叠单栏；
- * 公钥页面加载时取；填表不触发验证码，点「登录」弹滑块层，过验即登录；
+ * 公钥页面加载时取；填表不触发验证码，点「登录」卡内展开滑块区块，过验即登录；
  * 密码 RSA 加密提交 → 会话入内存 → 跳 redirect；
  * 公钥过期（后端 400 分语义）自动重取公钥重试一次；redirect 只认站内路径。
  */
@@ -25,9 +25,9 @@ const password = ref('')
 const submitting = ref(false)
 const captchaOpen = ref(false)
 
-/** 点「登录」弹滑块层：表单不全时不开层（校验消息由浏览器表单语义承担，不强弹提示） */
+/** 点「登录」展开滑块区块：表单不全时不展开（校验消息由浏览器表单语义承担，不强弹提示） */
 function onSubmit() {
-  if (!username.value || !password.value || submitting.value) return
+  if (!username.value || !password.value || submitting.value || captchaOpen.value) return
   captchaOpen.value = true
 }
 
@@ -120,30 +120,36 @@ async function submitWithCurrentKey(ticket: string, retried = false) {
           type="primary"
           class="login__submit"
           :loading="submitting"
+          :disabled="captchaOpen"
           data-test="login-submit"
           @click="onSubmit"
         >
           {{ t('login.submit') }}
         </el-button>
+        <!-- 滑块验证内联展开区：过验即登录；收起销毁重挂，重开重新出题（等价原弹层 destroy-on-close） -->
+        <Transition name="login-captcha">
+          <div v-if="captchaOpen" class="login__captcha" data-test="login-captcha-dialog">
+            <div class="login__captcha-head">
+              <span class="login__captcha-title">{{ t('login.captchaTitle') }}</span>
+              <button
+                type="button"
+                class="login__captcha-close"
+                data-test="login-captcha-close"
+                @click="captchaOpen = false"
+              >
+                {{ t('login.captchaClose') }}
+              </button>
+            </div>
+            <SliderCaptcha
+              :hint="t('login.slideHint')"
+              :fail-text="t('login.slideFail')"
+              :retry-text="t('login.captchaRetry')"
+              @verified="onVerified"
+            />
+          </div>
+        </Transition>
       </el-card>
     </main>
-
-    <!-- 滑块验证弹层：过验即登录；关层重开随组件重挂载重新出题 -->
-    <el-dialog
-      v-model="captchaOpen"
-      :title="t('login.captchaTitle')"
-      width="360px"
-      align-center
-      destroy-on-close
-      data-test="login-captcha-dialog"
-    >
-      <SliderCaptcha
-        :hint="t('login.slideHint')"
-        :fail-text="t('login.slideFail')"
-        :retry-text="t('login.captchaRetry')"
-        @verified="onVerified"
-      />
-    </el-dialog>
   </div>
 </template>
 
@@ -326,6 +332,47 @@ html.dark .login__panel {
 
 .login__submit {
   width: 100%;
+}
+
+/* 滑块内联展开区：随卡内容区同宽（flex 子项拉伸），与输入框天然左右缘对齐 */
+.login__captcha-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.login__captcha-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--el-text-color-secondary, #909399);
+}
+
+.login__captcha-close {
+  padding: 2px 8px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary, #909399);
+  cursor: pointer;
+  background: none;
+  border: none;
+
+  &:hover {
+    color: var(--el-text-color-primary, #303133);
+  }
+}
+
+/* 展开 / 收起过渡：淡入淡出带轻微位移，收起即销毁（v-if 重挂语义） */
+.login-captcha-enter-active,
+.login-captcha-leave-active {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.login-captcha-enter-from,
+.login-captcha-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 
 /* 窄屏折叠单栏：品牌区让位，表单卡满幅 */

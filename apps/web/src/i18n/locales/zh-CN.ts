@@ -124,6 +124,7 @@ export default {
     slideFail: '校验未通过，请重试',
     captchaTitle: '安全验证',
     captchaRetry: '出图失败，点击重试',
+    captchaClose: '收起',
     submit: '登录',
     success: '登录成功',
     failed: '登录失败，请稍后再试',

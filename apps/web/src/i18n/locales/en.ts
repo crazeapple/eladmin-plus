@@ -125,6 +125,7 @@ export default {
     slideFail: 'Verification failed, please try again',
     captchaTitle: 'Security check',
     captchaRetry: 'Failed to load, click to retry',
+    captchaClose: 'Collapse',
     submit: 'Sign in',
     success: 'Signed in',
     failed: 'Sign-in failed, please try again later',

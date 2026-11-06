@@ -61,7 +61,7 @@ function elInput(id: string): HTMLInputElement {
 }
 
 /**
- * 填表 + 点「登录」弹滑块层（不点过验）：填表不出滑块，提交时才弹层。
+ * 填表 + 点「登录」展开滑块区块（不点过验）：填表不出滑块，提交时才展开。
  * 过验动作单独走 verifySlider——过验即登录，会真实提交（须先备好协议桩）。
  */
 async function fillAndOpenSlider() {
@@ -138,9 +138,27 @@ describe('登录页', () => {
     expect(byTest('login-username')).toBeTruthy()
     expect(byTest('login-password')).toBeTruthy()
     expect(byTest('login-submit')).toBeTruthy()
-    // 填表不弹滑块，点登录才弹层（此处不点过验，避免触发真实提交链）
+    // 填表不出滑块，点登录才展开（此处不点过验，避免触发真实提交链）
     await fillAndOpenSlider()
     expect(document.querySelector('.layout')).toBeNull()
+  })
+
+  it('滑块区块内联在登录卡内展开，展开期提交锁定，收起销毁可重开', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    await mountLogin(makeRouter(), pinia)
+    await fillAndOpenSlider()
+
+    // 内联承载：展开区在登录卡 DOM 内部（非 body 直挂弹层）
+    expect(byTest('login-captcha-dialog').closest('.el-card')).not.toBeNull()
+    // 展开期锁定：提交按钮禁用（表单态锁定，过验或收起后恢复）
+    expect((byTest('login-submit') as HTMLButtonElement).disabled).toBe(true)
+    // 收起销毁：回表单态提交恢复，重开重新出题（旧题随 TTL 过期）
+    await fireEvent.click(byTest('login-captcha-close'))
+    await waitFor(() => expect(queryTest('login-captcha-dialog')).toBeNull())
+    expect((byTest('login-submit') as HTMLButtonElement).disabled).toBe(false)
+    await submit()
+    await waitFor(() => expect(byTest('slider-stub')).toBeTruthy())
   })
 
   it('全链成功：过验即登录，RSA 密文可被对应私钥解开、token 入内存、跳站内目标', async () => {
@@ -256,10 +274,10 @@ describe('登录页', () => {
     await waitFor(() => expect(mocks.login).toHaveBeenCalledTimes(1))
     expect(mocks.fetchPublicKey).toHaveBeenCalledTimes(1)
     await waitFor(() => expect(useSessionStore().accessToken).toBeNull())
-    // 失败回表单态：输入保留（票据一次性，重试需重新过滑块；弹层卸载随 EP 过渡时序，单测不锚定）
+    // 失败回表单态：输入保留（票据一次性，重试需重新过滑块；展开区卸载随过渡时序，单测不锚定）
     expect(elInput('login-username').value).toBe('admin')
     expect(elInput('login-password').value).toBe('123456')
-    // 再点登录可重新弹滑块出题（重开即重挂载出新题）
+    // 再点登录可重新展开滑块出题（重开即重挂载出新题）
     await submit()
     await waitFor(() => expect(byTest('slider-stub')).toBeTruthy())
   })

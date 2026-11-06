@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { nextCaptchaChallenge, solveSlider } from './helpers'
 
-// 滑块弹层交互链（匿名组）：填表不触发、提交弹层出图、过验即登录、可关闭重开换题、失败弹层内换题重拖。
+// 滑块内联展开链（匿名组）：填表不触发、点登录卡内展开出图、过验即登录、可收起重开换题、失败原区换题重拖。
 
 /** 填齐管理员表单（不点登录） */
 async function fillAdmin(page: import('@playwright/test').Page) {
@@ -10,11 +10,11 @@ async function fillAdmin(page: import('@playwright/test').Page) {
   await page.locator('[data-test="login-password"]').fill('123456')
 }
 
-test('填账号密码不出滑块，点登录弹层出图', async ({ page }) => {
+test('填账号密码不出滑块，点登录卡内展开出图', async ({ page }) => {
   await fillAdmin(page)
-  // 填表阶段：滑块弹层与轨道都不在
-  await expect(page.locator('[data-test="login-captcha-dialog"]')).not.toBeVisible()
-  await expect(page.locator('[data-test="slider-track"]')).not.toBeVisible()
+  // 填表阶段：滑块区块与轨道都不在
+  await expect(page.locator('[data-test="login-captcha-dialog"]')).toHaveCount(0)
+  await expect(page.locator('[data-test="slider-track"]')).toHaveCount(0)
   const challengePromise = nextCaptchaChallenge(page)
   await page.locator('[data-test="login-submit"]').click()
   const challenge = await challengePromise
@@ -35,25 +35,25 @@ test('拖动过验无需二次操作直接登录成功', async ({ page }) => {
   await expect(page.locator('[data-test="home-dashboard"]')).toBeVisible()
 })
 
-test('弹层可关闭，重开重新出图', async ({ page }) => {
+test('展开区可收起，重开重新出图', async ({ page }) => {
   await fillAdmin(page)
   const firstPromise = nextCaptchaChallenge(page)
   await page.locator('[data-test="login-submit"]').click()
   const first = await firstPromise
-  const dialog = page.locator('[data-test="login-captcha-dialog"]')
-  await expect(dialog).toBeVisible()
-  // 弹层头部关闭按钮
-  await dialog.locator('.el-dialog__headerbtn').click()
-  await expect(page.locator('[data-test="slider-track"]')).not.toBeVisible()
-  // 回登录表单态，重开弹层重新出图（token 换新，旧题随 TTL 自然过期）
+  const region = page.locator('[data-test="login-captcha-dialog"]')
+  await expect(region).toBeVisible()
+  // 头部收起按钮：收起即销毁回表单态（旧题随 TTL 自然过期）
+  await region.locator('[data-test="login-captcha-close"]').click()
+  await expect(page.locator('[data-test="login-captcha-dialog"]')).toHaveCount(0)
+  // 回登录表单态，重开重新出图（token 换新）
   const secondPromise = nextCaptchaChallenge(page)
   await page.locator('[data-test="login-submit"]').click()
   const second = await secondPromise
-  await expect(dialog).toBeVisible()
+  await expect(region).toBeVisible()
   expect(second.token).not.toBe(first.token)
 })
 
-test('拖动失败弹层内即时换题重拖', async ({ page }) => {
+test('拖动失败原区内即时换题重拖', async ({ page }) => {
   await fillAdmin(page)
   const challengePromise = nextCaptchaChallenge(page)
   await page.locator('[data-test="login-submit"]').click()
@@ -80,7 +80,7 @@ test('拖动失败弹层内即时换题重拖', async ({ page }) => {
     (res) => res.url().includes('/auth/captcha/check') && res.status() === 400,
   )
   const refetch = await refetchPromise
-  // 弹层仍在、失败提示在、题目已换新
+  // 展开区仍在、失败提示在、题目已换新
   await expect(page.locator('[data-test="login-captcha-dialog"]')).toBeVisible()
   await expect(page.locator('[data-test="slider-fail"]')).toBeVisible()
   expect(refetch.token).not.toBe(challenge.token)
