@@ -13,8 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /**
- * 菜单种子（V4 身份域 + V6 配置域 + V8 监控域 + V10 工具域 + V12 运维域）：四目录、十五子菜单、
- * 43 条按钮权限点行，幂等在册。
+ * 菜单种子（V4 身份域 + V6 配置域 + V8 监控域 + V10 工具域 + V12 运维域 + V16 演示目录化）：
+ * 五目录、十七子菜单、43 条按钮权限点行，幂等在册。
  */
 @SpringBootTest
 class MenuSeedTest {
@@ -222,8 +222,8 @@ class MenuSeedTest {
 
     @Test
     void 迁移幂等不产生重复行() {
-        // 全表行数精确：V2 三条页面 + 目录 4 + 子菜单 15 + 按钮 43 = 65
-        assertThat(menuMapper.selectCount(null)).isEqualTo(65);
+        // 全表行数精确：V2 首页单页（演示两页 V16 挂入目录）+ 目录 5 + 挂接子菜单 17 + 按钮 43 = 66
+        assertThat(menuMapper.selectCount(null)).isEqualTo(66);
         // 权限点标识唯一（NOT EXISTS 守卫语义）
         List<Menu> menus = menuMapper.selectList(null);
         long distinctPermissions = menus.stream()

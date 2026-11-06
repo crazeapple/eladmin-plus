@@ -44,22 +44,22 @@ class RbacSeedTest {
     }
 
     @Test
-    void 初始菜单三条页面在册且字段齐全() {
-        // V4 起菜单表含目录与按钮权限点行，本用例只断言 V2 的三条根级页面菜单
+    void 初始菜单根级仅剩首页单页且字段齐全() {
+        // V4 起菜单表含目录与按钮权限点行，V16 目录化后根级页面菜单只剩首页（演示两页挂 routes.demo 目录）
         List<Menu> menus = menuMapper.selectList(new LambdaQueryWrapper<Menu>()
                 .eq(Menu::getType, Menu.TYPE_MENU)
                 .isNull(Menu::getParentId)
                 .orderByAsc(Menu::getSort));
         assertThat(menus).extracting(Menu::getComponentPathKey)
-                .containsExactly("home/index", "demo/cached", "demo/no-cache");
+                .containsExactly("home/index");
         assertThat(menus).allSatisfy(menu -> {
             assertThat(menu.getI18nKey()).startsWith("routes.");
             assertThat(menu.getSort()).isPositive();
         });
         // 演示不缓存页标 noCache，页签缓存接线（P-010）按此判定
-        Menu noCache = menus.stream()
-                .filter(menu -> "demo/no-cache".equals(menu.getComponentPathKey()))
-                .findFirst().orElseThrow();
+        Menu noCache = menuMapper.selectOne(new LambdaQueryWrapper<Menu>()
+                .eq(Menu::getComponentPathKey, "demo/no-cache"));
+        assertThat(noCache).isNotNull();
         assertThat(noCache.getNoCache()).isTrue();
     }
 }
