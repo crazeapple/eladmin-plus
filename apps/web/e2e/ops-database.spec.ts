@@ -136,7 +136,7 @@ test('备份触发：真实备份成功提示落册文件名、错误凭据页�
   await expect(successToast).toBeVisible({ timeout: 60_000 })
   const toastText = (await successToast.first().textContent()) ?? ''
   const fileName = toastText.replace(/^.*备份完成：/, '').trim()
-  expect(fileName).toMatch(/^eladmin_plus_\d{14}\.sql$/)
+  expect(fileName).toMatch(/^eladmin_plus_\d{14}\.sql\.gz$/)
 
   // 负路径：错误凭据 5xx 页内提示（含后端原因），无成功提示
   await badRow.locator('[data-test="database-config-backup"]').click()
@@ -206,7 +206,7 @@ test('备份记录链：备份出新行、文件名筛选命中与无命中、�
   await expect(successToast).toBeVisible({ timeout: 60_000 })
   const toastText = (await successToast.first().textContent()) ?? ''
   const fileName = toastText.replace(/^.*备份完成：/, '').trim()
-  expect(fileName).toMatch(/^eladmin_plus_\d{14}\.sql$/)
+  expect(fileName).toMatch(/^eladmin_plus_\d{14}\.sql\.gz$/)
 
   // 切备份记录区块：新行在册（文件名唯一定位）
   await page.getByRole('tab', { name: '备份记录' }).click()

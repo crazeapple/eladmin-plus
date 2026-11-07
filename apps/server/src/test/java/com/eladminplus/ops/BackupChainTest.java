@@ -116,14 +116,14 @@ class BackupChainTest {
         // 响应即行视图：原名形态、库名解析展示
         assertThat(body).contains("\"dbName\":\"eladmin_plus\"");
         String fileName = body.replaceAll(".*\"fileName\":\"([^\"]+)\".*", "$1");
-        assertThat(fileName).matches("eladmin_plus_\\d{14}\\.sql");
+        assertThat(fileName).matches("eladmin_plus_\\d{14}\\.sql\\.gz");
         long id = Long.parseLong(body.replaceAll(".*\"id\":(\\d+).*", "$1"));
 
         StorageFile row = storageFileMapper.selectById(id);
         assertThat(row).isNotNull();
         assertThat(row.getSource()).isEqualTo(StorageService.SOURCE_BACKUP);
         assertThat(row.getName()).isEqualTo(fileName);
-        assertThat(row.getExt()).isEqualTo("sql");
+        assertThat(row.getExt()).isEqualTo("sql.gz");
         assertThat(row.getEngine()).isEqualTo(storageProperties.engine());
         assertThat(row.getUploader()).isEqualTo("admin");
 

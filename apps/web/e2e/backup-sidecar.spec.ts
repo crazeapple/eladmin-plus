@@ -31,7 +31,7 @@ test('备份 sidecar 全链：触发备份落册，下载与正规导出均为�
   expect(backupRes.ok()).toBeTruthy()
   const backup = (await backupRes.json()).data as { id: number; fileName: string; dbName: string }
   expect(backup.dbName).toBe('eladmin_plus')
-  expect(backup.fileName).toMatch(/^eladmin_plus_\d{14}\.sql$/)
+  expect(backup.fileName).toMatch(/^eladmin_plus_\d{14}\.sql\.gz$/)
 
   // 通用下载口：gzip 魔数 + 解压即 SQL（含建库与建表语句）
   const download = await request.get(`/api/storage/files/${backup.id}/download`, {

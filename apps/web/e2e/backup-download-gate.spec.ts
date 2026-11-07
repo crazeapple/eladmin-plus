@@ -27,7 +27,7 @@ test('备份下载门禁：无权限账号 403、root 200、普通文件登录�
   })
   expect(backupRes.ok()).toBeTruthy()
   const backup = (await backupRes.json()).data as { id: number; fileName: string }
-  expect(backup.fileName).toMatch(/^eladmin_plus_\d{14}\.sql$/)
+  expect(backup.fileName).toMatch(/^eladmin_plus_\d{14}\.sql\.gz$/)
 
   // 无权限登录账号：无角色用户（权限点空集）
   const username = `e2egate${Date.now().toString().slice(-8)}`

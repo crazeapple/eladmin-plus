@@ -80,9 +80,9 @@ public class StorageService {
 
     /** 备份落册（ops 备份链路内部入口）：流直存当前配置引擎，source 内部打标 backup，行名即备份原名 */
     public StorageFile storeBackup(String fileName, InputStream in, long size, String uploader) {
-        // 对象元数据须带 content type（S3 端非空校验），sql 脚本归 octet-stream
+        // 对象元数据须带 content type（S3 端非空校验），压缩备份归 octet-stream（下载原样落盘不自动解压）
         String mime = MediaType.APPLICATION_OCTET_STREAM_VALUE;
-        String key = LocalDate.now().format(MONTH_FORMAT) + "/" + UUID.randomUUID() + ".sql";
+        String key = LocalDate.now().format(MONTH_FORMAT) + "/" + UUID.randomUUID() + ".sql.gz";
         try {
             portOf(properties.engine()).store(key, in, size, mime);
         } catch (StorageUnavailableException e) {
@@ -92,7 +92,7 @@ public class StorageService {
         StorageFile row = new StorageFile();
         row.setName(truncate(fileName, NAME_MAX));
         row.setStorageKey(key);
-        row.setExt("sql");
+        row.setExt("sql.gz");
         row.setSize(size);
         row.setMime(mime);
         row.setEngine(properties.engine());

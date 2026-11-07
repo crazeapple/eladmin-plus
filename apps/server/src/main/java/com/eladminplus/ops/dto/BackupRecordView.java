@@ -7,8 +7,8 @@ import java.util.regex.Pattern;
 /** 备份记录视图（storage_file source=backup 的视图形态）：库名从原名前缀解析展示，仅展示用途。 */
 public record BackupRecordView(Long id, String fileName, String dbName, Long size, LocalDateTime createdAt) {
 
-    /** 原名形态 {库名}_{yyyyMMddHHmmss}.sql（库名可含下划线，锚定尾部时间戳拆分） */
-    private static final Pattern DB_NAME_PATTERN = Pattern.compile("^(.+)_(\\d{14})\\.sql$");
+    /** 原名形态 {库名}_{yyyyMMddHHmmss}.sql[.gz]（库名可含下划线，锚定尾部时间戳拆分；.gz 兼容段覆盖压缩落册改版前的旧记录） */
+    private static final Pattern DB_NAME_PATTERN = Pattern.compile("^(.+)_(\\d{14})\\.sql(?:\\.gz)?$");
 
     public static BackupRecordView from(StorageFile row) {
         return new BackupRecordView(row.getId(), row.getName(), dbNameOf(row.getName()), row.getSize(), row.getCreatedAt());

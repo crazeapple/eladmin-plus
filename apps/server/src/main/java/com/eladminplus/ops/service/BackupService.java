@@ -15,9 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 /**
- * 手动备份服务：容器内 mysqldump 的 stdout 流直写系统临时文件（先验 dump 退出码，失败不产生任何
+ * 手动备份服务：sidecar 转储端点的 gzip 流直写系统临时文件（先验 dump 响应码，失败不产生任何
  * 存储对象与行），过验后经存储域上传落当前配置引擎并打标 source=backup，storage_file 行在册
- * （原名 {库名}_{yyyyMMddHHmmss}.sql，大小取实际字节数）。存储键 uuid 唯一，无同名覆盖问题。
+ * （原名 {库名}_{yyyyMMddHHmmss}.sql.gz，大小取实际字节数）。存储键 uuid 唯一，无同名覆盖问题。
  */
 @Service
 public class BackupService {
@@ -41,7 +41,7 @@ public class BackupService {
         if (config == null) {
             throw new BusinessException(HttpStatus.NOT_FOUND, "error.system.not-found");
         }
-        String fileName = config.getName() + "_" + LocalDateTime.now().format(TIMESTAMP_FORMAT) + ".sql";
+        String fileName = config.getName() + "_" + LocalDateTime.now().format(TIMESTAMP_FORMAT) + ".sql.gz";
         Path staging = createStaging();
         try {
             mysqlDumpExecutor.dump(config.getName(), config.getUserName(), config.getPassword(), staging);
@@ -66,7 +66,7 @@ public class BackupService {
     /** 中转文件：dump 全量过验后才经存储域上传，dump 失败不产生半截对象 */
     private static Path createStaging() {
         try {
-            return Files.createTempFile("eladmin-backup-", ".sql");
+            return Files.createTempFile("eladmin-backup-", ".sql.gz");
         } catch (IOException e) {
             throw new BusinessException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "备份执行失败：临时文件创建失败（" + e.getMessage() + "）");
