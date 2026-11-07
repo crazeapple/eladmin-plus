@@ -3,7 +3,8 @@ import { expect, test } from '@playwright/test'
 import { gotoWithSession } from './helpers'
 
 // 演示菜单目录化（侧栏消费）：V16 种子生效——「演示」一级目录殿后（侧栏末位、缺省收起），
-// 两子菜单挂其下（缓存 / 不缓存），目录图标 svg:develop 渲染本地 svg 形态；
+// 两子菜单挂其下（缓存 / 不缓存），目录图标 V17 迁移后为 nv:code-slash-outline 渲染
+// ionicons 形态；
 // 页面路由与页内词条不动（/demo/cached 原路径可达，页内标题保持「演示·缓存」语境）。
 
 test('演示目录侧栏殿后收起态，展开两子项且目录图标渲染', async ({ page }) => {
@@ -21,8 +22,8 @@ test('演示目录侧栏殿后收起态，展开两子项且目录图标渲染',
   const items = demoNode.locator('.el-menu-item')
   await expect(items.nth(0)).not.toBeVisible()
 
-  // 目录图标：svg:develop 渲染本地 svg 形态
-  await expect(demoTitle.locator('.app-icon > svg')).toBeVisible()
+  // 目录图标：nv:code-slash-outline 渲染 ionicons 形态
+  await expect(demoTitle.locator('.app-icon--nv > svg')).toBeVisible()
 
   // 展开两子项：缓存（sort 1）在前、不缓存（sort 2）殿后
   await demoTitle.click()

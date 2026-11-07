@@ -2,10 +2,11 @@ import { expect, test, type Page } from '@playwright/test'
 
 import { resetAdminPreferences } from './helpers'
 
-// 风格开关（A4 / A5）：偏好抽屉「图标风格」控件写 iconSet 偏好（P-022 链路：
+// 风格开关（A1）：偏好抽屉「图标风格」控件写 iconSet 偏好（P-022 链路：
 // 本地即时 + PUT 持久），侧栏经统一分派组件响应式换边——在册同义项换 EP 形态、
-// 映射缺失项保持原库、切回 svg 恢复原渲染；刷新后 iconSet 账户值权威保持（A5）。
-// 侧栏解析纯库值无静态映射兜底（A6 静态断言在 T05 收口核验）。
+// 映射缺失项保持原库、切回恢复原渲染；刷新后 iconSet 账户值权威保持。
+// 「映射缺失」载体选支付宝工具：nv:wallet-outline 在注册集但无 EP 同义项
+// （ionicons 无品牌图形，映射表不收），与在册换边项同屏对照。
 
 /** 登录态进首页（storageState 静默恢复会话，落地 /home） */
 async function gotoHome(page: Page): Promise<void> {
@@ -40,7 +41,8 @@ test('切 EP 风格换边渲染，映射缺失保持原库；刷新保持；切�
   await gotoHome(page)
   const { sidebar, systemIcon, alipayIcon } = await sidebarLocators(page)
 
-  // 基线（缺省 svg 风格）：目录为本地 svg 形态，映射缺失项同为 svg 形态
+  // 基线（缺省 nv 风格）：目录与映射缺失项同为 ionicons 直包 svg 形态
+  await expect(systemIcon).toHaveClass(/app-icon--nv/)
   await expect(systemIcon.locator('> svg')).toBeVisible()
   await expect(alipayIcon.locator('> svg')).toBeVisible()
 
@@ -51,17 +53,17 @@ test('切 EP 风格换边渲染，映射缺失保持原库；刷新保持；切�
   await page.locator('[data-test="settings-icon-set"] .el-radio-button').nth(1).click()
   expect(await putPromise).toBe(200)
 
-  // 侧栏响应式换边：在册同义项（system → setting）换 el-icon 形态；alipay 缺映射保持 svg
+  // 侧栏响应式换边：在册同义项（cog-outline → setting）换 el-icon 形态；wallet-outline 缺映射保持 nv
   await expect(systemIcon.locator('.el-icon svg')).toBeVisible()
   await expect(alipayIcon.locator('> svg')).toBeVisible()
 
-  // 刷新保持（A5）：me 账户值 iconSet=ep 权威下发，侧栏仍 EP 形态
+  // 刷新保持：me 账户值 iconSet=ep 权威下发，侧栏仍 EP 形态
   await gotoHome(page)
   const reloaded = await sidebarLocators(page)
   await expect(reloaded.systemIcon.locator('.el-icon svg')).toBeVisible()
   await expect(reloaded.alipayIcon.locator('> svg')).toBeVisible()
 
-  // 切回 svg 风格：恢复原库渲染（PUT 落定收尾，账户值还原缺省）
+  // 切回 nv 风格：恢复原库渲染（PUT 落定收尾，账户值还原缺省）
   await page.locator('[data-test="settings-trigger"]').click()
   await expect(page.locator('[data-test="settings-drawer"]')).toBeVisible()
   const restorePromise = nextPreferencesPut(page)
