@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process'
-import type { Page } from '@playwright/test'
+import { constants as cryptoConstants, publicEncrypt } from 'node:crypto'
+import type { APIRequestContext, Page } from '@playwright/test'
 
 /** 栈内 Redis 容器名（deploy/compose.yaml 固定命名） */
 const REDIS_CONTAINER = 'eladmin-plus-prod-redis'
@@ -95,6 +96,60 @@ export async function gotoWithSession(page: Page, path: string): Promise<void> {
 
 /** 栈内 MySQL 容器名（deploy/compose.yaml 固定命名） */
 const MYSQL_CONTAINER = 'eladmin-plus-prod-mysql'
+
+/** API 全链登录态：access token（accessToken 只住应用内存，E2E 直调 API 须自取） */
+export interface ApiSession {
+  accessToken: string
+}
+
+/** bearer 请求头（API 直调端点的 Authorization 组装） */
+export function bearer(session: ApiSession): Record<string, string> {
+  return { Authorization: `Bearer ${session.accessToken}` }
+}
+
+/**
+ * API 全链登录（不经浏览器 UI）：出题 → Redis 读答案 → 校验签票 → 公钥 → RSA-OAEP 加密 → 登录。
+ * 加密参数与后端解密同参（OAEP SHA-256，MGF1 同 SHA-256）；登录失败（含锁定 / 限流语义）抛错由用例自决。
+ */
+export async function apiLogin(
+  request: APIRequestContext,
+  username: string,
+  password: string,
+): Promise<ApiSession> {
+  const captcha = (await (await request.get('/api/auth/captcha')).json()) as {
+    data: { token: string }
+  }
+  const answer = readPuzzleAnswer(captcha.data.token)
+  const check = (await (
+    await request.post('/api/auth/captcha/check', {
+      data: { token: captcha.data.token, moveDistance: answer },
+    })
+  ).json()) as { data: { ticket: string } }
+  const key = (await (await request.get('/api/auth/public-key')).json()) as {
+    data: { keyId: string; publicKey: string }
+  }
+  const cipher = publicEncrypt(
+    {
+      key: key.data.publicKey,
+      padding: cryptoConstants.RSA_PKCS1_OAEP_PADDING,
+      oaepHash: 'sha256',
+    },
+    Buffer.from(password, 'utf8'),
+  ).toString('base64')
+  const login = await request.post('/api/auth/login', {
+    data: {
+      username,
+      password: cipher,
+      keyId: key.data.keyId,
+      ticket: check.data.ticket,
+    },
+  })
+  if (!login.ok()) {
+    throw new Error(`API 登录失败：${username} 状态 ${login.status()}`)
+  }
+  const body = (await login.json()) as { data: { accessToken: string } }
+  return { accessToken: body.data.accessToken }
+}
 
 /**
  * 管理员账户偏好归零（preferences 置 NULL = 缺省）。
