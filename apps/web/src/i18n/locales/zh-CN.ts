@@ -111,7 +111,7 @@ export default {
     language: '语言',
     localeSystem: '跟随系统',
     iconSet: '图标风格',
-    iconSetSvg: 'SVG 图标',
+    iconSetSvg: 'Ionicons 图标',
     iconSetEp: 'Element 图标',
   },
   login: {

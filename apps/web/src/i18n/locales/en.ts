@@ -112,7 +112,7 @@ export default {
     language: 'Language',
     localeSystem: 'System',
     iconSet: 'Icon style',
-    iconSetSvg: 'SVG icons',
+    iconSetSvg: 'Ionicons icons',
     iconSetEp: 'Element icons',
   },
   login: {

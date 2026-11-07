@@ -54,7 +54,7 @@ class MenuSeedTest {
                 .first()
                 .satisfies(menu -> {
                     assertThat(menu.getI18nKey()).isEqualTo("routes.systemMenus");
-                    assertThat(menu.getIcon()).isEqualTo("svg:menu");
+                    assertThat(menu.getIcon()).isEqualTo("nv:menu-outline");
                     assertThat(menu.getSort()).isEqualTo(5);
                 });
         assertThat(menus)
@@ -62,7 +62,7 @@ class MenuSeedTest {
                 .first()
                 .satisfies(menu -> {
                     assertThat(menu.getI18nKey()).isEqualTo("routes.systemDicts");
-                    assertThat(menu.getIcon()).isEqualTo("svg:dictionary");
+                    assertThat(menu.getIcon()).isEqualTo("nv:library-outline");
                     assertThat(menu.getSort()).isEqualTo(6);
                 });
         assertThat(menus)
@@ -70,7 +70,7 @@ class MenuSeedTest {
                 .first()
                 .satisfies(menu -> {
                     assertThat(menu.getI18nKey()).isEqualTo("routes.systemTasks");
-                    assertThat(menu.getIcon()).isEqualTo("svg:timing");
+                    assertThat(menu.getIcon()).isEqualTo("nv:time-outline");
                     assertThat(menu.getSort()).isEqualTo(7);
                 });
     }
@@ -82,7 +82,7 @@ class MenuSeedTest {
                 .filter(menu -> "routes.monitor".equals(menu.getI18nKey()))
                 .filter(menu -> menu.getType() == Menu.TYPE_DIRECTORY)
                 .findFirst().orElseThrow();
-        assertThat(directory.getIcon()).isEqualTo("svg:monitor");
+        assertThat(directory.getIcon()).isEqualTo("nv:speedometer-outline");
         assertThat(directory.getSort()).isEqualTo(5);
 
         // 四子菜单挂监控目录之下：组件路径对齐前端视图、icon 库值入库、sort 1~4
@@ -92,10 +92,10 @@ class MenuSeedTest {
                 .extracting(Menu::getComponentPathKey, Menu::getI18nKey,
                         Menu::getIcon, Menu::getSort)
                 .containsExactlyInAnyOrder(
-                        tuple("monitor/operation-logs", "routes.monitorOperationLogs", "svg:log", 1),
-                        tuple("monitor/exception-logs", "routes.monitorExceptionLogs", "svg:error", 2),
-                        tuple("monitor/online-users", "routes.monitorOnlineUsers", "svg:peoples", 3),
-                        tuple("monitor/server-info", "routes.monitorServerInfo", "svg:server", 4));
+                        tuple("monitor/operation-logs", "routes.monitorOperationLogs", "nv:document-text-outline", 1),
+                        tuple("monitor/exception-logs", "routes.monitorExceptionLogs", "nv:warning-outline", 2),
+                        tuple("monitor/online-users", "routes.monitorOnlineUsers", "nv:people-circle-outline", 3),
+                        tuple("monitor/server-info", "routes.monitorServerInfo", "nv:server-outline", 4));
     }
 
     @Test
@@ -105,7 +105,7 @@ class MenuSeedTest {
                 .filter(menu -> "routes.tools".equals(menu.getI18nKey()))
                 .filter(menu -> menu.getType() == Menu.TYPE_DIRECTORY)
                 .findFirst().orElseThrow();
-        assertThat(directory.getIcon()).isEqualTo("svg:tools");
+        assertThat(directory.getIcon()).isEqualTo("nv:construct-outline");
         assertThat(directory.getSort()).isEqualTo(6);
 
         // 三子菜单挂工具目录之下：组件路径对齐前端视图、icon 库值入库、sort 1~3
@@ -115,9 +115,9 @@ class MenuSeedTest {
                 .extracting(Menu::getComponentPathKey, Menu::getI18nKey,
                         Menu::getIcon, Menu::getSort)
                 .containsExactlyInAnyOrder(
-                        tuple("tools/storage", "routes.toolsStorage", "svg:qiniu", 1),
-                        tuple("tools/email", "routes.toolsEmail", "svg:email", 2),
-                        tuple("tools/ali-pay", "routes.toolsAliPay", "svg:alipay", 3));
+                        tuple("tools/storage", "routes.toolsStorage", "nv:cloud-outline", 1),
+                        tuple("tools/email", "routes.toolsEmail", "nv:mail-outline", 2),
+                        tuple("tools/ali-pay", "routes.toolsAliPay", "nv:wallet-outline", 3));
     }
 
     @Test
@@ -138,7 +138,7 @@ class MenuSeedTest {
                 .filter(menu -> "routes.ops".equals(menu.getI18nKey()))
                 .filter(menu -> menu.getType() == Menu.TYPE_DIRECTORY)
                 .findFirst().orElseThrow();
-        assertThat(directory.getIcon()).isEqualTo("svg:deploy");
+        assertThat(directory.getIcon()).isEqualTo("nv:rocket-outline");
         assertThat(directory.getSort()).isEqualTo(7);
 
         // 单子菜单挂运维目录之下：一页两区块（连接配置 / 备份记录）对应单菜单
@@ -147,7 +147,7 @@ class MenuSeedTest {
                         && directory.getId().equals(menu.getParentId()))
                 .extracting(Menu::getComponentPathKey, Menu::getI18nKey,
                         Menu::getIcon, Menu::getSort)
-                .containsExactlyInAnyOrder(tuple("database", "routes.database", "svg:database", 1));
+                .containsExactlyInAnyOrder(tuple("database", "routes.database", "nv:albums-outline", 1));
     }
 
     @Test

@@ -138,10 +138,10 @@ function iconMenuTree(): MenuNode[] {
       children: [],
     }) as MenuNode
   return [
-    page(1, 'routes.systemUsers', 'system/users', 'svg:menu'),
+    page(1, 'routes.systemUsers', 'system/users', 'nv:menu-outline'),
     page(2, 'routes.systemRoles', 'system/roles', 'user'),
     page(3, 'routes.systemTasks', 'system/tasks', 'star'),
-    page(4, 'routes.systemDepts', 'system/depts', 'svg:no-such-icon'),
+    page(4, 'routes.systemDepts', 'system/depts', 'nv:no-such-icon'),
     page(5, 'routes.systemMenus', 'system/menus', null),
     page(6, 'routes.systemDicts', 'system/dicts', 'ep:refresh-left'),
   ]
@@ -153,7 +153,7 @@ function itemHasSvg(title: string): boolean {
 }
 
 describe('侧栏图标库值优先', () => {
-  it('svg: 前缀在册名直渲染库值图标', async () => {
+  it('nv: 前缀在册名直渲染库值图标（ionicons 形态）', async () => {
     await renderApp('/', iconMenuTree())
     await waitFor(() => expect(screen.getByText('用户管理')).toBeTruthy())
     expect(itemHasSvg('用户管理')).toBe(true)
@@ -166,12 +166,12 @@ describe('侧栏图标库值优先', () => {
     expect(item.querySelector('.app-icon--ep .el-icon svg')).toBeTruthy()
   })
 
-  it('无前缀值与 svg: 未知名不渲染图标（静态映射兜底已随 V14 补值退役）', async () => {
+  it('无前缀值与 nv: 未知名不渲染图标（缺省占位无 svg）', async () => {
     await renderApp('/', iconMenuTree())
     await waitFor(() => expect(screen.getByText('角色管理')).toBeTruthy())
     // 无前缀裸名值无解析通路 → 不渲染
     expect(itemHasSvg('角色管理')).toBe(false)
-    // svg: 未知名不在资产册 → 不渲染
+    // nv: 未知名不在注册集 → 缺省占位，无 svg 不算渲染
     expect(itemHasSvg('部门管理')).toBe(false)
   })
 

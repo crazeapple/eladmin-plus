@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import { PersonOutline } from '@vicons/ionicons5'
 import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
 import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
-import AppIcon from '@/components/AppIcon.vue'
 import { useChangePassword, useClearAvatar, useMe, useUpdateProfile } from '@/api/profile'
 import { broadcastLogout } from '@/api/auth-sync'
 import { GENDER_OPTIONS } from '@/constants/gender'
@@ -141,7 +141,7 @@ async function onChangePassword() {
                 class="profile__avatar-fallback"
                 data-test="account-avatar-default"
               >
-                <app-icon name="user" />
+                <person-outline />
               </span>
             </el-avatar>
             <div class="profile__avatar-actions">
@@ -290,6 +290,12 @@ async function onChangePassword() {
   display: inline-flex;
   font-size: 40px;
   color: var(--el-text-color-secondary);
+
+  /* 缺省头像为具名 ionicons 组件（裸 svg 无宽高属性），按 em 盒给尺寸 */
+  svg {
+    width: 1em;
+    height: 1em;
+  }
 }
 
 .profile__avatar-actions {

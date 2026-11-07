@@ -31,7 +31,7 @@ async function openPicker(modelValue: string) {
 }
 
 describe('图标选择器双 tab', () => {
-  it('nv tab 为缺省落点：无值与存量 svg: 值打开均落 nv，格渲染注册集 25 名', async () => {
+  it('nv tab 为缺省落点：无值与历史裸名值打开均落 nv，格渲染注册集 25 名', async () => {
     const empty = await openPicker('')
     // 弹层 append-to-body，tab 激活态从 document 取
     expect(document.querySelector('#tab-nv')?.classList.contains('is-active')).toBe(true)
@@ -41,7 +41,7 @@ describe('图标选择器双 tab', () => {
     ).toBe(Object.keys(NV_ICONS).length)
     empty.unmount()
 
-    await openPicker('svg:develop')
+    await openPicker('develop')
     expect(document.querySelector('#tab-nv')?.classList.contains('is-active')).toBe(true)
   })
 

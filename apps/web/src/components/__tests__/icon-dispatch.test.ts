@@ -34,13 +34,6 @@ describe('MenuIcon 前缀分派', () => {
     expect(elIcon?.querySelector('svg')).toBeTruthy()
   })
 
-  it('svg: 在册名渲染本地 svg 形态（存量待迁移，直渲）', () => {
-    const { container } = renderIcon('svg:settings')
-    expect(container.querySelector('.app-icon > svg')).toBeTruthy()
-    expect(container.querySelector('.app-icon--nv')).toBeNull()
-    expect(container.querySelector('.el-icon')).toBeNull()
-  })
-
   it('双色继承绑 currentColor：nv 描边与 ep 面填充均随文本色（暗色自适应）', () => {
     const nv = renderIcon('nv:home-outline')
     // ionicons 线性描边落在每个 path 上（fill none + stroke currentColor）
@@ -70,12 +63,6 @@ describe('MenuIcon 前缀分派', () => {
 
   it('ep: 未知名渲染缺省占位不崩', () => {
     const { container } = renderIcon('ep:no-such-icon')
-    expect(container.querySelector('.app-icon--missing')?.textContent).toBe('?')
-    expect(container.querySelector('svg')).toBeNull()
-  })
-
-  it('svg: 未知名渲染缺省占位不崩', () => {
-    const { container } = renderIcon('svg:no-such-icon')
     expect(container.querySelector('.app-icon--missing')?.textContent).toBe('?')
     expect(container.querySelector('svg')).toBeNull()
   })

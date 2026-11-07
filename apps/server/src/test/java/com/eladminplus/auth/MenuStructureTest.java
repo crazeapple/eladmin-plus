@@ -31,7 +31,7 @@ class MenuStructureTest {
                 .findFirst().orElseThrow();
         assertThat(directory.getParentId()).isNull();
         assertThat(directory.getComponentPathKey()).isNull();
-        assertThat(directory.getIcon()).isEqualTo("svg:develop");
+        assertThat(directory.getIcon()).isEqualTo("nv:code-slash-outline");
         // 殿后：sort 等于全部一级节点最大值（无更大者）
         Integer maxTopSort = menus.stream()
                 .filter(menu -> menu.getParentId() == null)

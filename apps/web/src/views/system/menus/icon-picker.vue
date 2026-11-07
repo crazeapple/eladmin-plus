@@ -25,7 +25,7 @@ const keyword = ref('')
 /** 双 tab：nv ionicons 集 / EP 集；落库值形态分别为 nv:name / ep:name */
 const activeTab = ref<'nv' | 'ep'>('nv')
 
-// 打开时按当前值形态落 tab：ep: 高亮 EP tab，nv: 与存量 svg:（待迁移）落 nv
+// 打开时按当前值形态落 tab：ep: 高亮 EP tab，nv: 值与无前缀形态落 nv
 function open() {
   activeTab.value = props.modelValue.startsWith('ep:') ? 'ep' : 'nv'
   visible.value = true
@@ -43,7 +43,7 @@ function filterBy(names: string[]): string[] {
 const filteredNv = computed(() => filterBy(NV_PICKER_ICONS))
 const filteredEp = computed(() => filterBy(EP_PICKER_ICONS))
 
-/** 当前选中格：icon 值带前缀时按形态取名段高亮（无前缀与存量 svg: 形态视为未选） */
+/** 当前选中格：icon 值带前缀时按形态取名段高亮（无前缀形态视为未选） */
 const selected = computed(() => {
   if (props.modelValue.startsWith('nv:')) {
     return { tab: 'nv', name: props.modelValue.slice('nv:'.length) }

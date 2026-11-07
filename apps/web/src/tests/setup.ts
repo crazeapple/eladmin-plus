@@ -62,7 +62,7 @@ beforeEach(() => {
                 permission: null,
                 i18nKey: 'routes.demo',
                 componentPathKey: null,
-                icon: 'svg:develop',
+                icon: 'nv:code-slash-outline',
                 noCache: false,
                 sort: 8,
                 children: [
