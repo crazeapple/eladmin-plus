@@ -28,6 +28,9 @@ spring:
 
 server:
   port: 8080
+  # 反代信任口径：容器 RemoteIpValve 仅对可信内网段（nginx 所在 compose 网络）解析转发头，
+  # 直连请求自带伪造 X-Forwarded-For 不生效，ClientIp 取到的即真实对端地址
+  forward-headers-strategy: native
 
 monitor:
   log:
@@ -49,6 +52,13 @@ auth:
     cookie-same-site: Lax
     # 生产 TLS 开启即开（Secure 标志环境变量可配）
     cookie-secure: false
+  guard:
+    # 登录防护：同账号连续失败达阈值即锁定（锁定期内正确密码同样拒绝），失败计数窗口与锁定时长一致
+    acct-max-failures: 5
+    acct-lock-ttl: 15m
+    # IP 维度滑动窗口限流：覆盖登录与验证码端点，超限 429（内网部署形态，不留白名单）
+    ip-window: 1m
+    ip-max-requests: 60
 
 storage:
   # 存储引擎：local 本地磁盘 / rustfs 对象存储（默认 rustfs，指向 compose 实例）；切换重启生效，不是回退。

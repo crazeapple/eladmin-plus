@@ -1,14 +1,14 @@
 package com.eladminplus.config;
 
+import com.eladminplus.auth.guard.IpRateLimitFilter;
+import com.eladminplus.auth.guard.LoginGuardService;
 import com.eladminplus.auth.session.TokenService;
-import com.eladminplus.common.R;
+import com.eladminplus.common.web.ErrorResponseWriter;
 import jakarta.servlet.http.HttpServletResponse;
-import java.nio.charset.StandardCharsets;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -31,11 +31,9 @@ import tools.jackson.databind.ObjectMapper;
 public class SecurityConfig {
 
     private final MessageSource messageSource;
-    private final ObjectMapper objectMapper;
 
-    public SecurityConfig(MessageSource messageSource, ObjectMapper objectMapper) {
+    public SecurityConfig(MessageSource messageSource) {
         this.messageSource = messageSource;
-        this.objectMapper = objectMapper;
     }
 
     @Bean
@@ -44,7 +42,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, TokenService tokenService) throws Exception {
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
+            TokenService tokenService,
+            LoginGuardService loginGuardService,
+            ObjectMapper objectMapper)
+            throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
@@ -66,24 +69,17 @@ public class SecurityConfig {
                         .anyRequest()
                         .authenticated())
                 .exceptionHandling(handling -> handling
-                        .authenticationEntryPoint(
-                                (request, response, exception) -> writeError(response, HttpStatus.UNAUTHORIZED,
-                                        "error.auth.unauthorized"))
-                        .accessDeniedHandler(
-                                (request, response, exception) -> writeError(response, HttpStatus.FORBIDDEN,
-                                        "error.auth.forbidden")))
-                .addFilterBefore(new BearerTokenFilter(tokenService), UsernamePasswordAuthenticationFilter.class);
+                        .authenticationEntryPoint((request, response, exception) -> ErrorResponseWriter.write(
+                                response, HttpStatus.UNAUTHORIZED, "error.auth.unauthorized", messageSource,
+                                objectMapper))
+                        .accessDeniedHandler((request, response, exception) -> ErrorResponseWriter.write(
+                                response, HttpStatus.FORBIDDEN, "error.auth.forbidden", messageSource,
+                                objectMapper)))
+                // 先注册认证过滤器定锚，限流再插其前：无凭据的刷量请求同样计窗封口
+                .addFilterBefore(new BearerTokenFilter(tokenService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(
+                        new IpRateLimitFilter(loginGuardService, messageSource, objectMapper),
+                        BearerTokenFilter.class);
         return http.build();
-    }
-
-    /** 401 / 403 统一同形结构输出（消息经 MessageSource 本地化） */
-    private void writeError(HttpServletResponse response, HttpStatus status, String messageKey)
-            throws java.io.IOException {
-        String message = messageSource.getMessage(
-                messageKey, null, messageKey, org.springframework.context.i18n.LocaleContextHolder.getLocale());
-        response.setStatus(status.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        response.getWriter().write(objectMapper.writeValueAsString(R.error(status, message)));
     }
 }

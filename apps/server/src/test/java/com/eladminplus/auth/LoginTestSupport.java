@@ -33,10 +33,11 @@ public final class LoginTestSupport {
         return fullLogin(mockMvc, redis, username, password, null, null);
     }
 
-    /** 带转发头与 UA 的完整登录链（在线用户域断言 IP / UA 补落用；传 null 即不发该头）。 */
+    /** 带对端地址与 UA 的完整登录链（在线用户域断言 IP / UA 补落用；传 null 即不设）。
+     * MockMvc 不过 RemoteIpValve，XFF 收口后头不再被读取：对端地址直拟反代解析结果。 */
     public static MvcResult fullLogin(
             MockMvc mockMvc, StringRedisTemplate redis, String username, String password,
-            String forwardedFor, String userAgent) throws Exception {
+            String remoteAddr, String userAgent) throws Exception {
         MvcResult captchaResult = mockMvc.perform(get("/auth/captcha")).andExpect(status().isOk()).andReturn();
         String captchaBody = captchaResult.getResponse().getContentAsString();
         String token = extractJsonField(captchaBody, "token");
@@ -59,8 +60,11 @@ public final class LoginTestSupport {
         String body = "{\"username\":\"" + username + "\",\"password\":\"" + cipher + "\",\"keyId\":\"" + keyId
                 + "\",\"ticket\":\"" + ticket + "\"}";
         var request = post("/auth/login").contentType(MediaType.APPLICATION_JSON).content(body);
-        if (forwardedFor != null) {
-            request = request.header("X-Forwarded-For", forwardedFor);
+        if (remoteAddr != null) {
+            request = request.with(r -> {
+                r.setRemoteAddr(remoteAddr);
+                return r;
+            });
         }
         if (userAgent != null) {
             request = request.header("User-Agent", userAgent);

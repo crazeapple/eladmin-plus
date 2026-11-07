@@ -69,7 +69,11 @@ class OperationLogTest {
     private void postStub(String path, String token, Map<String, Object> body) throws Exception {
         mockMvc.perform(post(path)
                         .header("Authorization", "Bearer " + token)
-                        .header("X-Forwarded-For", "203.0.113.9")
+                        // MockMvc 不过 RemoteIpValve：对端地址直拟反代解析结果（XFF 收口后头不再被读取）
+                        .with(request -> {
+                            request.setRemoteAddr("203.0.113.9");
+                            return request;
+                        })
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isOk())

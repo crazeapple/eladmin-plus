@@ -107,15 +107,21 @@ export function bearer(session: ApiSession): Record<string, string> {
   return { Authorization: `Bearer ${session.accessToken}` }
 }
 
+/** API 登录尝试的原始响应：状态与统一 R 结构（锁定 / 限流 / 密码错语义由用例自决断言） */
+export interface LoginAttemptResult {
+  status: number
+  body: { code: number; message: string; data: { accessToken?: string } | null }
+}
+
 /**
- * API 全链登录（不经浏览器 UI）：出题 → Redis 读答案 → 校验签票 → 公钥 → RSA-OAEP 加密 → 登录。
- * 加密参数与后端解密同参（OAEP SHA-256，MGF1 同 SHA-256）；登录失败（含锁定 / 限流语义）抛错由用例自决。
+ * API 全链登录尝试（不经浏览器 UI）：出题 → Redis 读答案 → 校验签票 → 公钥 → RSA-OAEP 加密 → 登录。
+ * 加密参数与后端解密同参（OAEP SHA-256，MGF1 同 SHA-256）；返回登录端点原始响应。
  */
-export async function apiLogin(
+export async function apiLoginAttempt(
   request: APIRequestContext,
   username: string,
   password: string,
-): Promise<ApiSession> {
+): Promise<LoginAttemptResult> {
   const captcha = (await (await request.get('/api/auth/captcha')).json()) as {
     data: { token: string }
   }
@@ -144,11 +150,21 @@ export async function apiLogin(
       ticket: check.data.ticket,
     },
   })
-  if (!login.ok()) {
-    throw new Error(`API 登录失败：${username} 状态 ${login.status()}`)
+  const body = (await login.json()) as LoginAttemptResult['body']
+  return { status: login.status(), body }
+}
+
+/** API 全链登录：成功返回会话态，失败（密码错 / 锁定 / 限流）抛错 */
+export async function apiLogin(
+  request: APIRequestContext,
+  username: string,
+  password: string,
+): Promise<ApiSession> {
+  const result = await apiLoginAttempt(request, username, password)
+  if (result.status !== 200 || !result.body.data?.accessToken) {
+    throw new Error(`API 登录失败：${username} 状态 ${result.status}`)
   }
-  const body = (await login.json()) as { data: { accessToken: string } }
-  return { accessToken: body.data.accessToken }
+  return { accessToken: result.body.data.accessToken }
 }
 
 /**

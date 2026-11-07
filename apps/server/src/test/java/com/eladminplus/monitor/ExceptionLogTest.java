@@ -84,7 +84,11 @@ class ExceptionLogTest {
         String marker = UUID.randomUUID().toString();
         mockMvc.perform(get("/test/log/boom").param("marker", marker)
                         .header("Authorization", "Bearer " + accessToken())
-                        .header("X-Forwarded-For", "203.0.113.7"))
+                        // MockMvc 不过 RemoteIpValve：对端地址直拟反代解析结果（XFF 收口后头不再被读取）
+                        .with(request -> {
+                            request.setRemoteAddr("203.0.113.7");
+                            return request;
+                        }))
                 .andExpect(status().isInternalServerError());
 
         ExceptionLog row = awaitRow("冒烟-" + marker);
