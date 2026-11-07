@@ -4,7 +4,7 @@ import sass from 'sass'
 import loginVue from '../index.vue?raw'
 
 // 登录页布局契约单测：与 tokens.test.ts 同语言——真编译 SFC 的 scoped 样式块，
-// 断言分栏基数、表单卡尺寸间距、层次 token 在册与右区图案底（亮暗双态）。
+// 断言整页背景图、单栏居中形态、表单卡尺寸间距、氛围遮罩与 token 化标语（亮暗双态收敛在 tokens 层）。
 const styleBlock = loginVue.match(/<style[^>]*>([\s\S]*?)<\/style>/)?.[1] ?? ''
 // 注释剥离后再解析：注释内的「50:50」形态会被误读成声明、块前注释会挡住 at 规则头识别
 const css = sass.compileString(styleBlock).css.replace(/\/\*[\s\S]*?\*\//g, '')
@@ -37,7 +37,9 @@ function rulesOf(source: string, prefix = ''): Map<string, Record<string, string
         declarations[name!] = value!.trim()
       }
       for (const part of selector.split(',')) {
-        rules.set(`${prefix}${part.trim()}`, declarations)
+        const name = `${prefix}${part.trim()}`
+        // 同名选择器层叠合并（后者覆盖同键）——贴近浏览器级联语义，组合选择器分块声明才可读全
+        rules.set(name, { ...(rules.get(name) ?? {}), ...declarations })
       }
     }
     cursor = close + 1
@@ -55,11 +57,10 @@ function pxOf(value: string | undefined): number {
 }
 
 describe('登录页布局契约', () => {
-  it('背景图铺满整页，品牌标识入卡、主区垂直水平居中', () => {
+  it('整页容器居中布局，品牌标识入卡、主区垂直水平居中', () => {
     const page = rules.get('.login')
     expect(page?.display).toBe('flex')
-    expect(page?.['background-image']).toContain('login-fabric')
-    expect(page?.['background-size']).toBe('cover')
+    expect(page?.['background-color']).toContain('var(--ea-login-base')
     const mark = rules.get('.login__mark')
     expect(mark?.color).toContain('var(--el-text-color-primary)')
     expect(mark?.['text-align']).toBe('center')
@@ -86,19 +87,38 @@ describe('登录页布局契约', () => {
     expect(card?.['box-shadow']).toContain('var(--ea-shadow-3')
   })
 
-  it('粒子背景图铺满整页，左右区全透明叠加', () => {
-    // 背景图在整页容器（cover 居中），左右区透明、文字靠图面暗区与文字阴影保可读
+  it('粒子背景图经伪元素铺满整页，左右区全透明叠加', () => {
+    // 背景图在双伪元素上（cover 居中），容器持底色兜底，左右区透明、文字靠图面明区与字色 token 保可读
     const page = rules.get('.login')
-    expect(page?.['background-image']).toContain('login-fabric')
-    expect(page?.['background-size']).toBe('cover')
-    expect(page?.['background-position']).toBe('center')
+    expect(page?.['background-color']).toContain('var(--ea-login-base')
+    for (const layer of ['.login::before', '.login::after']) {
+      expect(rules.get(layer)?.['background-size']).toBe('cover')
+      expect(rules.get(layer)?.['background-position']).toBe('center')
+    }
     expect(rules.get('.login__brand')?.['background']).toBeUndefined()
     expect(rules.get('.login__panel')?.['background-image']).toBeUndefined()
-    // 文字阴影在册（可读性增强且不遮背景图）
-    expect(rules.get('.login__slogan')?.['text-shadow']).toContain('rgb')
     // 左区装饰退役（背景图即视觉主体）
     expect(rules.get('.login__decor')).toBeUndefined()
     // 卡浮于背景图之上
     expect(rules.get('.login__card')?.['z-index']).toBe('1')
+  })
+
+  it('背景图亮暗双版在册：swap token 交叉切换，内容浮于图版上', () => {
+    // 亮版补透明度、暗版直取 swap——两态同一对素材，切换即交叉淡化
+    const lightLayer = rules.get('.login::before')
+    const darkLayer = rules.get('.login::after')
+    expect(lightLayer?.['background-image']).toContain('login-fabric-light')
+    expect(darkLayer?.['background-image']).toContain('login-fabric.jpg')
+    expect(lightLayer?.opacity).toContain('calc(1 - var(--ea-login-photo-swap')
+    expect(darkLayer?.opacity).toContain('var(--ea-login-photo-swap')
+    // 标语字色与阴影走 token（亮态深字无阴影、暗态白字带阴影，分支在 tokens 层）
+    const slogan = rules.get('.login__slogan')
+    expect(slogan?.color).toContain('var(--ea-login-hero-fg')
+    expect(slogan?.['text-shadow']).toContain('var(--ea-login-hero-shadow')
+    expect(rules.get('.login__slogan-sub')?.color).toContain('var(--ea-login-hero-sub-fg')
+    // 主区浮于背景图版之上
+    expect(rules.get('.login__main')?.['z-index']).toBe('1')
+    // 组件样式零暗色分支（亮暗双态收敛在 tokens 层）
+    expect(css).not.toContain('html.dark')
   })
 })

@@ -80,6 +80,25 @@ describe('品牌 token 值表', () => {
     expect(dark['--ea-sidebar-bg']).not.toBe(light['--ea-sidebar-bg'])
     expect(dark['--ea-page-bg']).not.toBe(light['--ea-page-bg'])
   })
+
+  it('登录页氛围 token 在册且亮暗双态分离（图版切换与标语字色）', () => {
+    for (const name of [
+      '--ea-login-photo-swap',
+      '--ea-login-base',
+      '--ea-login-hero-fg',
+      '--ea-login-hero-sub-fg',
+      '--ea-login-hero-shadow',
+    ]) {
+      expect(light[name], `亮色 ${name} 应在册`).toBeTruthy()
+      expect(dark[name], `暗色 ${name} 应在册`).toBeTruthy()
+    }
+    // 整页基调随主题可感切换：亮版 swap 0、暗版 swap 1，底色两态分离
+    expect(light['--ea-login-photo-swap']).toBe('0')
+    expect(dark['--ea-login-photo-swap']).toBe('1')
+    expect(dark['--ea-login-base']).not.toBe(light['--ea-login-base'])
+    // 标语字色亮暗翻转（亮态深字配浅底、暗态白字配暗图）
+    expect(dark['--ea-login-hero-fg']).not.toBe(light['--ea-login-hero-fg'])
+  })
 })
 
 describe('EP 覆盖层映射', () => {

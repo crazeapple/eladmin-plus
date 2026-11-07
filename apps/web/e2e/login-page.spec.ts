@@ -1,19 +1,37 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 import { nextCaptchaChallenge } from './helpers'
 
-// 登录页整页背景图 + 单栏居中形态（匿名组）：粒子面料图铺满整页、品牌标识左上、
-// 标语与登录卡居中，滑块区块内联在登录卡内与输入框对齐；窄屏卡满幅不破版。
+// 登录页整页背景图 + 单栏居中形态（匿名组）：粒子面料图铺满整页、品牌标识入卡、
+// 标语与登录卡居中，滑块区块内联在登录卡内与输入框对齐；整页基调随系统深浅切换；
+// 窄屏卡满幅不破版。
+
+/** login 组件样式是路由懒加载 chunk：断言计算样式前先等背景图规则就绪 */
+function waitForLoginCss(page: Page) {
+  return expect
+    .poll(() =>
+      page.evaluate(() => {
+        const el = document.querySelector('.login')
+        return !!el && getComputedStyle(el, '::before').backgroundImage.includes('login-fabric')
+      }),
+    )
+    .toBe(true)
+}
 
 test.describe('宽屏单栏居中', () => {
   test.use({ viewport: { width: 1440, height: 900 } })
 
   test('整页背景图在册，品牌标识在卡内顶部', async ({ page }) => {
     await page.goto('/login')
-    // 整页容器挂粒子面料背景图（cover 居中）
-    const pageBg = await page
-      .locator('.login')
-      .evaluate((el) => getComputedStyle(el).backgroundImage)
-    expect(pageBg).toContain('login-fabric')
+    await waitForLoginCss(page)
+    // 粒子面料背景图铺在双伪元素上（cover 居中），当前主题态的那版可见
+    const rawLayers = await page.evaluate(() =>
+      ['::before', '::after'].map((pseudo) => {
+        const s = getComputedStyle(document.querySelector('.login')!, pseudo)
+        return { img: s.backgroundImage.slice(0, 60), op: s.opacity }
+      }),
+    )
+    const layerOn = rawLayers.some((l) => l.img.includes('login-fabric') && Number(l.op) > 0)
+    expect(layerOn, `layers=${JSON.stringify(rawLayers)}`).toBe(true)
     // 品牌标识在登录卡内（页面无独立品牌角标）
     const mark = page.locator('.login__card [data-test="login-brand"]')
     await expect(mark).toBeVisible()
@@ -35,6 +53,21 @@ test.describe('宽屏单栏居中', () => {
     await expect(page.locator('[data-test="login-username"]')).toBeVisible()
     await expect(page.locator('[data-test="login-password"]')).toBeVisible()
     await expect(page.locator('[data-test="login-submit"]')).toBeVisible()
+  })
+
+  test('未登录整页基调随系统深浅实时切换（背景图版与标语字色双态）', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' })
+    await page.goto('/login')
+    await waitForLoginCss(page)
+    const state = () =>
+      page.evaluate(() => ({
+        lightLayer: getComputedStyle(document.querySelector('.login')!, '::before').opacity,
+        slogan: getComputedStyle(document.querySelector('.login__slogan')!).color,
+      }))
+    const light = await state()
+    // 不重载页面：模拟系统切换，主题监听实时响应
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await expect.poll(state).not.toEqual(light)
   })
 
   test('点登录后滑块区块内联在登录卡内且与输入框左右缘对齐，无视口弹层', async ({ page }) => {

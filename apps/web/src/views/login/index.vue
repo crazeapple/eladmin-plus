@@ -10,7 +10,7 @@ import SliderCaptcha from '@/components/captcha/SliderCaptcha.vue'
 
 /**
  * 登录页（布局壳之外，偏好主题与语言天然生效）：
- * 左侧品牌视觉区（渐变底 + 几何装饰 + 产品文案），右侧表单卡，窄屏折叠单栏；
+ * 整页粒子面料背景图亮暗双版（同一素材明暗两版，随主题交叉切换），标语 + 表单卡单栏居中；
  * 公钥页面加载时取；填表不触发验证码，点「登录」卡内展开滑块区块，过验即登录；
  * 密码 RSA 加密提交 → 会话入内存 → 跳 redirect；
  * 公钥过期（后端 400 分语义）自动重取公钥重试一次；redirect 只认站内路径。
@@ -142,12 +142,33 @@ async function submitWithCurrentKey(ticket: string, retried = false) {
 
 <style scoped lang="scss">
 .login {
+  position: relative;
   display: flex;
   min-height: 100vh;
-  /* 粒子面料背景图铺满整页：左右区全透明叠加，文字靠图面暗区与文字阴影保可读 */
-  background-image: url('../../assets/login-fabric.jpg');
+  /* 粒子面料背景图铺满整页：左右区全透明叠加，文字靠图面明区与字色 token 保可读 */
+  background-color: var(--ea-login-base, #0d0f14);
+}
+
+/* 背景图亮暗双版（同一素材的明暗两版，构图质感同构）：双伪元素铺图，
+   swap token 切换暗版透明度、亮版取其补，主题切换带交叉淡化 */
+.login::before,
+.login::after {
+  content: '';
+  position: absolute;
+  inset: 0;
   background-size: cover;
   background-position: center;
+  pointer-events: none;
+}
+
+.login::before {
+  background-image: url('../../assets/login-fabric-light.jpg');
+  opacity: calc(1 - var(--ea-login-photo-swap, 0));
+}
+
+.login::after {
+  background-image: url('../../assets/login-fabric.jpg');
+  opacity: var(--ea-login-photo-swap, 0);
 }
 
 .login__mark {
@@ -160,6 +181,9 @@ async function submitWithCurrentKey(ticket: string, retried = false) {
 }
 
 .login__main {
+  /* 内容浮于氛围遮罩之上 */
+  position: relative;
+  z-index: 1;
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -174,18 +198,18 @@ async function submitWithCurrentKey(ticket: string, retried = false) {
   font-size: 30px;
   font-weight: 700;
   line-height: 1.35;
-  color: #fff;
+  color: var(--ea-login-hero-fg, #fff);
   text-align: center;
-  text-shadow: 0 2px 16px rgb(0 0 0 / 50%);
+  text-shadow: var(--ea-login-hero-shadow, 0 2px 16px rgb(0 0 0 / 50%));
 }
 
 .login__slogan-sub {
   margin: -12px 0 0;
   font-size: 14px;
   line-height: 1.8;
-  color: rgb(255 255 255 / 78%);
+  color: var(--ea-login-hero-sub-fg, rgb(255 255 255 / 78%));
   text-align: center;
-  text-shadow: 0 1px 10px rgb(0 0 0 / 45%);
+  text-shadow: var(--ea-login-hero-shadow, 0 1px 10px rgb(0 0 0 / 45%));
 }
 
 .login__card {

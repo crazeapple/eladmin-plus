@@ -46,6 +46,15 @@
   --ea-header-bg: #ffffff;
   --ea-mask-bg: rgb(0 0 0 / 50%);
 
+  // —— 登录页氛围（背景图亮暗双版切换与标语字色，整页基调随亮暗可感切换） ——
+  // 同一素材的明暗两版（亮版为反相 + 色相校正生成的浅色粒子图），swap 控制暗版透明度
+  --ea-login-photo-swap: 0;
+  --ea-login-base: #f4f5f7;
+  --ea-login-hero-fg: var(--el-text-color-primary);
+  // 副标语在浅底上仍需可读：主文字色的近实色版（secondary 色对比不足）
+  --ea-login-hero-sub-fg: rgb(48 49 51 / 88%);
+  --ea-login-hero-shadow: none;
+
   // —— 覆盖层：品牌值映射到 EP 变量（偏好主色以行内样式接管，此处为缺省映射） ——
   --el-color-primary: var(--ea-primary);
   --el-border-radius-base: var(--ea-radius-sm);
@@ -98,6 +107,13 @@ html.dark {
   --ea-sidebar-active-text: #ffffff;
   --ea-header-bg: #141414;
   --ea-mask-bg: rgb(0 0 0 / 65%);
+
+  // —— 登录页氛围（暗态换深色原版粒子图，标语保持白字阴影） ——
+  --ea-login-photo-swap: 1;
+  --ea-login-base: #0d0f14;
+  --ea-login-hero-fg: #ffffff;
+  --ea-login-hero-sub-fg: rgb(255 255 255 / 78%);
+  --ea-login-hero-shadow: 0 2px 16px rgb(0 0 0 / 50%);
 
   // —— 覆盖层补映射 ——
   // html.dark 特异度高于 :root，EP 暗色变量集会把主色打回组件库默认蓝，品牌映射须在暗色分支重申
