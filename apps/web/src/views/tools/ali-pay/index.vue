@@ -1,7 +1,6 @@
 <script setup lang="ts">
+import { WalletOutline } from '@vicons/ionicons5'
 import { useI18n } from 'vue-i18n'
-
-import AppIcon from '@/components/AppIcon.vue'
 
 defineOptions({ name: 'ToolsAliPay' })
 
@@ -12,7 +11,7 @@ const { t } = useI18n()
   <div class="ali-pay" data-test="ali-pay-page">
     <div class="ali-pay__card" data-test="ali-pay-card">
       <div class="ali-pay__icon">
-        <app-icon name="alipay" />
+        <wallet-outline />
       </div>
       <div class="ali-pay__title">{{ t('aliPay.title') }}</div>
       <div class="ali-pay__desc">{{ t('aliPay.desc') }}</div>
@@ -45,6 +44,12 @@ const { t } = useI18n()
 .ali-pay__icon {
   font-size: 48px;
   color: var(--el-color-primary, #409eff);
+
+  /* 壳页图标为具名 ionicons 组件（裸 svg 无宽高属性），按 em 盒给尺寸 */
+  svg {
+    width: 1em;
+    height: 1em;
+  }
 }
 
 .ali-pay__title {

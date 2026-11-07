@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import { useFullscreen, useMediaQuery } from '@vueuse/core'
+import {
+  ContractOutline,
+  ExpandOutline,
+  MenuOutline,
+  PersonOutline,
+  SettingsOutline,
+} from '@vicons/ionicons5'
 import { storeToRefs } from 'pinia'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
-import AppIcon from '@/components/AppIcon.vue'
 import MenuIcon from '@/components/MenuIcon.vue'
 import SettingsDrawer from '@/components/settings/SettingsDrawer.vue'
 import { logout } from '@/api/auth'
@@ -205,7 +211,7 @@ function onMenuSelect() {
           :aria-label="t('layout.collapseToggle')"
           @click="onTriggerClick"
         >
-          <app-icon name="menu" />
+          <menu-outline />
         </button>
         <el-breadcrumb class="layout__breadcrumb" separator="/">
           <el-breadcrumb-item v-for="item in breadcrumbItems" :key="item.path" :to="item.path">
@@ -221,7 +227,8 @@ function onMenuSelect() {
             :aria-label="t('layout.fullscreenToggle')"
             @click="toggle()"
           >
-            <app-icon :name="isFullscreen ? 'exit-fullscreen' : 'fullscreen'" />
+            <contract-outline v-if="isFullscreen" />
+            <expand-outline v-else />
           </button>
           <button
             type="button"
@@ -231,7 +238,7 @@ function onMenuSelect() {
             data-test="settings-trigger"
             @click="settingsOpen = true"
           >
-            <app-icon name="settings" />
+            <settings-outline />
           </button>
           <el-dropdown
             class="layout__user"
@@ -252,7 +259,7 @@ function onMenuSelect() {
                 class="layout__avatar-img"
                 data-test="user-avatar-img"
               />
-              <app-icon v-else name="user" />
+              <person-outline v-else />
               <span>{{ username }}</span>
             </button>
             <template #dropdown>
@@ -400,6 +407,12 @@ function onMenuSelect() {
   transition:
     color 0.2s,
     background-color 0.2s;
+
+  /* 顶栏图标为具名 ionicons 组件（裸 svg 无宽高属性），按 em 盒给尺寸 */
+  svg {
+    width: 1em;
+    height: 1em;
+  }
 
   &:hover {
     color: var(--el-color-primary, #409eff);

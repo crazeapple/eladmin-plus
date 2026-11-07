@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import type { Component } from 'vue'
+
 import { toRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import AppIcon from '@/components/AppIcon.vue'
 import { useCountUp } from '@/composables/useCountUp'
 
-const props = defineProps<{ icon: string; labelKey: string; value?: number }>()
+const props = defineProps<{ icon: Component; labelKey: string; value?: number }>()
 
 const { t } = useI18n()
 const { display } = useCountUp(toRef(props, 'value'))
@@ -14,7 +15,7 @@ const { display } = useCountUp(toRef(props, 'value'))
 <template>
   <div class="stat-card" data-test="stat-card">
     <div class="stat-card__icon">
-      <app-icon :name="icon" />
+      <component :is="icon" />
     </div>
     <div class="stat-card__body">
       <div class="stat-card__label">{{ t(labelKey) }}</div>

@@ -1,4 +1,13 @@
 <script setup lang="ts">
+import type { Component } from 'vue'
+
+import {
+  AnalyticsOutline,
+  DocumentTextOutline,
+  PeopleCircleOutline,
+  PersonOutline,
+} from '@vicons/ionicons5'
+
 import type { CardKey } from '../demo-data'
 
 import StatCard from './StatCard.vue'
@@ -14,12 +23,13 @@ defineProps<{ stats: CardStats }>()
 
 const emit = defineEmits<{ select: [key: CardKey] }>()
 
-const cards = [
-  { key: 'users', icon: 'user', labelKey: 'home.cards.users' },
-  { key: 'online', icon: 'peoples', labelKey: 'home.cards.online' },
-  { key: 'visits', icon: 'ipvisits', labelKey: 'home.cards.visits' },
-  { key: 'logs', icon: 'log', labelKey: 'home.cards.logs' },
-] as const
+/** 首页统计卡为固定 UI，直接挂具名 ionicons 组件，不经库值字符串动态分派 */
+const cards: { key: CardKey; icon: Component; labelKey: string }[] = [
+  { key: 'users', icon: PersonOutline, labelKey: 'home.cards.users' },
+  { key: 'online', icon: PeopleCircleOutline, labelKey: 'home.cards.online' },
+  { key: 'visits', icon: AnalyticsOutline, labelKey: 'home.cards.visits' },
+  { key: 'logs', icon: DocumentTextOutline, labelKey: 'home.cards.logs' },
+]
 </script>
 
 <template>
