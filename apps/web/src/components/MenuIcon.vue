@@ -100,10 +100,12 @@ const missing = computed(() => resolved.value === 'missing')
   align-items: center;
   justify-content: center;
 
+  /* ionicons 画布自带边缘留白（EP 画布图形近满幅），同 1em 盒下笔迹偏小、
+     与菜单名的观感空隙偏大——放大补偿使两库笔迹视觉尺寸一致 */
   :deep(svg) {
     display: block;
-    width: 1em;
-    height: 1em;
+    width: 1.1em;
+    height: 1.1em;
   }
 }
 

@@ -3,6 +3,10 @@ import { createPinia, setActivePinia } from 'pinia'
 import { nextTick } from 'vue'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { describe as sassDescribe } from 'vitest'
+import sass from 'sass'
+
+import MenuIconSource from '../MenuIcon.vue?raw'
 import MenuIcon from '../MenuIcon.vue'
 import { usePreferencesStore } from '@/stores/preferences'
 
@@ -117,5 +121,27 @@ describe('MenuIcon 风格开关换算（iconSet 偏好 + 同义映射）', () =>
     await nextTick()
     // cog-outline → setting 在册：翻转为 EP 形态
     expect(container.querySelector('.app-icon--ep .el-icon svg')).toBeTruthy()
+  })
+})
+
+describe('MenuIcon 图标样式契约', () => {
+  const styleBlock = MenuIconSource.match(/<style[^>]*>([\s\S]*?)<\/style>/)?.[1] ?? ''
+  const css = sass.compileString(styleBlock).css
+
+  sassDescribe('两库图标盒与留白补偿', () => {
+    it('nv 形态 svg 放大 1.1em 补偿 ionicons 画布留白（与 ep 笔迹视觉尺寸对齐）', () => {
+      // :deep(svg) 嵌套块经 sass 编译后保留 vue 层选择器，块正则不可靠——锚唯一补偿值
+      expect(css).toContain(':deep(svg)')
+      expect(css).toContain('width: 1.1em')
+      expect(css).toContain('height: 1.1em')
+      // 1.1em 仅在 nv 的 svg 尺寸对出现（width + height 各一次）
+      expect(css.match(/1\.1em/g)?.length).toBe(2)
+    })
+
+    it('ep 形态保持 1em 盒（图形近满幅无需补偿）', () => {
+      const epSeg = css.slice(css.indexOf('.app-icon--ep'), css.indexOf('.app-icon--missing'))
+      expect(epSeg).toContain('width: 1em')
+      expect(epSeg).not.toContain('1.1em')
+    })
   })
 })
