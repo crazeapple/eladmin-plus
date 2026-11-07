@@ -54,16 +54,24 @@ test('dark 态登录页与滑块内联区块取暗色 token 值', async ({ page 
   await page.goto('/login')
   await expect(page.locator('[data-test="login-page"]')).toBeVisible()
 
-  // 登录页容器与表单卡（暗色值表 0a0a0a / 1d1e1f），卡片层次随 token 双态
-  expect(await backgroundOf(page, '.login')).toBe('rgb(10, 10, 10)')
+  // 登录页容器与表单卡（暗色值表 0d0f14 / 1d1e1f，整页粒子背景基调），卡片层次随 token 双态
+  expect(await backgroundOf(page, '.login')).toBe('rgb(13, 15, 20)')
   expect(await backgroundOf(page, '.login__card')).toBe('rgb(29, 30, 31)')
   expect(await borderOf(page, '.login__card')).toBe('rgb(65, 66, 67)')
 
-  // 右区几何图案底暗色自适应：点阵（radial-gradient 平铺）仍在册
-  const panelImage = await page
-    .locator('.login__panel')
-    .evaluate((el) => getComputedStyle(el).backgroundImage)
-  expect(panelImage).toContain('radial-gradient')
+  // 整页粒子面料背景图（明暗双版伪元素铺图）：暗态下暗版可见、亮版隐去
+  const fabricState = await page.locator('.login').evaluate((el) => ({
+    lightImage: getComputedStyle(el, '::before').backgroundImage,
+    lightOpacity: getComputedStyle(el, '::before').opacity,
+    darkImage: getComputedStyle(el, '::after').backgroundImage,
+    darkOpacity: getComputedStyle(el, '::after').opacity,
+  }))
+  // 产物带内容 hash：暗版为无 light 后缀素材、亮版为 light 素材
+  expect(fabricState.darkImage).toContain('login-fabric-')
+  expect(fabricState.darkImage).not.toContain('login-fabric-light')
+  expect(fabricState.darkOpacity).toBe('1')
+  expect(fabricState.lightImage).toContain('login-fabric-light')
+  expect(fabricState.lightOpacity).toBe('0')
 
   // 滑块内联区块：填表点登录卡内展开，轨道走 EP 暗色 --el-fill-color（随 token 自适应）
   await page.locator('[data-test="login-username"]').fill('admin')

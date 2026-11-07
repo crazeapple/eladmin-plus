@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-import { apiLogin, apiLoginAttempt, bearer } from './helpers'
+import { apiLogin, apiLoginAttempt, bearer, loginAsAdmin } from './helpers'
 
 // 登录防护 E2E（部署栈全链）：账号失败锁定（缺省阈值 5，锁定期内正确密码也拒且与密码错同文案）
 // 与 IP 限流（超窗 429 统一错误结构）；限流打点逐请求换伪造 X-Forwarded-For——429 出现即证
@@ -46,7 +46,7 @@ test('账号失败锁定：达阈值后锁定期内正确密码也拒且与密�
   ).toBeTruthy()
 })
 
-test('IP 限流与伪造头收口：超窗 429 统一结构、窗口滑动恢复', async ({ request }) => {
+test('IP 限流与伪造头收口：超窗 429 统一结构、窗口滑动恢复', async ({ request, page }) => {
   // 打满窗口 + 等窗口滑动恢复，远超默认用例超时
   test.setTimeout(180_000)
   // 逐请求换伪造源地址打满窗口：若服务端采信伪造头，各地址各桶永不超窗；
@@ -78,4 +78,11 @@ test('IP 限流与伪造头收口：超窗 429 统一结构、窗口滑动恢复
     await new Promise((resolve) => setTimeout(resolve, 2_000))
   }
   expect(recovered).toBe(true)
+
+  // 会话态续命：恢复等待远超共享 storageState refresh cookie 的旋转宽限窗（30s），
+  // 后续用例静默恢复必失败——重做一次管理员登录并写回会话态文件（与 auth-setup 同法）。
+  // 先清本 context cookie：request 侧 apiLogin 留下的活 cookie 会让守卫把 /login 弹回系统
+  await page.context().clearCookies()
+  await loginAsAdmin(page)
+  await page.context().storageState({ path: '.auth/state.json' })
 })
