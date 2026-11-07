@@ -58,7 +58,10 @@ test('备份下载门禁：无权限账号 403、root 200、普通文件登录�
   })
   expect(allowed.status()).toBe(200)
   const bytes = await allowed.body()
+  // 备份内容为 gzip SQL（sidecar gzip 流回原样落册）：魔数在册
   expect(bytes.length).toBeGreaterThan(0)
+  expect(bytes[0]).toBe(0x1f)
+  expect(bytes[1]).toBe(0x8b)
   expect(allowed.headers()['content-disposition']).toContain(backup.fileName)
 
   // 普通文件回归：无权限账号下载同样 200（登录即可语义不受门禁波及）

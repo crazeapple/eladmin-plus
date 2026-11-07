@@ -83,9 +83,9 @@ tools:
 
 ops:
   backup:
-    # 手动备份经容器执行（docker exec 调 mysqldump）；容器名随栈注入，生产栈以
-    # OPS_BACKUP_CONTAINER 覆盖为该栈 mysql 容器名
-    container: '${OPS_BACKUP_CONTAINER:eladmin-plus-mysql}'
+    # 手动备份经备份 sidecar 执行（HTTP 调内网端点，sidecar 自带 dump 客户端直连库容器）；
+    # 生产栈以 OPS_BACKUP_SIDECAR_URL 注入栈内地址，本地缺省指向 dev compose 映射的 9101 端口
+    sidecar-url: '${OPS_BACKUP_SIDECAR_URL:http://localhost:9101}'
 
 management:
   endpoints:

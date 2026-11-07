@@ -34,6 +34,22 @@ services:
       timeout: 3s
       retries: 20
 
+  # 备份 sidecar：server 测试链（BackupChainTest）与本地排障用，端点映射宿主 9101；
+  # 生产栈（deploy/compose.yaml）同服务不映射端口，仅内网可达
+  backup:
+    build:
+      context: .
+      dockerfile: deploy/backup.Dockerfile
+    container_name: eladmin-plus-backup
+    environment:
+      DUMP_DB_HOST: mysql
+      DUMP_DB_PORT: '3306'
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - '${BACKUP_PORT:-9101}:8080'
+
   rustfs:
     image: rustfs/rustfs:latest
     container_name: eladmin-plus-rustfs

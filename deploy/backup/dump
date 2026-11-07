@@ -1,0 +1,38 @@
+#!/bin/sh
+# 备份 sidecar 转储端点（busybox httpd CGI，compose 内网可达）：
+# POST /cgi-bin/dump?db={库名}；连接凭据经请求头传入（X-Dump-User / X-Dump-Pass，不进 URL），
+# mariadb-dump（mysqldump 同义客户端）按 DUMP_DB_HOST / DUMP_DB_PORT 直连库容器执行转储，
+# gzip 流式回 200；失败 500 携原因尾段（server 侧转「备份执行失败」语义）。
+# TLS 口径：mysql:8.4 默认自签证书，只关证书校验不关加密通道（--ssl-verify-server-cert=0）。
+set -u
+
+fail() {
+    printf 'Status: 500\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n'
+    printf '转储失败：%s' "$1"
+    exit 0
+}
+
+[ "${REQUEST_METHOD}" = "POST" ] || fail '仅接受 POST'
+
+# 库名白名单：字母数字下划线连字符，整段精确匹配（防参数拼接面）
+case "${QUERY_STRING:-}" in
+    db=[A-Za-z0-9_-]*) DB=${QUERY_STRING#db=} ;;
+    *) fail '库名参数缺失或含非白名单字符' ;;
+esac
+
+DUMP_USER=${HTTP_X_DUMP_USER:-}
+[ -n "$DUMP_USER" ] || fail '连接用户缺失'
+[ -n "${DUMP_DB_HOST:-}" ] || fail '库主机未注入'
+
+TMP_BASE=$(mktemp /tmp/dump-XXXXXX)
+trap 'rm -f "$TMP_BASE".sql "$TMP_BASE".gz "$TMP_BASE".err 2>/dev/null' EXIT
+
+MYSQL_PWD="${HTTP_X_DUMP_PASS:-}" mariadb-dump --ssl-verify-server-cert=0 \
+    --databases "$DB" -u"$DUMP_USER" -h "$DUMP_DB_HOST" -P "${DUMP_DB_PORT:-3306}" \
+    > "$TMP_BASE.sql" 2> "$TMP_BASE.err" || fail "$(tail -c 300 "$TMP_BASE.err" | tr '\n' ' ')"
+
+[ -s "$TMP_BASE.sql" ] || fail '转储输出为空'
+gzip -c "$TMP_BASE.sql" > "$TMP_BASE.gz" || fail 'gzip 压缩失败'
+
+printf 'Status: 200\r\nContent-Type: application/gzip\r\n\r\n'
+cat "$TMP_BASE.gz"

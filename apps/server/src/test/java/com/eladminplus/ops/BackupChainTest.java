@@ -15,9 +15,11 @@ import com.eladminplus.storage.StorageProperties;
 import com.eladminplus.storage.domain.StorageFile;
 import com.eladminplus.storage.mapper.StorageFileMapper;
 import com.eladminplus.storage.service.StorageService;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,9 +30,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 /**
- * 手动备份全链（compose mysql 真实执行）：docker exec 容器内 mysqldump，流经存储域落当前配置引擎并
- * 打标 source=backup，storage_file 行在册（原名形态、大小为实际字节数、含建库语句）；备份失败 5xx
- * 含「备份执行失败」明确原因且无 storage_file 行。
+ * 手动备份全链（dev compose 备份 sidecar 真实执行）：HTTP 调内网端点，sidecar 自带 dump 客户端直连
+ * mysql 容器，gzip 流回后经存储域落当前配置引擎并打标 source=backup，storage_file 行在册
+ * （原名形态、大小为 gzip 实际字节数、解压含建库语句）；备份失败 5xx 含「备份执行失败」明确原因
+ * 且无 storage_file 行。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -124,10 +127,13 @@ class BackupChainTest {
         assertThat(row.getEngine()).isEqualTo(storageProperties.engine());
         assertThat(row.getUploader()).isEqualTo("admin");
 
-        // 落引擎内容真实可读：含建库语句与表结构语句，行内大小即实际字节数
+        // 落引擎内容真实可读：gzip 包裹的 SQL 解压含建库语句与表结构语句，行内大小即 gzip 实际字节数
         try (InputStream in = storageService.open(row)) {
             byte[] bytes = in.readAllBytes();
-            String sql = new String(bytes, StandardCharsets.UTF_8);
+            String sql;
+            try (GZIPInputStream gzip = new GZIPInputStream(new ByteArrayInputStream(bytes))) {
+                sql = new String(gzip.readAllBytes(), StandardCharsets.UTF_8);
+            }
             assertThat(sql).contains("CREATE DATABASE").contains("CREATE TABLE");
             assertThat(row.getSize()).isEqualTo(bytes.length);
         }
