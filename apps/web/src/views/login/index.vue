@@ -2,7 +2,7 @@
 import { useI18n } from 'vue-i18n'
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, type InputInstance } from 'element-plus'
 import { fetchPublicKey, login } from '@/api/auth'
 import { encryptPassword } from '@/utils/crypto'
 import { useSessionStore } from '@/stores/session'
@@ -11,6 +11,7 @@ import SliderCaptcha from '@/components/captcha/SliderCaptcha.vue'
 /**
  * 登录页（布局壳之外，偏好主题与语言天然生效）：
  * 整页粒子面料背景图亮暗双版（同一素材明暗两版，随主题交叉切换），标语 + 表单卡单栏居中；
+ * el-form 承接表单语义（密码管理器识别），回车逐级推进：账号回车聚焦密码，密码回车等价点「登录」；
  * 公钥页面加载时取；填表不触发验证码，点「登录」卡内展开滑块区块，过验即登录；
  * 密码 RSA 加密提交 → 会话入内存 → 跳 redirect；
  * 公钥过期（后端 400 分语义）自动重取公钥重试一次；redirect 只认站内路径。
@@ -24,8 +25,14 @@ const username = ref('')
 const password = ref('')
 const submitting = ref(false)
 const captchaOpen = ref(false)
+const passwordRef = ref<InputInstance>()
 
-/** 点「登录」展开滑块区块：表单不全时不展开（校验消息由浏览器表单语义承担，不强弹提示） */
+/** 账号回车聚焦密码框（键盘逐级推进） */
+function focusPassword() {
+  passwordRef.value?.focus()
+}
+
+/** 点「登录」（或密码框回车）展开滑块区块：表单不全时不展开（校验消息由浏览器表单语义承担，不强弹提示） */
 function onSubmit() {
   if (!username.value || !password.value || submitting.value || captchaOpen.value) return
   captchaOpen.value = true
@@ -87,54 +94,61 @@ async function submitWithCurrentKey(ticket: string, retried = false) {
       <h2 class="login__slogan">{{ t('login.slogan') }}</h2>
       <p class="login__slogan-sub">{{ t('login.sloganSub') }}</p>
       <el-card class="login__card">
-        <!-- 品牌标识：卡内顶部，颜色随文字主色亮暗自适应 -->
-        <div class="login__mark" data-test="login-brand">eladmin-plus</div>
-        <el-input
-          v-model="username"
-          :placeholder="t('login.username')"
-          data-test="login-username"
-          autocomplete="username"
-        />
-        <el-input
-          v-model="password"
-          type="password"
-          :placeholder="t('login.password')"
-          data-test="login-password"
-          autocomplete="current-password"
-          show-password
-        />
-        <el-button
-          type="primary"
-          class="login__submit"
-          :loading="submitting"
-          :disabled="captchaOpen"
-          data-test="login-submit"
-          @click="onSubmit"
-        >
-          {{ t('login.submit') }}
-        </el-button>
-        <!-- 滑块验证内联展开区：过验即登录；收起销毁重挂，重开重新出题（等价原弹层 destroy-on-close） -->
-        <Transition name="login-captcha">
-          <div v-if="captchaOpen" class="login__captcha" data-test="login-captcha-dialog">
-            <div class="login__captcha-head">
-              <span class="login__captcha-title">{{ t('login.captchaTitle') }}</span>
-              <button
-                type="button"
-                class="login__captcha-close"
-                data-test="login-captcha-close"
-                @click="captchaOpen = false"
-              >
-                {{ t('login.captchaClose') }}
-              </button>
+        <!-- el-form 承接表单语义（原生 form 元素，隐式提交被挡由 keyup 接管）；
+             回车逐级推进：账号回车聚焦密码，密码回车展开滑块（与点「登录」同路） -->
+        <el-form class="login__form" data-test="login-form" @submit.prevent>
+          <!-- 品牌标识：卡内顶部，颜色随文字主色亮暗自适应 -->
+          <div class="login__mark" data-test="login-brand">eladmin-plus</div>
+          <el-input
+            v-model="username"
+            :placeholder="t('login.username')"
+            data-test="login-username"
+            autocomplete="username"
+            @keyup.enter="focusPassword"
+          />
+          <el-input
+            ref="passwordRef"
+            v-model="password"
+            type="password"
+            :placeholder="t('login.password')"
+            data-test="login-password"
+            autocomplete="current-password"
+            show-password
+            @keyup.enter="onSubmit"
+          />
+          <el-button
+            type="primary"
+            class="login__submit"
+            :loading="submitting"
+            :disabled="captchaOpen"
+            data-test="login-submit"
+            @click="onSubmit"
+          >
+            {{ t('login.submit') }}
+          </el-button>
+          <!-- 滑块验证内联展开区：过验即登录；收起销毁重挂，重开重新出题（等价原弹层 destroy-on-close） -->
+          <Transition name="login-captcha">
+            <div v-if="captchaOpen" class="login__captcha" data-test="login-captcha-dialog">
+              <div class="login__captcha-head">
+                <span class="login__captcha-title">{{ t('login.captchaTitle') }}</span>
+                <button
+                  type="button"
+                  class="login__captcha-close"
+                  data-test="login-captcha-close"
+                  @click="captchaOpen = false"
+                >
+                  {{ t('login.captchaClose') }}
+                </button>
+              </div>
+              <SliderCaptcha
+                :hint="t('login.slideHint')"
+                :fail-text="t('login.slideFail')"
+                :retry-text="t('login.captchaRetry')"
+                @verified="onVerified"
+              />
             </div>
-            <SliderCaptcha
-              :hint="t('login.slideHint')"
-              :fail-text="t('login.slideFail')"
-              :retry-text="t('login.captchaRetry')"
-              @verified="onVerified"
-            />
-          </div>
-        </Transition>
+          </Transition>
+        </el-form>
       </el-card>
     </main>
   </div>
@@ -226,9 +240,8 @@ async function submitWithCurrentKey(ticket: string, retried = false) {
   box-shadow: var(--ea-shadow-3, var(--el-box-shadow-light));
 }
 
-/* 表单元素垂直间距落在 EP 卡片内容区（title/input/button 都在 body 层，
-   卡根设 flex gap 只会作用于唯一子元素、不生效） */
-.login__card :deep(.el-card__body) {
+/* 表单元素垂直间距落在 el-form 层（卡 body 唯一子是 form，gap 作用于 form 内部元素） */
+.login__form {
   display: flex;
   flex-direction: column;
   gap: 20px;

@@ -55,6 +55,24 @@ test.describe('宽屏单栏居中', () => {
     await expect(page.locator('[data-test="login-submit"]')).toBeVisible()
   })
 
+  test('表单回车逐级推进：账号回车聚焦密码，密码回车展开滑块（form 语义在册）', async ({
+    page,
+  }) => {
+    await page.goto('/login')
+    // el-form 渲染的原生 form 元素在册（密码管理器识别依赖的表单语义）
+    await expect(page.locator('[data-test="login-form"]')).toBeVisible()
+    await page.locator('[data-test="login-username"]').fill('admin')
+    await page.keyboard.press('Enter')
+    // 账号回车 → 密码框聚焦
+    await expect(page.locator('[data-test="login-password"]')).toBeFocused()
+    await page.locator('[data-test="login-password"]').fill('123456')
+    const challengePromise = nextCaptchaChallenge(page)
+    await page.keyboard.press('Enter')
+    // 密码回车 → 展开滑块区块（与点「登录」同路）
+    await expect(page.locator('[data-test="login-captcha-dialog"]')).toBeVisible()
+    await challengePromise
+  })
+
   test('未登录整页基调随系统深浅实时切换（背景图版与标语字色双态）', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' })
     await page.goto('/login')

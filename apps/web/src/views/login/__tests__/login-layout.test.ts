@@ -73,10 +73,10 @@ describe('登录页布局契约', () => {
     const card = rules.get('.login__card')
     expect(card?.width).toBe('400px')
     expect(pxOf(card?.['--el-card-padding'])).toBeGreaterThanOrEqual(28)
-    // 间距落在 EP 卡片内容区（body 层）——卡根设 gap 只作用于唯一子元素不生效
-    const bodyRule = rules.get('.login__card :deep(.el-card__body)')
-    expect(pxOf(bodyRule?.gap)).toBeGreaterThanOrEqual(18)
-    expect(bodyRule?.['flex-direction']).toBe('column')
+    // 间距落在 el-form 层（卡 body 唯一子是 form）
+    const formRule = rules.get('.login__form')
+    expect(pxOf(formRule?.gap)).toBeGreaterThanOrEqual(18)
+    expect(formRule?.['flex-direction']).toBe('column')
   })
 
   it('表单卡层次 token 在册（卡片底 / 边框 / 圆角 / 重阴影）', () => {
