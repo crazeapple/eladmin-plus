@@ -62,4 +62,12 @@ test('列表页操作可达且页面不横向溢出', async ({ page }) => {
     .locator('[data-test="users-edit"]')
   await expect(editButton).toBeEnabled()
   expect(await editButton.boundingBox()).not.toBeNull()
+
+  // 自净删除:行级删除 + 确认弹窗,行消失——不跨轮累积残留挤占分页(全量跑每轮净增 0)
+  await table
+    .locator('tbody tr', { hasText: username })
+    .locator('[data-test="users-remove"]')
+    .click()
+  await page.getByRole('button', { name: '确定' }).click()
+  await expect(table.getByText(username, { exact: true })).toBeHidden()
 })
