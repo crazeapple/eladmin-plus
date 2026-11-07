@@ -67,17 +67,12 @@ test('IP 限流与伪造头收口：超窗 429 统一结构、窗口滑动恢复
   }
   expect(limited).toBe(true)
 
-  // 窗口滑动恢复：轮询至重新放行（不把限流残留带给同 IP 的后续用例）
-  const deadline = Date.now() + 90_000
-  let recovered = false
-  while (Date.now() < deadline) {
-    if ((await request.get('/api/auth/captcha')).status() === 200) {
-      recovered = true
-      break
-    }
-    await new Promise((resolve) => setTimeout(resolve, 2_000))
-  }
-  expect(recovered).toBe(true)
+  // 窗口真恢复判定：滑动窗口部分滑出即可让单次放行，而打满批记录仍在桶内——收尾登录链的
+  // 出题立刻超窗（前序用例分批灌桶形态下必现，单 spec 串跑被同批同时刻掩盖）。确定性等足
+  // 「打满时刻 + 缺省窗口 + 缓冲」再验证放行，等待期零请求不自我续窗；
+  // 窗口锚定 application.yml guard.ip-window 缺省 1m，配置改动需同步本用例
+  await new Promise((resolve) => setTimeout(resolve, 62_000))
+  expect((await request.get('/api/auth/captcha')).status()).toBe(200)
 
   // 会话态续命：恢复等待远超共享 storageState refresh cookie 的旋转宽限窗（30s），
   // 后续用例静默恢复必失败——重做一次管理员登录并写回会话态文件（与 auth-setup 同法）。
