@@ -170,26 +170,29 @@ describe('菜单管理页', () => {
     expect(nameInput.disabled).toBe(true)
   })
 
-  it('图标选择器：名称过滤与选中回填 svg: 前缀值', async () => {
+  it('图标选择器：名称过滤与选中回填 nv: 前缀值', async () => {
     await renderPage()
     await fireEvent.click(byTest('menus-create')[0]!)
     const dialog = document.querySelector('[data-test="menus-dialog"]') as HTMLElement
     await fireEvent.click(dialog.querySelector('[data-test="menus-icon-pick"]')!)
     const pickerDialog = document.querySelector('[data-test="menus-icon-dialog"]') as HTMLElement
     await waitFor(() => expect(pickerDialog).toBeTruthy())
-    // 名称过滤：输入 dict 只剩 dictionary 一格
+    // 名称过滤：输入 home 只剩 home-outline 一格
     const filterInput = pickerDialog.querySelector(
       '[data-test="menus-icon-filter"]',
     ) as HTMLInputElement
-    await fireEvent.update(filterInput, 'dict')
+    await fireEvent.update(filterInput, 'home')
     await waitFor(() => {
-      const cells = pickerDialog.querySelectorAll('[data-test^="icon-option-"]')
+      // 只数 nv tab 网格（双 tab 格并存，ep 清单含 home-filled 同撞关键词）
+      const cells = pickerDialog.querySelectorAll(
+        '[data-test="menus-icon-grid-nv"] [data-test^="icon-option-nv-"]',
+      )
       expect(cells.length).toBe(1)
     })
-    // 选中回填 svg: 前缀值并关闭弹窗
-    await fireEvent.click(pickerDialog.querySelector('[data-test="icon-option-dictionary"]')!)
+    // 选中回填 nv: 前缀值并关闭弹窗
+    await fireEvent.click(pickerDialog.querySelector('[data-test="icon-option-nv-home-outline"]')!)
     const iconInput = dialog.querySelector('[data-test="menus-icon-input"]') as HTMLInputElement
-    expect(iconInput?.value).toBe('svg:dictionary')
+    expect(iconInput?.value).toBe('nv:home-outline')
   })
 
   it('图标选择器：EP tab 选图回填 ep: 前缀值', async () => {

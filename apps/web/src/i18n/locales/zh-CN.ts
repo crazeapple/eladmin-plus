@@ -225,7 +225,7 @@ export default {
     iconTitle: '选择图标',
     iconFilter: '输入名称过滤',
     iconEmpty: '无匹配图标',
-    iconTabSvg: 'SVG 图标',
+    iconTabNv: 'Ionicons 图标',
     iconTabEp: 'Element 图标',
     hidden: '侧栏隐藏',
     noCache: '参与缓存',

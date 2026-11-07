@@ -3,86 +3,15 @@ import { ElButton, ElDialog, ElInput, ElIcon, ElTabPane, ElTabs } from 'element-
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import AppIcon from '@/components/AppIcon.vue'
 import { EP_ICONS } from '@/components/ep-icons'
+import { NV_ICONS } from '@/components/nv-icons'
 
 defineOptions({ name: 'MenusIconPicker' })
 
 const { t } = useI18n()
 
-/**
- * svg tab 收录白名单：81 个 svg 资产中挑适配后台菜单的子集，
- * 人像（user / people 等）与社交、消费类（wechat / alipay / shopping 等）明显不适配，不进选择器。
- * 选择器可见集与资产全集解耦：剔除不改资产，增补只动这份常量。
- */
-const PICKER_ICONS = [
-  'anq',
-  'app',
-  'backup',
-  'chain',
-  'chart',
-  'codeConsole',
-  'dashboard',
-  'database',
-  'date',
-  'deploy',
-  'dept',
-  'dev',
-  'develop',
-  'dictionary',
-  'doc',
-  'download',
-  'edit',
-  'error',
-  'exit-fullscreen',
-  'fullscreen',
-  'fwb',
-  'gonggao',
-  'icon',
-  'image',
-  'index',
-  'international',
-  'ipvisits',
-  'java',
-  'link',
-  'list',
-  'lock',
-  'log',
-  'login',
-  'markdown',
-  'menu',
-  'message',
-  'mnt',
-  'monitor',
-  'nested',
-  'password',
-  'permission',
-  'qiniu',
-  'redis',
-  'role',
-  'search',
-  'server',
-  'settings',
-  'size',
-  'skill',
-  'source',
-  'sqlMonitor',
-  'swagger',
-  'sys-tools',
-  'system',
-  'system1',
-  'tab',
-  'theme',
-  'timing',
-  'tools',
-  'tree',
-  'tree-table',
-  'unlock',
-  'validCode',
-  'visits',
-  'web',
-  'zujian',
-]
+/** nv tab 收录即 nv 注册集（在用 25 语义），与分派渲染同一事实源 */
+const NV_PICKER_ICONS = Object.keys(NV_ICONS)
 
 /** EP tab 收录即 EP 具名清单（挑适配后台菜单的子集在册），与分派渲染同一事实源 */
 const EP_PICKER_ICONS = Object.keys(EP_ICONS)
@@ -93,12 +22,12 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 const visible = ref(false)
 const keyword = ref('')
 
-/** 双 tab：svg 本地集 / EP 集；落库值形态分别为 svg:name / ep:name */
-const activeTab = ref<'svg' | 'ep'>('svg')
+/** 双 tab：nv ionicons 集 / EP 集；落库值形态分别为 nv:name / ep:name */
+const activeTab = ref<'nv' | 'ep'>('nv')
 
-// 打开时按当前值形态落 tab：svg: 高亮 svg tab，ep: 高亮 EP tab，其余落 svg
+// 打开时按当前值形态落 tab：ep: 高亮 EP tab，nv: 与存量 svg:（待迁移）落 nv
 function open() {
-  activeTab.value = props.modelValue.startsWith('ep:') ? 'ep' : 'svg'
+  activeTab.value = props.modelValue.startsWith('ep:') ? 'ep' : 'nv'
   visible.value = true
 }
 
@@ -111,13 +40,13 @@ function filterBy(names: string[]): string[] {
   return names.filter((name) => name.toLowerCase().includes(query))
 }
 
-const filteredSvg = computed(() => filterBy(PICKER_ICONS))
+const filteredNv = computed(() => filterBy(NV_PICKER_ICONS))
 const filteredEp = computed(() => filterBy(EP_PICKER_ICONS))
 
-/** 当前选中格：icon 值带前缀时按形态取名段高亮（无前缀视为未选） */
+/** 当前选中格：icon 值带前缀时按形态取名段高亮（无前缀与存量 svg: 形态视为未选） */
 const selected = computed(() => {
-  if (props.modelValue.startsWith('svg:')) {
-    return { tab: 'svg', name: props.modelValue.slice('svg:'.length) }
+  if (props.modelValue.startsWith('nv:')) {
+    return { tab: 'nv', name: props.modelValue.slice('nv:'.length) }
   }
   if (props.modelValue.startsWith('ep:')) {
     return { tab: 'ep', name: props.modelValue.slice('ep:'.length) }
@@ -166,19 +95,19 @@ function pick(name: string) {
         data-test="menus-icon-filter"
       />
       <el-tabs v-model="activeTab" class="icon-picker__tabs">
-        <el-tab-pane :label="t('menus.iconTabSvg')" name="svg">
-          <div class="icon-picker__grid" data-test="menus-icon-grid-svg">
+        <el-tab-pane :label="t('menus.iconTabNv')" name="nv">
+          <div class="icon-picker__grid" data-test="menus-icon-grid-nv">
             <button
-              v-for="name in filteredSvg"
+              v-for="name in filteredNv"
               :key="name"
               type="button"
               class="icon-picker__cell"
-              :class="{ 'is-active': selected?.tab === 'svg' && name === selected.name }"
+              :class="{ 'is-active': selected?.tab === 'nv' && name === selected.name }"
               :title="name"
-              :data-test="`icon-option-${name}`"
+              :data-test="`icon-option-nv-${name}`"
               @click="pick(name)"
             >
-              <app-icon :name="name" />
+              <component :is="NV_ICONS[name]" class="icon-picker__nv" />
               <span class="icon-picker__name">{{ name }}</span>
             </button>
           </div>
@@ -202,7 +131,7 @@ function pick(name: string) {
         </el-tab-pane>
       </el-tabs>
       <p
-        v-if="activeTab === 'svg' ? !filteredSvg.length : !filteredEp.length"
+        v-if="activeTab === 'nv' ? !filteredNv.length : !filteredEp.length"
         class="icon-picker__empty"
       >
         {{ t('menus.iconEmpty') }}
@@ -261,6 +190,12 @@ function pick(name: string) {
 
 .icon-picker__ep {
   font-size: 18px;
+}
+
+/* nv 格挂具名 ionicons 组件（裸 svg 无宽高属性），与 EP 格同 18px 视觉体量 */
+.icon-picker__nv {
+  width: 18px;
+  height: 18px;
 }
 
 .icon-picker__name {
