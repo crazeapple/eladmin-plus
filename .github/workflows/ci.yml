@@ -70,7 +70,11 @@ jobs:
       - name: JS unit tests
         run: pnpm -r run test
       - name: Server unit tests
-        run: cd apps/server && ./gradlew test
+        run: cd apps/server && ./gradlew test -PexcludeInfraTests
+        env:
+          # runner 无 rustfs 实例：存储走 local 引擎（落本地磁盘），
+          # 真实对象存储链路由慢层 compose 栈的 tools-storage E2E 覆盖
+          STORAGE_ENGINE: local
 
   slow:
     name: 'slow · compose stack + E2E'
