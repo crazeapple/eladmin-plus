@@ -70,10 +70,11 @@ jobs:
       - name: JS unit tests
         run: pnpm -r run test
       - name: Server unit tests
-        run: cd apps/server && ./gradlew test -PexcludeInfraTests
+        run: cd apps/server && ./gradlew test -PexcludeInfraTags
         env:
-          # runner 无 rustfs 实例：存储走 local 引擎（落本地磁盘），
-          # 真实对象存储链路由慢层 compose 栈的 tools-storage E2E 覆盖
+          # runner 无 rustfs 实例：存储走 local 引擎（落本地磁盘）；
+          # 基础设施依赖测试类自带 @Tag("infra")，-PexcludeInfraTags 按标签排除
+          # （真实链路由慢层 compose 栈的 tools-storage / backup-sidecar E2E 覆盖）
           STORAGE_ENGINE: local
 
   slow:
