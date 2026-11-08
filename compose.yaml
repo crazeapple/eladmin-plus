@@ -2,7 +2,7 @@ name: eladmin-plus
 
 services:
   mysql:
-    image: mysql:8.4
+    image: mysql:8.4@sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902
     container_name: eladmin-plus-mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -22,7 +22,7 @@ services:
       start_period: 30s
 
   redis:
-    image: redis:7.4-alpine
+    image: redis:7.4-alpine@sha256:c5d34a98396a4775e223c74e929162c35c5a2182901ba26b50ade939941ce14b
     container_name: eladmin-plus-redis
     ports:
       - '${REDIS_PORT:-6380}:6379'
@@ -51,7 +51,7 @@ services:
       - '${BACKUP_PORT:-9101}:8080'
 
   rustfs:
-    image: rustfs/rustfs:latest
+    image: rustfs/rustfs:latest@sha256:ed9210d6411d77ffceb70d94b964a3cb7d225983368bc25bebe01e995293dcc2
     container_name: eladmin-plus-rustfs
     environment:
       RUSTFS_ACCESS_KEY: rustfsadmin

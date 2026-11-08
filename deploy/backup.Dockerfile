@@ -2,7 +2,7 @@
 # alpine 的精简 client 缺该插件连不上 mysql:8.4），叠加 busybox 提供 CGI HTTP 端点
 # （alpine 的 busybox 构建无 httpd applet，取 Debian 包）。
 # 构建上下文为仓库根（compose.yaml 的 context）
-FROM mariadb:11
+FROM mariadb:11@sha256:c4124d1afa875e47f2892edf26b482fa54f796e2f342d3717a04ca091a22a9bd
 RUN apt-get update -qq \
     && apt-get install -y --no-install-recommends -qq busybox \
     && rm -rf /var/lib/apt/lists/*
