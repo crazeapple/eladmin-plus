@@ -4,6 +4,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { buildI18n } from '@/i18n'
+import { loadView } from '@/router/views'
 import { useMenusStore } from '@/stores/menus'
 import Menus from '../index.vue'
 import { componentPathSelectOptions, i18nKeySelectOptions } from '../form-options'
@@ -152,6 +153,9 @@ describe('菜单管理页', () => {
   })
 
   it('编辑时 type 锁定，推导 path 与 name 只读展示', async () => {
+    // 路由 name 由视图模块动态 import 异步解析；CI 冷启机器上解析链慢于
+    // waitFor 缺省超时——断言前预热模块缓存，链路即走内存命中
+    await loadView('system/users')
     await renderPage()
     // 第二个编辑按钮 = 用户管理页节点（componentPathKey system/users）
     await fireEvent.click(byTest('menus-edit')[1]!)
