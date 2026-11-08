@@ -1,0 +1,90 @@
+name: CI
+
+# 双层 CI：
+#   快层 fast —— 任意分支 push：形态检查（eslint / prettier / typecheck）+ 单元测试，分钟级反馈；
+#   慢层 slow —— 仅 main 与 test/* push：compose 起完整生产栈 + Playwright 全量 E2E，独立环境完整回归。
+# 慢层在快层绿之后才烧时长；发布链留在本地流程，CI 只验证不发布。
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  fast:
+    name: 'fast · lint + unit'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 工具链读 .mise.toml（node 24 / pnpm 12.14.0 / just），与本地一致
+      - uses: jdx/mise-action@v2
+
+      # server 单测需 JDK 21；setup-gradle 自带依赖与 wrapper 缓存
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Resolve pnpm store path
+        id: pnpm-store
+        run: echo "dir=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.dir }}
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # 对齐本地门禁（lefthook pre-commit）：形态 + 类型 + JS 侧单测；server 单测单独跑
+      - name: Lint & typecheck
+        run: |
+          pnpm exec eslint .
+          pnpm exec prettier --check .
+          just typecheck
+      - name: JS unit tests
+        run: pnpm -r run test
+      - name: Server unit tests
+        run: cd apps/server && ./gradlew test
+
+  slow:
+    name: 'slow · compose stack + E2E'
+    needs: fast
+    if: github.ref_name == 'main' || startsWith(github.ref_name, 'test/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+
+      - name: Resolve pnpm store path
+        id: pnpm-store
+        run: echo "dir=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.dir }}
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # compose 零改动：STORAGE_ENGINE=local 环境注入（双引擎参数化现成），E2E 不依赖宿主 RustFS
+      - name: Bring up compose stack
+        run: STORAGE_ENGINE=local docker compose -f deploy/compose.yaml up -d --build --wait
+
+      - name: Install Playwright chromium
+        run: cd apps/web && npx playwright install --with-deps chromium
+
+      - name: Run E2E
+        run: pnpm --filter @eladmin-plus/web run test:e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report/
+          if-no-files-found: ignore
+
+      - name: Tear down stack
+        if: always()
+        run: docker compose -f deploy/compose.yaml down -v
