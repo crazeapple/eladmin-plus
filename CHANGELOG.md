@@ -2,10 +2,10 @@
 
 ## 0.29.0
 
-工程基建：接入 Renovate 依赖更新机器人，供应链钉扎与升级转 PR 流。
+工程基建：接入 Renovate 依赖更新机器人，供应链锁定与升级转 PR 流。
 
-- 仓库根新增 Renovate 配置：npm / gradle / GitHub Actions / Docker（含 compose）四类依赖全管，镜像与 Actions 将自动钉扎到内容摘要（digest）——浮动 tag 被动漂移面清零
-- 首波钉扎以单个 PR 交付一次审完；此后依赖升级均以 PR 形式到齐，合并即完成升级
+- 仓库根新增 Renovate 配置：npm / gradle / GitHub Actions / Docker（含 compose）四类依赖全管，镜像与 Actions 将自动锁定到内容摘要（digest）——浮动 tag 被动漂移面清零
+- 首波锁定以单个 PR 交付一次审完；此后依赖升级均以 PR 形式到齐，合并即完成升级
 
 ## 0.28.1
 
