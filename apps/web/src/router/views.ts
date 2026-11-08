@@ -1,6 +1,6 @@
 /**
  * 视图模块映射：构建期由 import.meta.glob 枚举全部页面组件（配错菜单的组件路径 key 编译期即暴露）。
- * 反向导出清单供后续菜单管理下拉使用（P-013 / P-014）。
+ * 反向导出清单供后续菜单管理下拉使用。
  */
 // 页面组件约定 = views 下的 index.vue；components 子目录等非页面文件天然出局
 const modules = import.meta.glob('../views/**/index.vue') as Record<

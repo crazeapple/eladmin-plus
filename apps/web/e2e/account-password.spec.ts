@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 
 import { gotoWithSession, loginAs } from './helpers'
 
-// 改密全链（A7）：旧密码错误页内提示；改密成功自动登出跳登录；旧密码再登录被拒、新密码可登录。
+// 改密全链：旧密码错误页内提示；改密成功自动登出跳登录；旧密码再登录被拒、新密码可登录。
 // 改密踢该用户全部会话（storageState 的 refresh cookie 一并失效），本用例殿后跑（project 依赖 system），
 // 末尾把密码还原为种子值，保证后续套件与 auth-setup 依赖不变。
 

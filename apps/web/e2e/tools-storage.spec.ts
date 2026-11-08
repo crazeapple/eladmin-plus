@@ -5,9 +5,9 @@ import { expect, test } from '@playwright/test'
 
 import { gotoWithSession } from './helpers'
 
-// 存储管理页主链（A3、A4）：页内真实上传 → 行渲染（原名 / 大小 / 上传人 / 时间）→
+// 存储管理页主链：页内真实上传 → 行渲染（原名 / 大小 / 上传人 / 时间）→
 // 原名模糊 / 上传人 / 时间范围三维筛选 → 删除确认后行消失（造数自清，不留测试数据）。
-// 图片预览与下载（A5）：图片行缩略（blob 经鉴权下载）→ 点开大图 → 行下载原名落地。
+// 图片预览与下载：图片行缩略（blob 经鉴权下载）→ 点开大图 → 行下载原名落地。
 
 const AVATAR_PNG = readFileSync(fileURLToPath(new URL('./fixtures/avatar.png', import.meta.url)))
 

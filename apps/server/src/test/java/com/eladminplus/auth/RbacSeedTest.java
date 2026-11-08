@@ -56,7 +56,7 @@ class RbacSeedTest {
             assertThat(menu.getI18nKey()).startsWith("routes.");
             assertThat(menu.getSort()).isPositive();
         });
-        // 演示不缓存页标 noCache，页签缓存接线（P-010）按此判定
+        // 演示不缓存页标 noCache，页签缓存接线按此判定
         Menu noCache = menuMapper.selectOne(new LambdaQueryWrapper<Menu>()
                 .eq(Menu::getComponentPathKey, "demo/no-cache"));
         assertThat(noCache).isNotNull();

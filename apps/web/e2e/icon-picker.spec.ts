@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 
 import { gotoWithSession } from './helpers'
 
-// icon-picker 双 tab（A2）：nv ionicons 集与 EP 具名集两 tab 选图，落库对应前缀值，
+// icon-picker 双 tab：nv ionicons 集与 EP 具名集两 tab 选图，落库对应前缀值，
 // 菜单树与侧栏经统一分派组件回显。编辑既有种子菜单且收尾还原原值，栈数据零残留
 // （载体选字典管理：当前值 nv:library-outline 为 V17 迁移产物，还原可全程走 UI）。
 

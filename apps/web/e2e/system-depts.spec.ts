@@ -7,14 +7,14 @@ import { gotoWithSession } from './helpers'
 test('部门页主链：面包屑两级、种子树、新增与删除', async ({ page }) => {
   await gotoWithSession(page, '/system/depts')
 
-  // A2：侧栏「系统管理」目录 + 面包屑两级（目录纯文本、页面可点）
+  // 侧栏「系统管理」目录 + 面包屑两级（目录纯文本、页面可点）
   const submenu = page.locator('.el-sub-menu__title', { hasText: '系统管理' })
   await expect(submenu).toBeVisible()
   const breadcrumb = page.locator('.layout__breadcrumb')
   await expect(breadcrumb).toContainText('系统管理')
   await expect(breadcrumb).toContainText('部门管理')
 
-  // A3：种子树在册
+  // 种子树在册
   const tree = page.locator('[data-test="depts-tree"]')
   await expect(tree).toBeVisible()
   for (const name of ['总部', '研发部', '市场部']) {

@@ -1,4 +1,4 @@
--- 菜单图标源替换：svg: 库值按 P-027 选型语义映射为 nv: ionicons Outline 名（逐名核对在册，
+-- 菜单图标源替换：svg: 库值按选型语义映射为 nv: ionicons Outline 名（逐名核对在册，
 -- 杜绝渲染落空值入库）。ep: 值（box / refresh-left）与映射表外的 svg: 值不猜、留原样
 -- （现状库无后者形态）。
 UPDATE menu

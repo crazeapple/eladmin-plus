@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 
 import { gotoWithSession } from './helpers'
 
-// 工具菜单组（A1）：V10 种子生效——侧栏「工具」目录 + 三子菜单在册，路由可达、页面渲染。
+// 工具菜单组：V10 种子生效——侧栏「工具」目录 + 三子菜单在册，路由可达、页面渲染。
 
 test('工具菜单组：侧栏三子菜单在册且逐页可达', async ({ page }) => {
   await gotoWithSession(page, '/home')

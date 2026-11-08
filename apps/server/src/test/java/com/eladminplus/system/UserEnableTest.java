@@ -83,7 +83,7 @@ class UserEnableTest {
     @Test
     void 停用即强退且登录拒绝启用后恢复() throws Exception {
         Long userId = createEnabledUser();
-        // 该用户登录拿 access（登录链含验证码与 RSA——直接用令牌服务签发等价会话,验证链在 P-009 已覆盖）
+        // 该用户登录拿 access（登录链含验证码与 RSA——直接用令牌服务签发等价会话,验证链已有专门用例覆盖）
         User target = userMapper.selectById(userId);
         String userToken = tokenService.issue(target, List.of(), List.of()).accessToken();
 

@@ -10,7 +10,7 @@ afterEach(() => {
 })
 
 // admin-ui 组件层消费冒烟：包入口在 web 应用内可用、三件套可运行
-// （组件行为的完整验收在 admin-ui 包内测试，真实页面随 P-012+ 落地）
+// （组件行为的完整验收在 admin-ui 包内测试，真实页面随后续迭代落地）
 describe('admin-ui 消费冒烟', () => {
   it('DataTable 以声明式渲染数据', () => {
     render(DataTable, {

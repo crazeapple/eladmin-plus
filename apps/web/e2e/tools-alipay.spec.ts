@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 
 import { gotoWithSession } from './helpers'
 
-// 支付宝壳页（A8）：未启用提示卡渲染，零表单零假交互（与后端零实现现实一致）。
+// 支付宝壳页：未启用提示卡渲染，零表单零假交互（与后端零实现现实一致）。
 
 test('支付宝壳页：提示卡渲染且无交互面', async ({ page }) => {
   await gotoWithSession(page, '/tools/ali-pay')

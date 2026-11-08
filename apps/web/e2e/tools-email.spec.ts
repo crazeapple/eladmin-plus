@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 
 import { gotoWithSession } from './helpers'
 
-// 邮件工具页（A8 负路径）：dev 环境 SMTP 未配置是稳定态——提交即报「邮件服务未启用」，
+// 邮件工具页（负路径）：dev 环境 SMTP 未配置是稳定态——提交即报「邮件服务未启用」，
 // 负路径即全链验证；收件人非法走后端 422 页内提示。正路径真发已由后端 GreenMail 测试覆盖。
 
 test('邮件页：非法收件人 422 页内提示、SMTP 未配置报邮件服务未启用', async ({ page }) => {

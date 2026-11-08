@@ -2,8 +2,8 @@ import { expect, test, type Page } from '@playwright/test'
 
 import { resetAdminPreferences } from './helpers'
 
-// 风格开关（A1）：偏好抽屉「图标风格」控件写 iconSet 偏好（P-022 链路：
-// 本地即时 + PUT 持久），侧栏经统一分派组件响应式换边——在册同义项换 EP 形态、
+// 风格开关：偏好抽屉「图标风格」控件写 iconSet 偏好（链路：本地即时 + PUT 持久），
+// 侧栏经统一分派组件响应式换边——在册同义项换 EP 形态、
 // 映射缺失项保持原库、切回恢复原渲染；刷新后 iconSet 账户值权威保持。
 // 「映射缺失」载体选支付宝工具：nv:wallet-outline 在注册集但无 EP 同义项
 // （ionicons 无品牌图形，映射表不收），与在册换边项同屏对照。

@@ -10,7 +10,7 @@ import { usePreferencesStore } from '@/stores/preferences'
 /** 菜单 icon 库值（nv:name / ep:name 双前缀形态） */
 const props = defineProps<{ value?: string | null }>()
 
-// 图标风格偏好（P-022 框架）：切换即经同义映射换边渲染，侧栏响应式重渲
+// 图标风格偏好：切换即经同义映射换边渲染，侧栏响应式重渲
 const prefs = usePreferencesStore()
 
 /**

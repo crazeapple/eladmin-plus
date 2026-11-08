@@ -28,8 +28,8 @@ import {
 } from '@vicons/ionicons5'
 
 /**
- * Ionicons 图标具名清单：@vicons/ionicons5 Outline 变体挑在用 25 语义（P-027
- * 接替 svg 资产源；具名引入免全量 500+ 枚进 bundle）。key 为 `nv:` 库值的名段
+ * Ionicons 图标具名清单：@vicons/ionicons5 Outline 变体挑在用 25 语义
+ * （替换 svg 资产源；具名引入免全量 500+ 枚进 bundle）。key 为 `nv:` 库值的名段
  * （Outline 全名 kebab 形，与包导出名直映：kebab → Pascal + Outline），增补只动这份常量。
  */
 export const NV_ICONS: Record<string, Component> = {

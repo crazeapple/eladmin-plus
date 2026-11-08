@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { hasNvIcon, NV_ICONS } from '../nv-icons'
 
-/** 在用 25 语义全集（P-027 选型拍板）：菜单在用 21 名 + 固定 UI 消费 4 名 */
+/** 在用 25 语义全集（选型拍板）：菜单在用 21 名 + 固定 UI 消费 4 名 */
 const NV_NAMES = [
   'albums-outline',
   'analytics-outline',

@@ -21,7 +21,7 @@ export interface LoginResult {
   expiresIn: number
 }
 
-/** 认证端点（P-009 后端协议）：全部走统一 client（envelope 解包与 ApiError 已收口） */
+/** 认证端点：全部走统一 client（envelope 解包与 ApiError 已收口） */
 export async function fetchPublicKey(): Promise<PublicKeyPayload> {
   const { data } = await client.request({
     url: '/auth/public-key',

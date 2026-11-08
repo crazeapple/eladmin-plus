@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 
 import { gotoWithSession } from './helpers'
 
-// 数据库管理页（A1、A2）：V12 种子生效——侧栏「运维」目录 + 数据库管理子菜单在册、路由可达；
+// 数据库管理页：V12 种子生效——侧栏「运维」目录 + 数据库管理子菜单在册、路由可达；
 // 页面两区块 tabs 渲染且切换正常。
 
 test('运维菜单组：数据库管理入口可达且两区块 tabs 可切换', async ({ page }) => {
