@@ -1,0 +1,13 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "timezone": "Asia/Shanghai",
+  "pinDigests": true,
+  "packageRules": [
+    {
+      "description": "首波 digest 钉扎合为单一 PR 一次审完",
+      "matchUpdateTypes": ["pin"],
+      "groupName": "digest pinning"
+    }
+  ]
+}
