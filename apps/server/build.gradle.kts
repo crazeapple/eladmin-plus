@@ -50,7 +50,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-webmvc-test")
     // 邮件工具协议级测试：内嵌 SMTP 服务（随机端口收信断言）
-    testImplementation("com.icegreen:greenmail:2.1.3")
+    testImplementation("com.icegreen:greenmail:2.1.15")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
