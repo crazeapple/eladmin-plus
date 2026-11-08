@@ -27,3 +27,6 @@ backups/
 
 # E2E 会话态产物
 .auth/
+
+# server 运行产物（local 存储引擎测试落盘等）
+apps/server/data/

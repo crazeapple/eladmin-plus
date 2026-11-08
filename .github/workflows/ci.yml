@@ -2,7 +2,7 @@ name: CI
 
 # 双层 CI：
 #   快层 fast —— 任意分支 push：形态检查（eslint / prettier / typecheck）+ 单元测试，分钟级反馈；
-#   慢层 slow —— 仅 main 与 test/* push：compose 起完整生产栈 + Playwright 全量 E2E，独立环境完整回归。
+#   慢层 slow —— main、test/* 与 renovate/* push：compose 起完整生产栈 + Playwright 全量 E2E，独立环境完整回归。
 # 慢层在快层绿之后才烧时长；发布链留在本地流程，CI 只验证不发布。
 on:
   push:
@@ -80,7 +80,7 @@ jobs:
   slow:
     name: 'slow · compose stack + E2E'
     needs: fast
-    if: github.ref_name == 'main' || startsWith(github.ref_name, 'test/')
+    if: github.ref_name == 'main' || startsWith(github.ref_name, 'test/') || startsWith(github.ref_name, 'renovate/')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
