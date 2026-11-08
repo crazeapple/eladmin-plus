@@ -14,6 +14,7 @@ import com.eladminplus.storage.mapper.StorageFileMapper;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,7 +22,12 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
-/** RustFS 不可达：端点指向无监听端口，上传与按行路由下载均报 5xx 含「存储服务不可用」明确消息。 */
+/** RustFS 不可达：端点指向无监听端口，上传与按行路由下载均报 5xx 含「存储服务不可用」明确消息。
+ *
+ * <p>rustfs 引擎形态专属故障注入（引擎切换为 local 时语义不适用）：类标 {@code @Tag("infra")}，
+ * 快层 CI 以 -PexcludeInfraTags 排除；无对应 E2E，本地全量跑覆盖。
+ */
+@Tag("infra")
 @SpringBootTest(properties = {"storage.rustfs.endpoint=http://localhost:59999", "storage.rustfs.bucket=eladmin-plus-dead"})
 @AutoConfigureMockMvc
 class StorageUnavailableTest {

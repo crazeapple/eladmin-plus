@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -43,7 +44,11 @@ import tools.jackson.databind.ObjectMapper;
  * RustFS 引擎全链（默认配置激活 rustfs，真实读写 compose 实例）：上传下载删除落对象、引擎字段落 rustfs、
  * 桶不存在自动创建、混引擎历史按行内引擎字段路由下载。
  * 桶名取独立测试桶（eladmin-plus-it），前后清空建桶以覆盖「桶不存在自动创建」路径。
+ *
+ * <p>依赖外部基础设施（RustFS 对象存储）：类标 {@code @Tag("infra")}，快层 CI 以 -PexcludeInfraTags
+ * 排除；上传下载链路由慢层 E2E tools-storage.spec.ts 覆盖。
  */
+@Tag("infra")
 @SpringBootTest(properties = {"storage.rustfs.bucket=eladmin-plus-it", "storage.local.base-path=build/test-storage-rustfs"})
 @AutoConfigureMockMvc
 class RustfsStorageChainTest {

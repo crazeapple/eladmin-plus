@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.zip.GZIPInputStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,7 +35,11 @@ import org.springframework.test.web.servlet.MvcResult;
  * mysql 容器，gzip 流回后经存储域落当前配置引擎并打标 source=backup，storage_file 行在册
  * （原名形态、大小为 gzip 实际字节数、解压含建库语句）；备份失败 5xx 含「备份执行失败」明确原因
  * 且无 storage_file 行。
+ *
+ * <p>依赖外部基础设施（备份 sidecar）：类标 {@code @Tag("infra")}，快层 CI 以 -PexcludeInfraTags
+ * 排除；真实链路由慢层 E2E backup-sidecar.spec.ts 覆盖。
  */
+@Tag("infra")
 @SpringBootTest
 @AutoConfigureMockMvc
 class BackupChainTest {

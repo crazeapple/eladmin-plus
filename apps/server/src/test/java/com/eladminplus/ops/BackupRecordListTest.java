@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,7 +31,11 @@ import org.springframework.test.web.servlet.MvcResult;
 /**
  * 备份记录端点（storage_file source=backup 视图）：分页、文件名模糊筛选、手传文件不混入；删除代理
  * 同删对象与行、文件已失仅删记录；导出代理流式回原名、已删 404；无权限 403；非备份行与未知 id 404。
+ *
+ * <p>导出代理依赖外部基础设施（备份 sidecar）：类标 {@code @Tag("infra")}，快层 CI 以 -PexcludeInfraTags
+ * 排除；落册记录的下载与导出链路由慢层 E2E backup-sidecar.spec.ts 覆盖。
  */
+@Tag("infra")
 @SpringBootTest
 @AutoConfigureMockMvc
 class BackupRecordListTest {

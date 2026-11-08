@@ -56,12 +56,15 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
-    // 依赖外部基础设施的集成测试在快层 CI 无对应物，传 -PexcludeInfraTests 排除
-    // （真实链路由慢层 compose 栈的 E2E 覆盖；本地开发机依赖齐备可全量跑）：
-    //   备份 sidecar → E2E backup-sidecar.spec.ts；rustfs 对象存储 → E2E tools-storage.spec.ts
-    if (project.hasProperty("excludeInfraTests")) {
-        exclude("**/BackupChainTest*", "**/BackupRecordListTest*")
-        exclude("**/RustfsStorageChainTest*", "**/StorageUnavailableTest*")
+    // 基础设施依赖测试类自带 @Tag("infra") 自描述（备份 sidecar 两项、rustfs 两项）：
+    // 传 -PexcludeInfraTags 按标签排除（快层 CI）；不带开关本地全量（本地依赖齐备）。
+    // 真实链路由慢层 compose 栈的 E2E 覆盖（backup-sidecar.spec.ts / tools-storage.spec.ts）。
+    if (project.hasProperty("excludeInfraTags")) {
+        useJUnitPlatform {
+            excludeTags("infra")
+        }
+    } else {
+        useJUnitPlatform()
     }
     // 集成测试库独立于开发库（eladmin_plus）：迁移历史与本分支迁移集严格一致，
     // 并行分支迁移互不干扰；库不存在时首跑自建（createDatabaseIfNotExist）
